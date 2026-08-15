@@ -71,11 +71,11 @@ export default function EventsPage() {
     <>
       <Header title="Events" />
 
-      <div className="mb-6 flex items-center justify-between">
-        <p className="text-charcoal/70">Register competitions and assign participating members.</p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <p className="text-sm text-charcoal/70">Register competitions and assign participating members.</p>
         {canRegisterEvent(profile) && (
-          <Button onClick={() => setModalOpen(true)}>
-            <Plus className="h-4 w-4" /> Register Event
+          <Button onClick={() => setModalOpen(true)} className="gap-1.5 shrink-0 self-start sm:self-auto font-semibold">
+            <Plus className="h-4 w-4 shrink-0" /> Register Event
           </Button>
         )}
       </div>
