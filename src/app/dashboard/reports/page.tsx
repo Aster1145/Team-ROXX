@@ -11,7 +11,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input, Textarea } from "@/components/ui/Input";
 import { WeeklyReport, Profile } from "@/types";
 import { isCaptain, isViceCaptain, roleLabel } from "@/lib/roles";
-import { Plus, Download, FileText, Star, Trophy, Award, MessageSquare, CheckCircle2 } from "lucide-react";
+import { Plus, Download, FileText, Star, Trophy, Award, MessageSquare, CheckCircle2, AlertTriangle } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import * as XLSX from "xlsx";
 
@@ -29,6 +29,10 @@ export default function ReportsPage() {
   const [stars, setStars] = useState<number>(5);
   const [feedback, setFeedback] = useState<string>("");
   const [submittingRating, setSubmittingRating] = useState(false);
+
+  // Duplicate report limit modal state
+  const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
+  const [duplicateWeekDate, setDuplicateWeekDate] = useState("");
 
   const [form, setForm] = useState({
     week_ending: "",
@@ -69,11 +73,8 @@ export default function ReportsPage() {
     );
 
     if (existing) {
-      alert(
-        `You have already submitted a weekly report for the week ending ${formatDate(
-          form.week_ending
-        )}. Each member is allowed only 1 report per week to maintain an accurate performance leaderboard.`
-      );
+      setDuplicateWeekDate(formatDate(form.week_ending));
+      setDuplicateModalOpen(true);
       return;
     }
 
@@ -82,11 +83,8 @@ export default function ReportsPage() {
 
       if (error) {
         if (error.code === "23505" || error.message.includes("unique") || error.message.includes("duplicate")) {
-          alert(
-            `You have already submitted a weekly report for the week ending ${formatDate(
-              form.week_ending
-            )}. Each member is allowed only 1 report per week.`
-          );
+          setDuplicateWeekDate(formatDate(form.week_ending));
+          setDuplicateModalOpen(true);
         } else {
           alert("Error submitting report: " + error.message);
         }
@@ -127,7 +125,6 @@ export default function ReportsPage() {
         .eq("id", selectedReport.id);
 
       if (error) {
-        // Fallback: If columns rating_stars/points are missing, notify
         alert("Error saving rating: " + error.message);
       } else {
         setRatingModalOpen(false);
@@ -413,6 +410,38 @@ export default function ReportsPage() {
           </div>
           <Button type="submit" className="w-full">Submit Report</Button>
         </form>
+      </Modal>
+
+      {/* Custom Duplicate Report Limit Warning Modal */}
+      <Modal
+        isOpen={duplicateModalOpen}
+        onClose={() => setDuplicateModalOpen(false)}
+        title="Weekly Report Limit Reached"
+      >
+        <div className="space-y-4">
+          <div className="rounded-xl bg-amber-50 p-4 border border-amber-200 flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-xs text-amber-950 space-y-1.5">
+              <p className="font-bold text-sm text-amber-900">Only 1 Report Per Week Allowed</p>
+              <p>
+                You have already submitted a weekly report for the week ending{" "}
+                <strong>{duplicateWeekDate}</strong>.
+              </p>
+              <p className="text-amber-800 pt-1">
+                Each team member is permitted <strong>only 1 report per week</strong> to maintain an accurate, fair, and reliable performance points leaderboard.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <Button
+              onClick={() => setDuplicateModalOpen(false)}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-semibold"
+            >
+              Understood
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       {/* Captain Only Star Rating Modal */}
