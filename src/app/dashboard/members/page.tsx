@@ -438,7 +438,14 @@ export default function MembersPage() {
           <div className="grid grid-cols-2 gap-4">
             <Select
               value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value as any })}
+              onChange={(e) => {
+                const newRole = e.target.value as Role;
+                setForm({
+                  ...form,
+                  role: newRole,
+                  department: newRole === "trainee" ? "Trainee" : form.department,
+                });
+              }}
             >
               {availableRoles.map((r) => (
                 <option key={r.value} value={r.value}>{r.label}</option>
@@ -495,7 +502,14 @@ export default function MembersPage() {
               <label className="text-xs font-semibold text-charcoal/70 block mb-1">Role</label>
               <Select
                 value={editForm.role}
-                onChange={(e) => setEditForm({ ...editForm, role: e.target.value as any })}
+                onChange={(e) => {
+                  const newRole = e.target.value as Role;
+                  setEditForm({
+                    ...editForm,
+                    role: newRole,
+                    department: newRole === "trainee" ? "Trainee" : editForm.department,
+                  });
+                }}
               >
                 {ROLES.map((r) => {
                   if (r.value === "captain" && hasCaptain && editingMember?.role !== "captain") {
