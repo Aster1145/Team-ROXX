@@ -5,7 +5,6 @@ export type Department =
   | "Electronics"
   | "System Integration"
   | "Software"
-  | "Implementation"
   | "Research"
   | "Drone Controller"
   | "Trainee"
