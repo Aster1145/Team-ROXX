@@ -24,6 +24,8 @@ export default function BudgetPage() {
   const [requests, setRequests] = useState<BudgetItemRequest[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [requestSearchQuery, setRequestSearchQuery] = useState<string>("");
   
   // Modals state
   const [expenseModalOpen, setExpenseModalOpen] = useState(false);
@@ -283,9 +285,82 @@ export default function BudgetPage() {
   };
 
   const filteredRequests = requests.filter((r) => {
-    if (statusFilter === "all") return true;
-    return r.status === statusFilter;
+    if (statusFilter !== "all" && r.status !== statusFilter) return false;
+    if (categoryFilter !== "all" && r.category !== categoryFilter) return false;
+    if (requestSearchQuery.trim() !== "") {
+      const q = requestSearchQuery.toLowerCase();
+      const matchItem = r.item?.toLowerCase().includes(q);
+      const matchJustification = r.justification?.toLowerCase().includes(q);
+      const matchRequester = r.requester?.full_name?.toLowerCase().includes(q);
+      if (!matchItem && !matchJustification && !matchRequester) return false;
+    }
+    return true;
   });
+
+  const exportFilteredRequestsExcel = () => {
+    if (filteredRequests.length === 0) {
+      alert("No item requests match the current filter criteria to export.");
+      return;
+    }
+
+    const rows = filteredRequests.map((r, idx) => {
+      const unitPrice = Number(r.amount) || 0;
+      const qty = Number(r.quantity) || 1;
+      const totalPrice = unitPrice * qty;
+
+      return {
+        "S.No": idx + 1,
+        "Item Name": r.item,
+        Category: r.category,
+        Priority: r.priority ? r.priority.toUpperCase() : "MEDIUM",
+        Quantity: qty,
+        "Estimated Unit Price (₹)": unitPrice,
+        "Total Estimated Cost (₹)": totalPrice,
+        "Requested By": r.requester?.full_name || "Team Member",
+        "Requested Email": r.requester?.email || "N/A",
+        Status: r.status ? r.status.toUpperCase() : "PENDING",
+        "Project / Domain": projectName(r.project_id),
+        "Justification / Purpose": r.justification || "N/A",
+        "Product Link / Reference": r.link || "N/A",
+        "Reviewed By": r.reviewer?.full_name || "N/A",
+        "Rejection Note": r.rejection_reason || "N/A",
+        "Date Requested": formatDate(r.created_at),
+      };
+    });
+
+    const grandTotal = filteredRequests.reduce(
+      (sum, r) => sum + (Number(r.amount) || 0) * (Number(r.quantity) || 1),
+      0
+    );
+
+    // Summary row
+    rows.push({
+      "S.No": "" as any,
+      "Item Name": "TOTAL ESTIMATED BUDGET SUM",
+      Category: "",
+      Priority: "",
+      Quantity: "" as any,
+      "Estimated Unit Price (₹)": "" as any,
+      "Total Estimated Cost (₹)": grandTotal as any,
+      "Requested By": "",
+      "Requested Email": "",
+      Status: "",
+      "Project / Domain": "",
+      "Justification / Purpose": "",
+      "Product Link / Reference": "",
+      "Reviewed By": "",
+      "Rejection Note": "",
+      "Date Requested": "",
+    });
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    const filterTag = statusFilter === "all" ? "Filtered" : statusFilter.toUpperCase();
+    XLSX.utils.book_append_sheet(wb, ws, `${filterTag} Requests`);
+
+    const fileName = `${filterTag}-Item-Requests-TeamROXX-${new Date().toISOString().split("T")[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  };
 
   const projectName = (id: string | null) => projects.find((p) => p.id === id)?.name || "General";
 
@@ -435,21 +510,68 @@ export default function BudgetPage() {
       {/* ITEM REQUESTS TAB */}
       {activeTab === "requests" && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-4">
-            <CardTitle>Item Request Queue</CardTitle>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-charcoal/60">Filter:</span>
+          <CardHeader className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-stone/40">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5 text-forest" />
+                Item Request Queue
+              </CardTitle>
+              <p className="text-xs text-charcoal/60 mt-1">
+                Showing <strong>{filteredRequests.length}</strong> of {requests.length} requests
+                {statusFilter !== "all" ? ` · Status: ${statusFilter.toUpperCase()}` : ""}
+                {categoryFilter !== "all" ? ` · Category: ${categoryFilter}` : ""}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Search Box */}
+              <Input
+                placeholder="Search item, requester..."
+                value={requestSearchQuery}
+                onChange={(e) => setRequestSearchQuery(e.target.value)}
+                className="w-44 text-xs py-1 h-9"
+              />
+
+              {/* Category Filter */}
+              <Select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-36 text-xs py-1 h-9"
+              >
+                <option value="all">All Categories</option>
+                <option value="Components">Components</option>
+                <option value="Tools">Tools</option>
+                <option value="Raw Materials">Raw Materials</option>
+                <option value="Software & Licenses">Software & Licenses</option>
+                <option value="Safety & Gear">Safety & Gear</option>
+                <option value="Testing Equipment">Testing Equipment</option>
+                <option value="Other">Other</option>
+              </Select>
+
+              {/* Status Filter */}
               <Select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-36 text-xs py-1"
+                className="w-36 text-xs py-1 h-9 font-medium"
               >
-                <option value="all">All Requests</option>
-                <option value="pending">Pending</option>
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending Review</option>
                 <option value="approved">Approved</option>
-                <option value="ordered">Ordered</option>
+                <option value="ordered">Ordered / Purchased</option>
                 <option value="rejected">Rejected</option>
               </Select>
+
+              {/* Export Filtered Requests Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exportFilteredRequestsExcel}
+                className="text-xs font-semibold gap-1.5 bg-forest/10 hover:bg-forest hover:text-white border-forest/30 text-forest h-9 transition-all"
+                title="Export currently filtered list to Excel for mentors or budget approval"
+              >
+                <Download className="h-3.5 w-3.5" />
+                Export Filtered List ({filteredRequests.length})
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
