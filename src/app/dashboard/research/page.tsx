@@ -122,14 +122,14 @@ export default function ResearchPage() {
     <>
       <Header title="Research & Documentation" />
 
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-charcoal">Research Log</h2>
           <p className="text-xs text-charcoal/60">Document engineering improvements, experiments, and technical notes</p>
         </div>
         {canCreateOrEdit(profile) && (
-          <Button onClick={handleOpenAddModal} className="gap-2">
-            <Plus className="h-4 w-4" /> Add Doc
+          <Button onClick={handleOpenAddModal} className="gap-2 shrink-0 self-start sm:self-auto font-semibold">
+            <Plus className="h-4 w-4 shrink-0" /> Add Doc
           </Button>
         )}
       </div>

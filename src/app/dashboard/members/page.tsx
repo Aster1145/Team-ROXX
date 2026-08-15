@@ -247,14 +247,14 @@ export default function MembersPage() {
     <>
       <Header title="Members" />
 
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-charcoal">Team Directory</h2>
           <p className="text-xs text-charcoal/60">Complete member directory with roles, contact information, and projects</p>
         </div>
         {userIsCaptain && (
-          <Button onClick={() => setModalOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" /> Add Member
+          <Button onClick={() => setModalOpen(true)} className="gap-2 shrink-0 self-start sm:self-auto font-semibold">
+            <Plus className="h-4 w-4 shrink-0" /> Add Member
           </Button>
         )}
       </div>

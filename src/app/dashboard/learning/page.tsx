@@ -262,10 +262,10 @@ export default function LearningPage() {
       <Header title="Learning Hub & Study Materials" />
 
       {/* Top Banner & Header */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold text-charcoal flex items-center gap-2">
-            <GraduationCap className="h-5 w-5 text-forest" />
+            <GraduationCap className="h-5 w-5 text-forest shrink-0" />
             Learning & Knowledge Hub
           </h2>
           <p className="text-xs text-charcoal/70">
@@ -275,8 +275,8 @@ export default function LearningPage() {
           </p>
         </div>
         {userCanManage && (
-          <Button onClick={handleOpenCreate} className="gap-2 bg-forest hover:bg-forest/90 text-white font-semibold">
-            <Plus className="h-4 w-4" /> Add Learning Material
+          <Button onClick={handleOpenCreate} className="gap-2 bg-forest hover:bg-forest/90 text-white font-semibold shrink-0 self-start sm:self-auto">
+            <Plus className="h-4 w-4 shrink-0" /> Add Learning Material
           </Button>
         )}
       </div>

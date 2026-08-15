@@ -286,21 +286,21 @@ export default function ReportsPage() {
       <Header title="Weekly Reports & Performance" />
 
       {/* Top Description & Actions */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <p className="text-charcoal/70">
+          <p className="text-sm text-charcoal/70">
             Submit weekly progress reports. Captain evaluates performance (Up to 5 Stars = 10 Points).
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
           {canDownload && (
-            <Button variant="outline" onClick={exportExcel}>
-              <Download className="h-4 w-4" /> Export Excel
+            <Button variant="outline" onClick={exportExcel} className="text-xs font-semibold gap-1.5">
+              <Download className="h-4 w-4 shrink-0" /> Export Excel
             </Button>
           )}
           {profile?.role !== "trainee" && (
-            <Button onClick={() => setModalOpen(true)}>
-              <Plus className="h-4 w-4" /> Submit Report
+            <Button onClick={() => setModalOpen(true)} className="text-xs font-semibold gap-1.5">
+              <Plus className="h-4 w-4 shrink-0" /> Submit Report
             </Button>
           )}
         </div>

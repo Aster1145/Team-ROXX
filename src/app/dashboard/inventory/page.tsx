@@ -124,16 +124,16 @@ export default function InventoryPage() {
     <>
       <Header title="Inventory Log" />
 
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-charcoal/70">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <p className="text-sm text-charcoal/70">
           Log tools and components taken out of the lab. State the purpose, and dates are captured automatically.
         </p>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={exportExcel}>
-            <Download className="h-4 w-4" /> Export Excel
+        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+          <Button variant="outline" onClick={exportExcel} className="text-xs font-semibold gap-1.5">
+            <Download className="h-4 w-4 shrink-0" /> Export Excel
           </Button>
-          <Button onClick={() => setModalOpen(true)}>
-            <Package className="h-4 w-4" /> Take Item
+          <Button onClick={() => setModalOpen(true)} className="text-xs font-semibold gap-1.5">
+            <Package className="h-4 w-4 shrink-0" /> Take Item
           </Button>
         </div>
       </div>

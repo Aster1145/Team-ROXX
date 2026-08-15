@@ -81,11 +81,11 @@ export default function ProjectsPage() {
     <>
       <Header title="Projects" />
 
-      <div className="mb-6 flex items-center justify-between">
-        <p className="text-charcoal/70">Track drone, hydroponics and research projects.</p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <p className="text-sm text-charcoal/70">Track drone, hydroponics and research projects.</p>
         {canEditProject(profile) && (
-          <Button onClick={openCreate}>
-            <Plus className="h-4 w-4" /> New Project
+          <Button onClick={openCreate} className="gap-1.5 shrink-0 self-start sm:self-auto font-semibold">
+            <Plus className="h-4 w-4 shrink-0" /> New Project
           </Button>
         )}
       </div>
