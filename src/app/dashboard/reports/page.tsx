@@ -11,7 +11,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input, Textarea } from "@/components/ui/Input";
 import { WeeklyReport, Profile } from "@/types";
 import { isCaptain, isViceCaptain, isTrainee, roleLabel } from "@/lib/roles";
-import { Plus, Download, FileText, Star, Trophy, Award, MessageSquare, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Plus, Download, FileText, Star, Trophy, Award, MessageSquare, CheckCircle2, AlertTriangle, FileDown } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import * as XLSX from "xlsx";
 
@@ -159,6 +159,93 @@ export default function ReportsPage() {
     XLSX.writeFile(wb, `weekly-reports-${new Date().toISOString().split("T")[0]}.xlsx`);
   };
 
+  const downloadReportDoc = (r: WeeklyReport) => {
+    const memberName = r.profile?.full_name || "Team Member";
+    const dept = r.profile?.department || "General";
+    const weekEnding = formatDate(r.week_ending);
+    const submittedOn = formatDate(r.created_at);
+
+    const docContent = `
+      <html xmlns:o='urn:schemas-microsoft-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>Weekly Work Report - ${memberName}</title>
+        <style>
+          body { font-family: Calibri, Arial, sans-serif; margin: 30px; color: #1e293b; line-height: 1.6; }
+          .header { border-bottom: 3px solid #166534; padding-bottom: 10px; margin-bottom: 20px; }
+          .header h1 { font-size: 22px; color: #166534; margin: 0; }
+          .header p { font-size: 12px; color: #64748b; margin: 4px 0 0 0; }
+          .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; background: #f8fafc; border: 1px solid #e2e8f0; }
+          .meta-table td { padding: 8px 12px; font-size: 13px; border: 1px solid #cbd5e1; }
+          .meta-label { font-weight: bold; color: #334155; width: 30%; background: #f1f5f9; }
+          .section-title { font-size: 14px; font-weight: bold; color: #166534; margin-top: 20px; margin-bottom: 8px; text-transform: uppercase; border-left: 4px solid #166534; padding-left: 8px; }
+          .content-box { font-size: 13px; background: #fafafa; padding: 12px; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 15px; white-space: pre-wrap; word-wrap: break-word; }
+          .rating-card { background: #fffbeb; border: 1px solid #fcd34d; padding: 14px; border-radius: 6px; margin-top: 25px; }
+          .rating-card h3 { margin: 0 0 8px 0; color: #92400e; font-size: 15px; }
+          .rating-card p { margin: 4px 0; font-size: 13px; color: #78350f; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Weekly Performance & Work Progress Report</h1>
+          <p>Team ROXX Student Project Management Platform</p>
+        </div>
+
+        <table class="meta-table">
+          <tr>
+            <td class="meta-label">Submitted By:</td>
+            <td><strong>${memberName}</strong></td>
+          </tr>
+          <tr>
+            <td class="meta-label">Department / Domain:</td>
+            <td>${dept}</td>
+          </tr>
+          <tr>
+            <td class="meta-label">Week Ending Date:</td>
+            <td>${weekEnding}</td>
+          </tr>
+          <tr>
+            <td class="meta-label">Submitted Date:</td>
+            <td>${submittedOn}</td>
+          </tr>
+        </table>
+
+        <div class="section-title">1. Weekly Work Summary</div>
+        <div class="content-box">${r.summary || "No summary provided."}</div>
+
+        <div class="section-title">2. Key Accomplishments</div>
+        <div class="content-box">${r.accomplishments || "None stated."}</div>
+
+        <div class="section-title">3. Blockers & Challenges</div>
+        <div class="content-box">${r.blockers || "None stated."}</div>
+
+        <div class="section-title">4. Next Steps & Target Goals</div>
+        <div class="content-box">${r.next_steps || "None stated."}</div>
+
+        ${r.rating_stars ? `
+        <div class="rating-card">
+          <h3>Captain Evaluation Rating</h3>
+          <p><strong>Stars Awarded:</strong> ${r.rating_stars} / 5 Stars</p>
+          <p><strong>Performance Points:</strong> +${r.points || 0} Pts</p>
+          ${r.rating_feedback ? `<p><strong>Captain Feedback:</strong> ${r.rating_feedback}</p>` : ""}
+        </div>
+        ` : ""}
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(["\ufeff" + docContent], { type: "application/msword" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const safeName = memberName.replace(/[^a-zA-Z0-9_-]/g, "_");
+    link.download = `Weekly-Report-${safeName}-${r.week_ending}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const userIsCaptain = isCaptain(profile);
   const canDownload = isCaptain(profile) || isViceCaptain(profile);
 
@@ -293,6 +380,7 @@ export default function ReportsPage() {
         {reports.map((r) => {
           const authorIsCaptain = r.profile?.role === "captain";
           const hasBeenRated = r.rating_stars != null;
+          const canDownloadDoc = isCaptain(profile) || isViceCaptain(profile) || r.profile_id === profile?.id;
 
           return (
             <Card key={r.id} className="hover:shadow-sm transition-shadow">
@@ -315,7 +403,7 @@ export default function ReportsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
                     {/* Display Rating & Points */}
                     {!authorIsCaptain && (
                       <div className="flex items-center gap-2 bg-stone-50 px-3 py-1.5 rounded-lg border border-stone/60">
@@ -344,6 +432,20 @@ export default function ReportsPage() {
                       >
                         <Award className="h-3.5 w-3.5" />
                         {hasBeenRated ? "Edit Rating" : "Rate Performance"}
+                      </Button>
+                    )}
+
+                    {/* Download Individual Report as Word .doc */}
+                    {canDownloadDoc && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => downloadReportDoc(r)}
+                        className="text-xs bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-700 hover:text-white hover:border-emerald-700 transition-all font-medium gap-1"
+                        title="Download this report as a Word document (.doc)"
+                      >
+                        <FileDown className="h-3.5 w-3.5" />
+                        Download .doc
                       </Button>
                     )}
 
