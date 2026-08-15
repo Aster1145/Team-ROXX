@@ -411,27 +411,27 @@ export default function BudgetPage() {
       <Header title="Budget & Item Requests" />
 
       {/* Top Header & Actions */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-charcoal/80 font-medium">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <p className="text-sm text-charcoal/80 font-medium">
           Request hardware/materials, manage team lead approvals, and track budget expenses.
         </p>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={exportExpensesExcel} className="gap-1.5">
-            <Download className="h-4 w-4" /> Export Excel
+        <div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-auto">
+          <Button variant="outline" onClick={exportExpensesExcel} className="gap-1.5 shrink-0 text-xs font-semibold whitespace-nowrap">
+            <Download className="h-4 w-4 shrink-0" /> Export Excel
           </Button>
           <Button
             onClick={() => setRequestModalOpen(true)}
-            className="bg-forest hover:bg-forest/90 text-white font-semibold shadow-md"
+            className="bg-forest hover:bg-forest/90 text-white font-semibold shadow-md gap-1.5 shrink-0 text-xs whitespace-nowrap"
           >
-            <ShoppingCart className="h-4 w-4" /> Request Item
+            <ShoppingCart className="h-4 w-4 shrink-0" /> Request Item
           </Button>
           {canManageBudget(profile) && (
             <Button
               variant="outline"
               onClick={() => setExpenseModalOpen(true)}
-              className="border-charcoal/30 text-charcoal hover:bg-stone/50 font-medium"
+              className="border-charcoal/30 text-charcoal hover:bg-stone/50 font-semibold gap-1.5 shrink-0 text-xs whitespace-nowrap"
             >
-              <Plus className="h-4 w-4" /> Direct Expense
+              <Plus className="h-4 w-4 shrink-0" /> Direct Expense
             </Button>
           )}
         </div>
