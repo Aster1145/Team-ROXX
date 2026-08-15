@@ -716,15 +716,66 @@ export default function BudgetPage() {
       {/* RECORDED EXPENSES TAB */}
       {activeTab === "expenses" && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-4">
+          <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4">
             <CardTitle>Expenses & Purchases Log</CardTitle>
-            <Button variant="outline" size="sm" onClick={exportExpensesExcel} className="text-xs font-medium gap-1.5">
+            <Button variant="outline" size="sm" onClick={exportExpensesExcel} className="text-xs font-medium gap-1.5 w-full sm:w-auto justify-center">
               <Download className="h-3.5 w-3.5" /> Export Excel
             </Button>
           </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+          <CardContent className="p-3.5 sm:p-5">
+            {/* MOBILE CARD VIEW (Phone screens < md) */}
+            <div className="space-y-3 md:hidden">
+              {items.map((i) => (
+                <div key={i.id} className="rounded-xl border border-stone/60 bg-white p-3.5 space-y-2.5 shadow-2xs">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-charcoal text-base break-words">{i.item}</h4>
+                      <p className="text-xs text-charcoal/60 mt-0.5">
+                        {i.category} • {projectName(i.project_id)}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-base font-bold text-forest block">₹{(i.amount * i.quantity).toLocaleString("en-IN")}</span>
+                      <span className="text-[11px] text-charcoal/50">{i.quantity} x ₹{i.amount.toLocaleString("en-IN")}</span>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-charcoal/70 flex items-center justify-between pt-2 border-t border-stone/30">
+                    <div>
+                      <span>By: <strong>{i.profile?.full_name || "Team Lead"}</strong></span>
+                      <span className="text-charcoal/50 block text-[11px]">{formatDate(i.purchased_at)}</span>
+                    </div>
+
+                    {isCaptain(profile) && (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleOpenEditExpense(i)}
+                          className="p-1.5 text-charcoal/60 hover:text-forest hover:bg-forest/10 rounded-lg transition-colors border border-stone/40"
+                          title="Edit Expense (Captain Only)"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteExpense(i.id, i.item)}
+                          className="p-1.5 text-charcoal/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-stone/40"
+                          title="Delete Expense (Captain Only)"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {items.length === 0 && (
+                <p className="py-8 text-center text-xs text-charcoal/60">No expenses recorded yet.</p>
+              )}
+            </div>
+
+            {/* DESKTOP TABLE VIEW (Screens >= md) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm min-w-[750px]">
                 <thead>
                   <tr className="border-b border-stone text-charcoal/60">
                     <th className="pb-3 font-medium">Item</th>

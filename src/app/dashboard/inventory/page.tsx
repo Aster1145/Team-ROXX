@@ -142,9 +142,63 @@ export default function InventoryPage() {
         <CardHeader>
           <CardTitle>Recent Logs</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+        <CardContent className="p-3.5 sm:p-5">
+          {/* MOBILE CARD VIEW (Phone screens < md) */}
+          <div className="space-y-3 md:hidden">
+            {logs.map((l) => (
+              <div key={l.id} className="rounded-xl border border-stone/60 bg-white p-3.5 space-y-2.5 shadow-2xs">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-charcoal text-base break-words [overflow-wrap:anywhere]">{l.item_name}</h4>
+                    <p className="text-xs text-charcoal/70 mt-0.5 break-words">
+                      <span className="font-semibold text-charcoal/80">Purpose:</span> {l.purpose || "N/A"}
+                    </p>
+                  </div>
+                  <Badge variant={l.returned_at ? "success" : "warning"} className="shrink-0">
+                    {l.returned_at ? "Returned" : "Out"}
+                  </Badge>
+                </div>
+
+                <div className="text-xs text-charcoal/70 space-y-1.5 pt-2 border-t border-stone/30">
+                  <div className="flex items-center justify-between">
+                    <span className="text-charcoal/60">Taken By:</span>
+                    <strong className="text-charcoal">{l.profile?.full_name || "Team Member"}</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-charcoal/60">Taken At:</span>
+                    <span className="text-charcoal font-medium">{formatDateTime(l.taken_at)}</span>
+                  </div>
+                  {l.returned_at && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-charcoal/60">Returned At:</span>
+                      <span className="text-charcoal font-medium">{formatDateTime(l.returned_at)}</span>
+                    </div>
+                  )}
+                  {(l.notes || l.condition_notes) && (
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-charcoal/60 shrink-0">Notes:</span>
+                      <span className="text-charcoal italic text-right break-words">{l.notes || l.condition_notes}</span>
+                    </div>
+                  )}
+                </div>
+
+                {!l.returned_at && (
+                  <div className="pt-2 border-t border-stone/30">
+                    <Button size="sm" variant="outline" onClick={() => markReturned(l.id)} className="w-full justify-center text-xs gap-1 py-1.5 h-8">
+                      <CheckCircle className="h-4 w-4" /> Mark as Returned
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+            {logs.length === 0 && (
+              <p className="py-8 text-center text-xs text-charcoal/60">No inventory logs recorded yet.</p>
+            )}
+          </div>
+
+          {/* DESKTOP TABLE VIEW (Screens >= md) */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[700px]">
               <thead>
                 <tr className="border-b border-stone text-charcoal/60">
                   <th className="pb-3 font-medium">Item</th>
@@ -158,7 +212,7 @@ export default function InventoryPage() {
               </thead>
               <tbody>
                 {logs.map((l) => (
-                  <tr key={l.id} className="border-b border-stone/50">
+                  <tr key={l.id} className="border-b border-stone/50 hover:bg-stone/20">
                     <td className="py-3 font-medium text-charcoal">{l.item_name}</td>
                     <td className="py-3 text-charcoal/80">{l.purpose || "—"}</td>
                     <td className="py-3">{l.profile?.full_name || "Team Member"}</td>
