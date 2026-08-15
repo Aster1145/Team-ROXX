@@ -44,6 +44,7 @@ export interface Task {
   status: TaskStatus;
   due_date: string | null;
   created_at: string;
+  project?: { name: string };
 }
 
 export interface Event {
