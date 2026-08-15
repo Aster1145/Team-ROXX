@@ -13,7 +13,7 @@ import { Select } from "@/components/ui/Select";
 import { DEPARTMENTS, ROLES } from "@/lib/constants";
 import { isCaptain, isTrainee, roleLabel } from "@/lib/roles";
 import { Profile, Project, Role, Department } from "@/types";
-import { Plus, Trash2, Mail, Phone, Building, FolderGit2, Pencil, Crown, ShieldAlert } from "lucide-react";
+import { Plus, Trash2, Mail, Phone, Building, FolderGit2, Pencil, Crown, ShieldAlert, Eye, EyeOff } from "lucide-react";
 
 export default function MembersPage() {
   const { profile } = useAuth();
@@ -26,6 +26,7 @@ export default function MembersPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [showAddPassword, setShowAddPassword] = useState(false);
   
   const [editingMember, setEditingMember] = useState<Profile | null>(null);
   const [targetMember, setTargetMember] = useState<Profile | null>(null);
@@ -437,14 +438,29 @@ export default function MembersPage() {
             value={form.phone_number}
             onChange={(e) => setForm({ ...form, phone_number: e.target.value })}
           />
-          <Input
-            type="password"
-            placeholder="Temporary Password"
-            required
-            minLength={6}
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
+          <div className="relative">
+            <Input
+              type={showAddPassword ? "text" : "password"}
+              placeholder="Temporary Password"
+              required
+              minLength={6}
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowAddPassword(!showAddPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/50 hover:text-forest transition-colors p-1"
+              title={showAddPassword ? "Hide password" : "Show password"}
+            >
+              {showAddPassword ? (
+                <EyeOff className="h-4 w-4 text-forest" />
+              ) : (
+                <Eye className="h-4 w-4 text-charcoal/60" />
+              )}
+            </button>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <Select
               value={form.role}
