@@ -35,7 +35,7 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
         )}
       >
         <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-          {title ? <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">{title}</h2> : <div />}
+          {title ? <h2 className="text-lg sm:text-xl font-semibold font-[family-name:var(--font-playfair)] text-slate-900 dark:text-slate-100">{title}</h2> : <div />}
           <button
             onClick={onClose}
             className="rounded-full p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"

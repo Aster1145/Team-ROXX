@@ -49,7 +49,7 @@ export function Sidebar() {
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold text-sm shadow-xs">
           RX
         </span>
-        <span className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+        <span className="font-[family-name:var(--font-playfair)] text-xl font-semibold text-slate-900 dark:text-white">
           Team ROXX
         </span>
       </div>

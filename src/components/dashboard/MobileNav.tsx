@@ -51,7 +51,7 @@ export function MobileNav() {
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold text-xs">
                   RX
                 </span>
-                <span className="text-lg font-extrabold text-slate-900 dark:text-white">
+                <span className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-slate-900 dark:text-white">
                   Team ROXX
                 </span>
               </div>

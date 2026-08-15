@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --font-inter: var(--font-inter), sans-serif;
+  --font-playfair: var(--font-playfair), Georgia, serif;
+}
+
 @layer base {
   :root {
     --bg-canvas: #F4F6FA;
@@ -26,7 +31,7 @@ html, body {
 body {
   background-color: #F4F6FA;
   color: #0F172A;
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 

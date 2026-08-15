@@ -16,7 +16,7 @@ export function Header({ title }: { title: string }) {
       <div className="flex items-center gap-3 min-w-0">
         <MobileNav />
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 truncate">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold font-[family-name:var(--font-playfair)] text-slate-900 dark:text-slate-100 truncate">
             {title}
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
