@@ -286,40 +286,42 @@ export default function MembersPage() {
                     </Badge>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-charcoal/70 min-w-0 break-words [overflow-wrap:anywhere]">
-                    <div className="flex items-center gap-1.5 min-w-0">
+                  <div className="space-y-1.5 text-xs text-charcoal/70 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
                       <Mail className="h-3.5 w-3.5 text-forest shrink-0" />
-                      <span className="break-all">
+                      <span className="break-all no-underline font-medium text-charcoal/90" style={{ textDecoration: "none" }}>
                         {canSeeContactDetails ? m.email : "••••••@••••• (Restricted)"}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <Phone className="h-3.5 w-3.5 text-forest shrink-0" />
-                      <span className="truncate">
-                        {canSeeContactDetails
-                          ? m.phone_number || "No phone listed"
-                          : "Restricted (Team Leads Only)"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <Building className="h-3.5 w-3.5 text-sage shrink-0" />
-                      <span>{m.department}</span>
-                    </div>
-
-                    {memberProjectName && (
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <FolderGit2 className="h-3.5 w-3.5 text-amber-700 shrink-0" />
-                        <span>{memberProjectName}</span>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Phone className="h-3.5 w-3.5 text-forest shrink-0" />
+                        <span className="truncate no-underline font-medium text-charcoal/90" style={{ textDecoration: "none" }}>
+                          {canSeeContactDetails
+                            ? m.phone_number || "No phone listed"
+                            : "Restricted (Team Leads Only)"}
+                        </span>
                       </div>
-                    )}
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Building className="h-3.5 w-3.5 text-sage shrink-0" />
+                        <span className="font-medium text-charcoal/80">{m.department}</span>
+                      </div>
+
+                      {memberProjectName && (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <FolderGit2 className="h-3.5 w-3.5 text-amber-700 shrink-0" />
+                          <span className="font-medium text-charcoal/80">{memberProjectName}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 {/* Action Buttons for Captain */}
                 {userIsCaptain && (
-                  <div className="flex flex-wrap items-center gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-sand/40">
+                  <div className="flex flex-wrap items-center gap-2 pt-1 lg:pt-0">
                     {/* Transfer Captain Ownership button (Only for non-self teammates) */}
                     {!isSelf && (
                       <button
@@ -337,7 +339,7 @@ export default function MembersPage() {
 
                     <button
                       onClick={() => handleOpenEditModal(m)}
-                      className="p-2 text-charcoal/70 hover:text-forest hover:bg-forest/10 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium border border-sand px-3 py-1.5"
+                      className="p-2 text-charcoal/70 hover:text-forest hover:bg-forest/10 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium border border-stone/60 px-3 py-1.5"
                       title="Edit Member Details"
                     >
                       <Pencil className="h-3.5 w-3.5" />
