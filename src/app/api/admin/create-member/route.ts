@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Insert/upsert into public.profiles
-    const { data: profile, error: profileError } = await adminSupabase
+    let { data: profile, error: profileError } = await adminSupabase
       .from("profiles")
       .upsert(
         {
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
           email,
           full_name,
           role: role || "member",
-          department: department || "General",
+          department: role === "trainee" ? "Trainee" : (department || "General"),
           project_id: project_id || null,
           phone_number: phone_number || null,
         },
@@ -66,8 +66,28 @@ export async function POST(request: NextRequest) {
       .select("*")
       .single();
 
-    if (profileError) {
-      console.error("Profile insert error in API route:", profileError);
+    if (profileError && (profileError.message.includes("check constraint") || profileError.message.includes("profiles_role_check"))) {
+      // Fallback for strict database constraints: store role as 'member' and department as 'Trainee'
+      const fallback = await adminSupabase
+        .from("profiles")
+        .upsert(
+          {
+            id: userId,
+            email,
+            full_name,
+            role: "member",
+            department: "Trainee",
+            project_id: project_id || null,
+            phone_number: phone_number || null,
+          },
+          { onConflict: "id" }
+        )
+        .select("*")
+        .single();
+
+      if (fallback.data) {
+        profile = fallback.data;
+      }
     }
 
     return NextResponse.json({

@@ -144,7 +144,22 @@ export default function MembersPage() {
         .update(updateData)
         .eq("id", editingMember.id);
 
-      if (error && error.message.includes("phone_number")) {
+      if (error && (error.message.includes("profiles_role_check") || error.message.includes("check constraint"))) {
+        // Fallback for DB check constraints: store role as 'member' and department as 'Trainee'
+        updateData.role = "member";
+        updateData.department = "Trainee";
+        const fallback = await supabase
+          .from("profiles")
+          .update(updateData)
+          .eq("id", editingMember.id);
+
+        if (fallback.error) {
+          alert("Error updating profile: " + fallback.error.message);
+          setSubmitting(false);
+          return;
+        }
+        error = null;
+      } else if (error && error.message.includes("phone_number")) {
         delete updateData.phone_number;
         const fallback = await supabase
           .from("profiles")
@@ -156,10 +171,6 @@ export default function MembersPage() {
           setSubmitting(false);
           return;
         }
-
-        alert(
-          "Profile updated! Note: To store Phone Numbers permanently, run this line in your Supabase SQL Editor:\n\nALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone_number TEXT;"
-        );
       } else if (error) {
         alert("Error updating profile: " + error.message);
         setSubmitting(false);
@@ -266,7 +277,7 @@ export default function MembersPage() {
                       {isSelf && <span className="text-xs text-charcoal/50 font-normal">(You)</span>}
                     </h3>
                     <Badge variant={m.role === "captain" ? "forest" : m.role === "vice_captain" ? "sage" : "default"}>
-                      {roleLabel(m.role)}
+                      {roleLabel(m.role, m.department)}
                     </Badge>
                   </div>
 

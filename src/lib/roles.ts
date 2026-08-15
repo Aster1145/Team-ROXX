@@ -1,4 +1,4 @@
-import { Profile, Role } from "@/types";
+import { Profile, Role, Department } from "@/types";
 
 export const ROLES: Record<Role, number> = {
   captain: 3,
@@ -20,14 +20,16 @@ export function isViceCaptain(profile?: Profile | null) {
 }
 
 export function isTrainee(profile?: Profile | null) {
-  return profile?.role === "trainee";
+  return profile?.role === "trainee" || profile?.department === "Trainee";
 }
 
 export function canEditProject(profile?: Profile | null) {
+  if (isTrainee(profile)) return false;
   return profile?.role === "captain" || profile?.role === "vice_captain";
 }
 
 export function canManageBudget(profile?: Profile | null) {
+  if (isTrainee(profile)) return false;
   return profile?.role === "captain" || profile?.role === "vice_captain";
 }
 
@@ -40,21 +42,22 @@ export function canAssignEventParticipants(profile?: Profile | null) {
 }
 
 export function canAccessRestrictedSections(profile?: Profile | null) {
-  return profile?.role !== "trainee";
+  return !isTrainee(profile);
 }
 
 export function canCreateOrEdit(profile?: Profile | null) {
-  return profile?.role !== "trainee";
+  return !isTrainee(profile);
 }
 
-export function roleLabel(role: Role) {
+export function roleLabel(role?: Role, department?: Department) {
+  if (role === "trainee" || department === "Trainee") {
+    return "Trainee (1st Year)";
+  }
   switch (role) {
     case "captain":
       return "Captain";
     case "vice_captain":
       return "Vice Captain";
-    case "trainee":
-      return "Trainee (1st Year)";
     case "member":
     default:
       return "Member";
