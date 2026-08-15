@@ -13,6 +13,7 @@ import {
   Package,
   Wallet,
   BookOpen,
+  Video,
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +23,7 @@ const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
   { href: "/dashboard/learning", label: "Learning Hub", icon: BookOpen },
+  { href: "/dashboard/meetings", label: "Meetings", icon: Video },
   { href: "/dashboard/events", label: "Events", icon: CalendarDays },
   { href: "/dashboard/research", label: "Research", icon: FlaskConical },
   { href: "/dashboard/reports", label: "Reports", icon: FileText },
@@ -37,7 +39,7 @@ export function Sidebar() {
   const isUserTrainee = isTrainee(profile);
   const visibleNav = NAV.filter((item) => {
     if (isUserTrainee) {
-      return !["/dashboard/inventory", "/dashboard/budget"].includes(item.href);
+      return !["/dashboard/inventory", "/dashboard/budget", "/dashboard/meetings"].includes(item.href);
     }
     return true;
   });

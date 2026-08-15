@@ -45,6 +45,16 @@ export function canAccessRestrictedSections(profile?: Profile | null) {
   return !isTrainee(profile);
 }
 
+export function canAccessMeetings(profile?: Profile | null) {
+  if (isTrainee(profile)) return false;
+  return profile?.role === "captain" || profile?.role === "vice_captain" || profile?.role === "member";
+}
+
+export function canScheduleMeetings(profile?: Profile | null) {
+  if (isTrainee(profile)) return false;
+  return profile?.role === "captain" || profile?.role === "vice_captain";
+}
+
 export function canCreateOrEdit(profile?: Profile | null) {
   return !isTrainee(profile);
 }

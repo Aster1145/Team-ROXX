@@ -169,3 +169,17 @@ export interface LearningResource {
   created_at: string;
   author?: { full_name: string };
 }
+
+export interface ScheduledMeeting {
+  id: string;
+  title: string;
+  description?: string | null;
+  meet_url: string;
+  meeting_date: string;
+  start_time: string;
+  end_time: string;
+  target_department?: string | null;
+  scheduled_by?: string | null;
+  created_at: string;
+  organizer?: { full_name: string; role: Role; department?: Department };
+}

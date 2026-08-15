@@ -11,6 +11,7 @@ import {
   CheckSquare,
   FlaskConical,
   FileText,
+  Video,
   X,
   ArrowRight,
   Sparkles,
@@ -20,7 +21,7 @@ interface SearchResultItem {
   id: string;
   title: string;
   subtitle: string;
-  category: "Project" | "Member" | "Inventory" | "Task" | "Research" | "Report";
+  category: "Project" | "Member" | "Inventory" | "Task" | "Research" | "Report" | "Meeting";
   href: string;
 }
 
@@ -169,6 +170,8 @@ export function GlobalSearch() {
         return <FlaskConical className="h-4 w-4 text-indigo-500" />;
       case "Report":
         return <FileText className="h-4 w-4 text-rose-500" />;
+      case "Meeting":
+        return <Video className="h-4 w-4 text-emerald-500" />;
     }
   };
 
