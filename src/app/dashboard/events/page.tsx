@@ -87,21 +87,21 @@ export default function EventsPage() {
             <Card key={e.id}>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle>{e.title}</CardTitle>
+                  <div className="min-w-0">
+                    <CardTitle className="break-words [overflow-wrap:anywhere]">{e.title}</CardTitle>
                     <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-charcoal/60">
-                      <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" /> {formatDate(e.event_date)}</span>
-                      <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {e.location}</span>
-                      <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {current.length}/{e.max_participants}</span>
+                      <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5 shrink-0" /> {formatDate(e.event_date)}</span>
+                      <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5 shrink-0" /> {e.location}</span>
+                      <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5 shrink-0" /> {current.length}/{e.max_participants}</span>
                     </div>
                   </div>
-                  <Badge variant={current.length >= e.max_participants ? "success" : "forest"}>
+                  <Badge variant={current.length >= e.max_participants ? "success" : "forest"} className="shrink-0">
                     {current.length >= e.max_participants ? "Full" : "Open"}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-charcoal/70">{e.description}</p>
+              <CardContent className="p-3.5 sm:p-5 pt-0 sm:pt-0">
+                <p className="text-sm text-charcoal/70 break-words [overflow-wrap:anywhere]">{e.description}</p>
                 <div className="mt-4">
                   <p className="mb-2 text-sm font-medium text-charcoal">Participants</p>
                   <div className="flex flex-wrap gap-2">
@@ -114,7 +114,7 @@ export default function EventsPage() {
                 {canAssignEventParticipants(profile) && (
                   <div className="mt-4">
                     <p className="mb-2 text-sm font-medium text-charcoal">Assign members</p>
-                    <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
                       {members.map((m) => {
                         const selected = current.some((p) => p.profile_id === m.id);
                         return (
@@ -128,9 +128,9 @@ export default function EventsPage() {
                               type="checkbox"
                               checked={selected}
                               onChange={() => toggleParticipant(e.id, m.id, e.max_participants)}
-                              className="h-4 w-4 accent-forest"
+                              className="h-4 w-4 accent-forest shrink-0"
                             />
-                            {m.full_name}
+                            <span className="truncate">{m.full_name}</span>
                           </label>
                         );
                       })}
@@ -147,7 +147,7 @@ export default function EventsPage() {
         <form onSubmit={handleCreate} className="space-y-4">
           <Input placeholder="Event title" required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           <Textarea placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input type="date" required value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} />
             <Input type="number" min={1} required value={form.max_participants} onChange={(e) => setForm({ ...form, max_participants: Number(e.target.value) })} placeholder="Max participants" />
           </div>

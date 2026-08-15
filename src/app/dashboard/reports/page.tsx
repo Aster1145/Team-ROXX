@@ -384,29 +384,29 @@ export default function ReportsPage() {
 
           return (
             <Card key={r.id} className="hover:shadow-sm transition-shadow">
-              <CardHeader>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-forest/10 text-forest">
+              <CardHeader className="p-3.5 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest/10 text-forest">
                       <FileText className="h-5 w-5" />
                     </div>
-                    <div>
-                      <CardTitle className="text-base flex items-center gap-2">
-                        {r.profile?.full_name}
+                    <div className="min-w-0">
+                      <CardTitle className="text-base flex items-center gap-2 flex-wrap">
+                        <span className="truncate">{r.profile?.full_name}</span>
                         {authorIsCaptain && (
-                          <Badge variant="forest" className="text-[10px]">Captain</Badge>
+                          <Badge variant="forest" className="text-[10px] shrink-0">Captain</Badge>
                         )}
                       </CardTitle>
-                      <p className="text-xs text-charcoal/60">
+                      <p className="text-xs text-charcoal/60 truncate">
                         {r.profile?.department} · Week ending {formatDate(r.week_ending)}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     {/* Display Rating & Points */}
                     {!authorIsCaptain && (
-                      <div className="flex items-center gap-2 bg-stone-50 px-3 py-1.5 rounded-lg border border-stone/60">
+                      <div className="flex items-center gap-2 bg-stone-50 px-2.5 py-1.5 rounded-lg border border-stone/60">
                         {hasBeenRated ? (
                           <>
                             {renderStars(r.rating_stars!)}
@@ -449,12 +449,12 @@ export default function ReportsPage() {
                       </Button>
                     )}
 
-                    <Badge variant="sage">{formatDate(r.created_at)}</Badge>
+                    <Badge variant="sage" className="shrink-0">{formatDate(r.created_at)}</Badge>
                   </div>
                 </div>
               </CardHeader>
 
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 p-3.5 sm:p-6 pt-0 sm:pt-0">
                 <div className="min-w-0 break-words">
                   <p className="text-xs font-semibold uppercase text-charcoal/50 mb-1">Summary</p>
                   <p className="text-sm text-charcoal/90 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{r.summary}</p>

@@ -185,9 +185,9 @@ export default function DashboardPage() {
 
       {/* DEDICATED ASSIGNED TASKS WIDGET FOR LOGGED IN USER */}
       <Card className="mt-6 border-forest/30 bg-gradient-to-r from-forest/5 via-white to-forest/5 shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-forest/10">
-          <div className="flex items-center gap-2">
-            <CheckSquare className="h-5 w-5 text-forest" />
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-forest/10">
+          <div className="flex items-center gap-2 flex-wrap">
+            <CheckSquare className="h-5 w-5 text-forest shrink-0" />
             <CardTitle className="text-base text-charcoal">My Assigned Tasks</CardTitle>
             <span className="rounded-full bg-forest px-2.5 py-0.5 text-xs font-bold text-white">
               {myTasks.length} Assigned
@@ -196,35 +196,35 @@ export default function DashboardPage() {
           <span className="text-xs text-charcoal/60 font-medium">Update progress status directly from dashboard</span>
         </CardHeader>
 
-        <CardContent className="pt-4">
+        <CardContent className="pt-4 p-3.5 sm:p-5">
           <div className="space-y-3">
             {myTasks.map((t) => (
               <div
                 key={t.id}
-                className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 rounded-xl border border-stone/70 bg-white shadow-2xs hover:border-forest/40 transition-all"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-xl border border-stone/70 bg-white shadow-2xs hover:border-forest/40 transition-all min-w-0"
               >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h4 className="font-bold text-charcoal text-sm">{t.title}</h4>
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <h4 className="font-bold text-charcoal text-sm break-words [overflow-wrap:anywhere]">{t.title}</h4>
                     {t.project?.name && (
-                      <Badge variant="forest" className="text-[10px]">
+                      <Badge variant="forest" className="text-[10px] shrink-0">
                         {t.project.name}
                       </Badge>
                     )}
                     {renderTaskStatusBadge(t.status)}
                   </div>
                   {t.description && (
-                    <p className="text-xs text-charcoal/70 line-clamp-2">{t.description}</p>
+                    <p className="text-xs text-charcoal/70 line-clamp-2 break-words">{t.description}</p>
                   )}
                   {t.due_date && (
                     <p className="text-[11px] text-charcoal/50 flex items-center gap-1">
-                      <Clock className="h-3 w-3 text-amber-600" /> Due: {formatDate(t.due_date)}
+                      <Clock className="h-3 w-3 text-amber-600 shrink-0" /> Due: {formatDate(t.due_date)}
                     </p>
                   )}
                 </div>
 
                 {/* Direct Interactive Status Selector on Dashboard */}
-                <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
+                <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone/30">
                   <span className="text-xs text-charcoal/60 font-medium">Status:</span>
                   <Select
                     value={t.status}

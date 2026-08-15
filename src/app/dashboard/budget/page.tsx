@@ -523,20 +523,20 @@ export default function BudgetPage() {
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
               {/* Search Box */}
               <Input
                 placeholder="Search item, requester..."
                 value={requestSearchQuery}
                 onChange={(e) => setRequestSearchQuery(e.target.value)}
-                className="w-44 text-xs py-1 h-9"
+                className="w-full sm:w-44 text-xs py-1 h-9"
               />
 
               {/* Category Filter */}
               <Select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="w-36 text-xs py-1 h-9"
+                className="w-[calc(50%-4px)] sm:w-36 text-xs py-1 h-9"
               >
                 <option value="all">All Categories</option>
                 <option value="Components">Components</option>
@@ -552,7 +552,7 @@ export default function BudgetPage() {
               <Select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-36 text-xs py-1 h-9 font-medium"
+                className="w-[calc(50%-4px)] sm:w-36 text-xs py-1 h-9 font-medium"
               >
                 <option value="all">All Statuses</option>
                 <option value="pending">Pending Review</option>
@@ -566,7 +566,7 @@ export default function BudgetPage() {
                 variant="outline"
                 size="sm"
                 onClick={exportFilteredRequestsExcel}
-                className="text-xs font-semibold gap-1.5 bg-forest/10 hover:bg-forest hover:text-white border-forest/30 text-forest h-9 transition-all"
+                className="w-full sm:w-auto text-xs font-semibold gap-1.5 bg-forest/10 hover:bg-forest hover:text-white border-forest/30 text-forest h-9 transition-all justify-center"
                 title="Export currently filtered list to Excel for mentors or budget approval"
               >
                 <Download className="h-3.5 w-3.5" />

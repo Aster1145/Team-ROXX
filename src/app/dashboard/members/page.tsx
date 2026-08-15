@@ -271,45 +271,45 @@ export default function MembersPage() {
 
           return (
             <Card key={m.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <CardContent className="p-3.5 sm:p-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between min-w-0">
                 {/* Member Info */}
-                <div className="space-y-2">
+                <div className="space-y-2 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-base font-bold text-charcoal flex items-center gap-1.5">
-                      {isCurrentCaptain && <Crown className="h-4 w-4 text-amber-500 fill-amber-400" />}
-                      {m.full_name}
+                    <h3 className="text-base font-bold text-charcoal flex items-center gap-1.5 break-words">
+                      {isCurrentCaptain && <Crown className="h-4 w-4 text-amber-500 fill-amber-400 shrink-0" />}
+                      <span>{m.full_name}</span>
                       {isSelf && <span className="text-xs text-charcoal/50 font-normal">(You)</span>}
                     </h3>
-                    <Badge variant={m.role === "captain" ? "forest" : m.role === "vice_captain" ? "sage" : "default"}>
+                    <Badge variant={m.role === "captain" ? "forest" : m.role === "vice_captain" ? "sage" : "default"} className="shrink-0">
                       {roleLabel(m.role, m.department)}
                     </Badge>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-4 text-xs text-charcoal/70">
-                    <div className="flex items-center gap-1.5">
-                      <Mail className="h-3.5 w-3.5 text-forest" />
-                      <span>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-charcoal/70 min-w-0 break-words [overflow-wrap:anywhere]">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Mail className="h-3.5 w-3.5 text-forest shrink-0" />
+                      <span className="break-all">
                         {canSeeContactDetails ? m.email : "••••••@••••• (Restricted)"}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                      <Phone className="h-3.5 w-3.5 text-forest" />
-                      <span>
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Phone className="h-3.5 w-3.5 text-forest shrink-0" />
+                      <span className="truncate">
                         {canSeeContactDetails
                           ? m.phone_number || "No phone listed"
                           : "Restricted (Team Leads Only)"}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                      <Building className="h-3.5 w-3.5 text-sage" />
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Building className="h-3.5 w-3.5 text-sage shrink-0" />
                       <span>{m.department}</span>
                     </div>
 
                     {memberProjectName && (
-                      <div className="flex items-center gap-1.5">
-                        <FolderGit2 className="h-3.5 w-3.5 text-amber-700" />
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <FolderGit2 className="h-3.5 w-3.5 text-amber-700 shrink-0" />
                         <span>{memberProjectName}</span>
                       </div>
                     )}

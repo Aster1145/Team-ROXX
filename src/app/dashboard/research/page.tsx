@@ -134,25 +134,25 @@ export default function ResearchPage() {
         )}
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-5 grid-cols-1 md:grid-cols-2">
         {docs.map((d) => (
-          <Card key={d.id} className="relative group">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3">
+          <Card key={d.id} className="relative group min-w-0">
+            <CardHeader className="pb-3 p-3.5 sm:p-5">
+              <div className="flex items-start justify-between gap-3 min-w-0">
+                <div className="flex items-start gap-3 min-w-0">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest/10 text-forest">
                     <BookOpen className="h-5 w-5" />
                   </div>
-                  <div>
-                    <CardTitle className="text-base font-bold">{d.title}</CardTitle>
-                    <p className="text-xs text-charcoal/60 mt-0.5">
+                  <div className="min-w-0">
+                    <CardTitle className="text-base font-bold break-words [overflow-wrap:anywhere]">{d.title}</CardTitle>
+                    <p className="text-xs text-charcoal/60 mt-0.5 truncate">
                       {projectName(d.project_id)} · {d.author?.full_name || "Author"} · {formatDate(d.created_at)}
                     </p>
                   </div>
                 </div>
 
                 {canModifyDoc(d) && (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => handleOpenEditModal(d)}
                       className="p-1.5 text-charcoal/50 hover:text-forest hover:bg-forest/10 rounded-lg transition-colors"
@@ -171,8 +171,8 @@ export default function ResearchPage() {
                 )}
               </div>
             </CardHeader>
-            <CardContent>
-              <p className="whitespace-pre-line text-sm leading-relaxed text-charcoal/80 bg-cream/30 p-3 rounded-lg border border-sand/40">
+            <CardContent className="p-3.5 sm:p-5 pt-0 sm:pt-0">
+              <p className="whitespace-pre-line text-sm leading-relaxed text-charcoal/80 bg-cream/30 p-3 rounded-lg border border-sand/40 break-words [overflow-wrap:anywhere]">
                 {d.content}
               </p>
             </CardContent>

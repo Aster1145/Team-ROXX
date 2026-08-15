@@ -359,15 +359,15 @@ export default function LearningPage() {
       </div>
 
       {/* Learning Resources Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {filteredResources.map((res) => {
           const embedUrl = res.resource_type === "youtube" ? getYouTubeEmbedUrl(res.url) : null;
           const isCompleted = completedResourceIds.includes(res.id);
 
           return (
-            <Card key={res.id} className={`hover:shadow-md transition-all border-stone/70 flex flex-col justify-between ${isCompleted ? "bg-emerald-50/30 border-emerald-300" : ""}`}>
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between gap-2 mb-2">
+            <Card key={res.id} className={`hover:shadow-md transition-all border-stone/70 flex flex-col justify-between min-w-0 ${isCompleted ? "bg-emerald-50/30 border-emerald-300" : ""}`}>
+              <CardHeader className="pb-3 p-3.5 sm:p-5">
+                <div className="flex items-start justify-between gap-2 mb-2 min-w-0">
                   <div className="flex items-center gap-2">
                     <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-stone-100 border border-stone">
                       {renderTypeIcon(res.resource_type)}
