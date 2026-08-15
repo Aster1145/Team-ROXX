@@ -343,33 +343,33 @@ export default function ReportsPage() {
               </CardHeader>
 
               <CardContent className="space-y-4">
-                <div>
+                <div className="min-w-0 break-words">
                   <p className="text-xs font-semibold uppercase text-charcoal/50 mb-1">Summary</p>
-                  <p className="text-sm text-charcoal/90">{r.summary}</p>
+                  <p className="text-sm text-charcoal/90 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{r.summary}</p>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div>
+                <div className="grid gap-4 md:grid-cols-3 min-w-0">
+                  <div className="min-w-0 break-words">
                     <p className="text-xs font-semibold uppercase text-charcoal/50 mb-1">Accomplishments</p>
-                    <p className="text-sm text-charcoal/80">{r.accomplishments || "—"}</p>
+                    <p className="text-sm text-charcoal/80 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{r.accomplishments || "—"}</p>
                   </div>
-                  <div>
+                  <div className="min-w-0 break-words">
                     <p className="text-xs font-semibold uppercase text-charcoal/50 mb-1">Blockers</p>
-                    <p className="text-sm text-charcoal/80">{r.blockers || "—"}</p>
+                    <p className="text-sm text-charcoal/80 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{r.blockers || "—"}</p>
                   </div>
-                  <div>
+                  <div className="min-w-0 break-words">
                     <p className="text-xs font-semibold uppercase text-charcoal/50 mb-1">Next Steps</p>
-                    <p className="text-sm text-charcoal/80">{r.next_steps || "—"}</p>
+                    <p className="text-sm text-charcoal/80 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{r.next_steps || "—"}</p>
                   </div>
                 </div>
 
                 {/* Captain Feedback Note */}
                 {r.rating_feedback && (
-                  <div className="mt-3 rounded-lg bg-amber-50/70 p-3 border border-amber-200 text-xs text-amber-950 flex items-start gap-2">
+                  <div className="mt-3 rounded-lg bg-amber-50/70 p-3 border border-amber-200 text-xs text-amber-950 flex items-start gap-2 min-w-0 break-words">
                     <MessageSquare className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
-                    <div>
+                    <div className="min-w-0 break-words">
                       <span className="font-bold block">Captain Review:</span>
-                      <p className="mt-0.5">{r.rating_feedback}</p>
+                      <p className="mt-0.5 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{r.rating_feedback}</p>
                     </div>
                   </div>
                 )}
