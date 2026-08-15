@@ -96,10 +96,12 @@ export interface InventoryLog {
   id: string;
   item_name: string;
   purpose?: string | null;
-  taken_by: string;
+  profile_id?: string | null;
+  taken_by?: string | null;
   taken_at: string;
   returned_at: string | null;
-  condition_notes: string;
+  notes?: string | null;
+  condition_notes?: string | null;
   profile?: { full_name: string };
 }
 

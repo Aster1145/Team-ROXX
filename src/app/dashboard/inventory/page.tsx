@@ -19,14 +19,28 @@ export default function InventoryPage() {
   const supabase = createClient();
   const [logs, setLogs] = useState<InventoryLog[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ item_name: "", purpose: "", condition_notes: "" });
 
   const fetchLogs = async () => {
-    const { data } = await supabase
-      .from("inventory_logs")
-      .select("*, profile:profiles(full_name)")
-      .order("taken_at", { ascending: false });
-    setLogs((data as InventoryLog[]) || []);
+    try {
+      let { data, error } = await supabase
+        .from("inventory_logs")
+        .select("*, profile:profiles!profile_id(full_name)")
+        .order("taken_at", { ascending: false });
+
+      if (error) {
+        const fallback = await supabase
+          .from("inventory_logs")
+          .select("*, profile:profiles(full_name)")
+          .order("taken_at", { ascending: false });
+        data = fallback.data;
+      }
+
+      setLogs((data as InventoryLog[]) || []);
+    } catch (err) {
+      console.error("Error fetching inventory logs:", err);
+    }
   };
 
   useEffect(() => {
@@ -35,30 +49,69 @@ export default function InventoryPage() {
 
   const handleTake = async (e: React.FormEvent) => {
     e.preventDefault();
-    await supabase.from("inventory_logs").insert({
-      item_name: form.item_name,
-      purpose: form.purpose || null,
-      taken_by: profile?.id,
-      condition_notes: form.condition_notes,
-    });
-    setModalOpen(false);
-    setForm({ item_name: "", purpose: "", condition_notes: "" });
-    fetchLogs();
+    if (!profile?.id) {
+      alert("You must be logged in to log an item.");
+      return;
+    }
+    setSubmitting(true);
+
+    try {
+      // 1. Primary insert attempting profile_id & notes
+      let { error } = await supabase.from("inventory_logs").insert({
+        item_name: form.item_name,
+        purpose: form.purpose || null,
+        profile_id: profile.id,
+        notes: form.condition_notes || null,
+      });
+
+      // 2. Fallback attempt if database schema expects taken_by / condition_notes
+      if (error) {
+        const fallback = await supabase.from("inventory_logs").insert({
+          item_name: form.item_name,
+          purpose: form.purpose || null,
+          taken_by: profile.id,
+          condition_notes: form.condition_notes || null,
+        });
+        error = fallback.error;
+      }
+
+      if (error) {
+        alert("Error logging inventory item: " + error.message);
+        return;
+      }
+
+      setModalOpen(false);
+      setForm({ item_name: "", purpose: "", condition_notes: "" });
+      await fetchLogs();
+    } catch (err: any) {
+      alert("Failed to log inventory item: " + err.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const markReturned = async (id: string) => {
-    await supabase.from("inventory_logs").update({ returned_at: new Date().toISOString() }).eq("id", id);
-    fetchLogs();
+    try {
+      const { error } = await supabase
+        .from("inventory_logs")
+        .update({ returned_at: new Date().toISOString() })
+        .eq("id", id);
+
+      if (error) throw error;
+      await fetchLogs();
+    } catch (err: any) {
+      alert("Failed to mark item returned: " + err.message);
+    }
   };
 
   const exportExcel = () => {
     const rows = logs.map((l) => ({
       Item: l.item_name,
       Purpose: l.purpose || "N/A",
-      "Taken By": l.profile?.full_name,
+      "Taken By": l.profile?.full_name || "Team Member",
       "Taken At": formatDateTime(l.taken_at),
       "Returned At": formatDateTime(l.returned_at),
-      Notes: l.condition_notes,
+      Notes: l.notes || l.condition_notes || "None",
       Status: l.returned_at ? "Returned" : "Out",
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
@@ -108,7 +161,7 @@ export default function InventoryPage() {
                   <tr key={l.id} className="border-b border-stone/50">
                     <td className="py-3 font-medium text-charcoal">{l.item_name}</td>
                     <td className="py-3 text-charcoal/80">{l.purpose || "—"}</td>
-                    <td className="py-3">{l.profile?.full_name}</td>
+                    <td className="py-3">{l.profile?.full_name || "Team Member"}</td>
                     <td className="py-3">{formatDateTime(l.taken_at)}</td>
                     <td className="py-3">{formatDateTime(l.returned_at)}</td>
                     <td className="py-3">
@@ -128,7 +181,7 @@ export default function InventoryPage() {
                 {logs.length === 0 && (
                   <tr>
                     <td colSpan={7} className="py-8 text-center text-charcoal/60">
-                      No inventory logs yet.
+                      No inventory logs recorded yet.
                     </td>
                   </tr>
                 )}
@@ -169,7 +222,9 @@ export default function InventoryPage() {
             />
           </div>
 
-          <Button type="submit" className="w-full">Log Item</Button>
+          <Button type="submit" className="w-full" isLoading={submitting}>
+            Log Item
+          </Button>
         </form>
       </Modal>
     </>
