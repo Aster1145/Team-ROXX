@@ -13,7 +13,7 @@ import { Select } from "@/components/ui/Select";
 import { DEPARTMENTS, ROLES } from "@/lib/constants";
 import { isCaptain, roleLabel } from "@/lib/roles";
 import { Profile, Project, Role, Department } from "@/types";
-import { Plus, Trash2, Mail, Phone, Building, FolderGit2, Pencil } from "lucide-react";
+import { Plus, Trash2, Mail, Phone, Building, FolderGit2, Pencil, Crown, ShieldAlert } from "lucide-react";
 
 export default function MembersPage() {
   const { profile } = useAuth();
@@ -21,10 +21,16 @@ export default function MembersPage() {
   const [members, setMembers] = useState<Profile[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Modals state
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  
   const [editingMember, setEditingMember] = useState<Profile | null>(null);
+  const [targetMember, setTargetMember] = useState<Profile | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -139,7 +145,6 @@ export default function MembersPage() {
         .eq("id", editingMember.id);
 
       if (error && error.message.includes("phone_number")) {
-        // Fallback: update profile without phone_number if column is not created yet
         delete updateData.phone_number;
         const fallback = await supabase
           .from("profiles")
@@ -166,6 +171,38 @@ export default function MembersPage() {
       await fetchMembers();
     } catch (err: any) {
       alert(err.message || "Failed to update member.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleTransferOwnership = async () => {
+    if (!targetMember || !profile?.id) return;
+    setSubmitting(true);
+    try {
+      // 1. Promote target teammate to 'captain'
+      const promoteRes = await supabase
+        .from("profiles")
+        .update({ role: "captain" })
+        .eq("id", targetMember.id);
+
+      if (promoteRes.error) throw promoteRes.error;
+
+      // 2. Demote current captain stepping down to 'vice_captain'
+      const demoteRes = await supabase
+        .from("profiles")
+        .update({ role: "vice_captain" })
+        .eq("id", profile.id);
+
+      if (demoteRes.error) throw demoteRes.error;
+
+      alert(`Ownership transferred! ${targetMember.full_name} is now Captain. You have stepped down to Vice Captain.`);
+      setTransferModalOpen(false);
+      setTargetMember(null);
+      await fetchMembers();
+      window.location.reload();
+    } catch (err: any) {
+      alert("Failed to transfer ownership: " + err.message);
     } finally {
       setSubmitting(false);
     }
@@ -199,7 +236,7 @@ export default function MembersPage() {
     <>
       <Header title="Members" />
 
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-charcoal">Team Directory</h2>
           <p className="text-xs text-charcoal/60">Complete member directory with roles, contact information, and projects</p>
@@ -214,6 +251,8 @@ export default function MembersPage() {
       <div className="space-y-4">
         {members.map((m) => {
           const memberProjectName = projects.find((p) => p.id === m.project_id)?.name;
+          const isCurrentCaptain = m.role === "captain";
+          const isSelf = m.id === profile?.id;
 
           return (
             <Card key={m.id} className="hover:shadow-md transition-shadow">
@@ -221,7 +260,11 @@ export default function MembersPage() {
                 {/* Member Info */}
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-base font-bold text-charcoal">{m.full_name}</h3>
+                    <h3 className="text-base font-bold text-charcoal flex items-center gap-1.5">
+                      {isCurrentCaptain && <Crown className="h-4 w-4 text-amber-500 fill-amber-400" />}
+                      {m.full_name}
+                      {isSelf && <span className="text-xs text-charcoal/50 font-normal">(You)</span>}
+                    </h3>
                     <Badge variant={m.role === "captain" ? "forest" : m.role === "vice_captain" ? "sage" : "default"}>
                       {roleLabel(m.role)}
                     </Badge>
@@ -254,17 +297,32 @@ export default function MembersPage() {
 
                 {/* Action Buttons for Captain */}
                 {userIsCaptain && (
-                  <div className="flex items-center gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-sand/40">
+                  <div className="flex flex-wrap items-center gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-sand/40">
+                    {/* Transfer Captain Ownership button (Only for non-self teammates) */}
+                    {!isSelf && (
+                      <button
+                        onClick={() => {
+                          setTargetMember(m);
+                          setTransferModalOpen(true);
+                        }}
+                        className="p-2 text-amber-800 hover:text-amber-950 hover:bg-amber-100/70 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold border border-amber-300 bg-amber-50 px-3 py-1.5"
+                        title="Transfer Captain Ownership to this teammate"
+                      >
+                        <Crown className="h-3.5 w-3.5 text-amber-600" />
+                        <span>Transfer Captain Role</span>
+                      </button>
+                    )}
+
                     <button
                       onClick={() => handleOpenEditModal(m)}
-                      className="p-2 text-charcoal/60 hover:text-forest hover:bg-forest/10 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium border border-sand px-3 py-1.5"
+                      className="p-2 text-charcoal/70 hover:text-forest hover:bg-forest/10 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium border border-sand px-3 py-1.5"
                       title="Edit Member Details"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                       <span>Edit Teammate</span>
                     </button>
 
-                    {m.id !== profile?.id && (
+                    {!isSelf && (
                       <button
                         onClick={() => handleRemoveMember(m.id, m.full_name)}
                         className="p-2 text-charcoal/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -280,6 +338,62 @@ export default function MembersPage() {
           );
         })}
       </div>
+
+      {/* Transfer Captain Ownership Modal */}
+      {targetMember && (
+        <Modal
+          isOpen={transferModalOpen}
+          onClose={() => {
+            setTransferModalOpen(false);
+            setTargetMember(null);
+          }}
+          title="Transfer Captain Ownership"
+        >
+          <div className="space-y-4">
+            <div className="rounded-xl bg-amber-50 p-4 border border-amber-200 flex items-start gap-3">
+              <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-xs text-amber-900 space-y-1">
+                <p className="font-bold text-sm">Are you sure you want to step down?</p>
+                <p>
+                  You are about to transfer <strong>Captain Ownership</strong> to{" "}
+                  <strong>{targetMember.full_name}</strong>.
+                </p>
+                <ul className="list-disc pl-4 mt-2 space-y-1 text-amber-800">
+                  <li>
+                    <strong>{targetMember.full_name}</strong> will become the new <strong>Captain</strong> (Team Lead).
+                  </li>
+                  <li>
+                    You (<strong>{profile?.full_name}</strong>) will step down to <strong>Vice Captain</strong>.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <p className="text-xs text-charcoal/70">
+              This action takes effect immediately and updates permissions for managing team members and project settings.
+            </p>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setTransferModalOpen(false);
+                  setTargetMember(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleTransferOwnership}
+                isLoading={submitting}
+                className="bg-amber-600 hover:bg-amber-700 text-white font-semibold flex items-center gap-1.5"
+              >
+                <Crown className="h-4 w-4" /> Transfer Role & Step Down
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Add Member Modal (Captain Only) */}
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Add New Team Member">

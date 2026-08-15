@@ -7,6 +7,8 @@ export type Department =
   | "Software"
   | "Implementation"
   | "Research"
+  | "Drone Controller"
+  | "Trainee"
   | "General";
 
 export interface Profile {
@@ -81,13 +83,18 @@ export interface WeeklyReport {
   accomplishments: string;
   blockers: string;
   next_steps: string;
+  rating_stars?: number | null;
+  points?: number | null;
+  rated_by?: string | null;
+  rating_feedback?: string | null;
   created_at: string;
-  profile?: { full_name: string; department: Department };
+  profile?: { full_name: string; department: Department; role?: string };
 }
 
 export interface InventoryLog {
   id: string;
   item_name: string;
+  purpose?: string | null;
   taken_by: string;
   taken_at: string;
   returned_at: string | null;
@@ -105,6 +112,29 @@ export interface BudgetItem {
   purchased_by: string | null;
   purchased_at: string;
   profile?: { full_name: string };
+}
+
+export type RequestStatus = "pending" | "approved" | "rejected" | "ordered";
+export type RequestPriority = "low" | "medium" | "high" | "urgent";
+
+export interface BudgetItemRequest {
+  id: string;
+  requested_by: string;
+  project_id: string | null;
+  item: string;
+  amount: number;
+  quantity: number;
+  category: string;
+  priority: RequestPriority;
+  status: RequestStatus;
+  justification?: string | null;
+  link?: string | null;
+  rejection_reason?: string | null;
+  reviewed_by?: string | null;
+  created_at: string;
+  updated_at: string;
+  requester?: { full_name: string; email: string };
+  reviewer?: { full_name: string };
 }
 
 export interface Comment {

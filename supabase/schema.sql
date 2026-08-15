@@ -147,8 +147,17 @@ CREATE TABLE IF NOT EXISTS public.weekly_reports (
   accomplishments TEXT,
   blockers TEXT,
   next_steps TEXT,
+  rating_stars INTEGER CHECK (rating_stars BETWEEN 1 AND 5),
+  points INTEGER CHECK (points BETWEEN 2 AND 10),
+  rated_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  rating_feedback TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE public.weekly_reports ADD COLUMN IF NOT EXISTS rating_stars INTEGER CHECK (rating_stars BETWEEN 1 AND 5);
+ALTER TABLE public.weekly_reports ADD COLUMN IF NOT EXISTS points INTEGER CHECK (points BETWEEN 2 AND 10);
+ALTER TABLE public.weekly_reports ADD COLUMN IF NOT EXISTS rated_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
+ALTER TABLE public.weekly_reports ADD COLUMN IF NOT EXISTS rating_feedback TEXT;
 
 ALTER TABLE public.weekly_reports ENABLE ROW LEVEL SECURITY;
 
@@ -158,16 +167,22 @@ CREATE POLICY "Weekly reports are viewable by authenticated users"
 CREATE POLICY "Members can create own reports"
   ON public.weekly_reports FOR INSERT TO authenticated WITH CHECK (auth.uid() = profile_id);
 
+CREATE POLICY "Captains can rate weekly reports"
+  ON public.weekly_reports FOR UPDATE TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'captain'));
+
 -- Inventory logs
 CREATE TABLE IF NOT EXISTS public.inventory_logs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   item_name TEXT NOT NULL,
+  purpose TEXT,
   taken_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   taken_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   returned_at TIMESTAMPTZ,
   condition_notes TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+ALTER TABLE public.inventory_logs ADD COLUMN IF NOT EXISTS purpose TEXT;
 
 ALTER TABLE public.inventory_logs ENABLE ROW LEVEL SECURITY;
 
@@ -200,6 +215,41 @@ CREATE POLICY "Budget items are viewable by authenticated users"
 
 CREATE POLICY "Captains and vice captains can manage budget items"
   ON public.budget_items FOR ALL TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
+
+-- Budget requests
+CREATE TABLE IF NOT EXISTS public.budget_requests (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  requested_by UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
+  item TEXT NOT NULL,
+  amount NUMERIC NOT NULL CHECK (amount >= 0),
+  quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+  category TEXT NOT NULL DEFAULT 'Components',
+  priority TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'ordered')),
+  justification TEXT,
+  link TEXT,
+  rejection_reason TEXT,
+  reviewed_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.budget_requests ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Budget requests are viewable by authenticated users"
+  ON public.budget_requests FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Authenticated users can create budget requests"
+  ON public.budget_requests FOR INSERT TO authenticated WITH CHECK (auth.uid() = requested_by);
+
+CREATE POLICY "Requesters can update pending requests"
+  ON public.budget_requests FOR UPDATE TO authenticated
+  USING (auth.uid() = requested_by AND status = 'pending');
+
+CREATE POLICY "Captains and vice captains can manage budget requests"
+  ON public.budget_requests FOR ALL TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
 
 -- Trigger to auto-create profile on signup

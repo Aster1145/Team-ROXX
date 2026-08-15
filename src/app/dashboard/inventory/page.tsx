@@ -19,7 +19,7 @@ export default function InventoryPage() {
   const supabase = createClient();
   const [logs, setLogs] = useState<InventoryLog[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ item_name: "", condition_notes: "" });
+  const [form, setForm] = useState({ item_name: "", purpose: "", condition_notes: "" });
 
   const fetchLogs = async () => {
     const { data } = await supabase
@@ -37,11 +37,12 @@ export default function InventoryPage() {
     e.preventDefault();
     await supabase.from("inventory_logs").insert({
       item_name: form.item_name,
+      purpose: form.purpose || null,
       taken_by: profile?.id,
       condition_notes: form.condition_notes,
     });
     setModalOpen(false);
-    setForm({ item_name: "", condition_notes: "" });
+    setForm({ item_name: "", purpose: "", condition_notes: "" });
     fetchLogs();
   };
 
@@ -53,6 +54,7 @@ export default function InventoryPage() {
   const exportExcel = () => {
     const rows = logs.map((l) => ({
       Item: l.item_name,
+      Purpose: l.purpose || "N/A",
       "Taken By": l.profile?.full_name,
       "Taken At": formatDateTime(l.taken_at),
       "Returned At": formatDateTime(l.returned_at),
@@ -70,7 +72,9 @@ export default function InventoryPage() {
       <Header title="Inventory Log" />
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-charcoal/70">Log tools and components taken out of the lab. Date and time are captured automatically.</p>
+        <p className="text-charcoal/70">
+          Log tools and components taken out of the lab. State the purpose, and dates are captured automatically.
+        </p>
         <div className="flex gap-2">
           <Button variant="outline" onClick={exportExcel}>
             <Download className="h-4 w-4" /> Export Excel
@@ -91,6 +95,7 @@ export default function InventoryPage() {
               <thead>
                 <tr className="border-b border-stone text-charcoal/60">
                   <th className="pb-3 font-medium">Item</th>
+                  <th className="pb-3 font-medium">Purpose / Intended Use</th>
                   <th className="pb-3 font-medium">Taken By</th>
                   <th className="pb-3 font-medium">Taken At</th>
                   <th className="pb-3 font-medium">Returned At</th>
@@ -102,11 +107,14 @@ export default function InventoryPage() {
                 {logs.map((l) => (
                   <tr key={l.id} className="border-b border-stone/50">
                     <td className="py-3 font-medium text-charcoal">{l.item_name}</td>
+                    <td className="py-3 text-charcoal/80">{l.purpose || "—"}</td>
                     <td className="py-3">{l.profile?.full_name}</td>
                     <td className="py-3">{formatDateTime(l.taken_at)}</td>
                     <td className="py-3">{formatDateTime(l.returned_at)}</td>
                     <td className="py-3">
-                      <Badge variant={l.returned_at ? "success" : "warning"}>{l.returned_at ? "Returned" : "Out"}</Badge>
+                      <Badge variant={l.returned_at ? "success" : "warning"}>
+                        {l.returned_at ? "Returned" : "Out"}
+                      </Badge>
                     </td>
                     <td className="py-3">
                       {!l.returned_at && (
@@ -119,7 +127,7 @@ export default function InventoryPage() {
                 ))}
                 {logs.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-charcoal/60">
+                    <td colSpan={7} className="py-8 text-center text-charcoal/60">
                       No inventory logs yet.
                     </td>
                   </tr>
@@ -132,8 +140,35 @@ export default function InventoryPage() {
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Take Item Out">
         <form onSubmit={handleTake} className="space-y-4">
-          <Input placeholder="Item name (e.g. Drilling machine)" required value={form.item_name} onChange={(e) => setForm({ ...form, item_name: e.target.value })} />
-          <Textarea placeholder="Condition / notes" value={form.condition_notes} onChange={(e) => setForm({ ...form, condition_notes: e.target.value })} />
+          <div>
+            <label className="text-xs font-semibold text-charcoal/70 block mb-1">Item Name *</label>
+            <Input
+              placeholder="e.g. Drilling Machine / Oscilloscope"
+              required
+              value={form.item_name}
+              onChange={(e) => setForm({ ...form, item_name: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-charcoal/70 block mb-1">Purpose / Intended Use *</label>
+            <Input
+              placeholder="e.g. Aero Mechanics wing assembly testing"
+              required
+              value={form.purpose}
+              onChange={(e) => setForm({ ...form, purpose: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-charcoal/70 block mb-1">Condition / Notes (Optional)</label>
+            <Textarea
+              placeholder="Condition, extra accessories taken, or notes..."
+              value={form.condition_notes}
+              onChange={(e) => setForm({ ...form, condition_notes: e.target.value })}
+            />
+          </div>
+
           <Button type="submit" className="w-full">Log Item</Button>
         </form>
       </Modal>
