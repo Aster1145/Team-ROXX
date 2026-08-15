@@ -775,40 +775,40 @@ export default function BudgetPage() {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-sm min-w-[750px]">
                 <thead>
-                  <tr className="border-b border-stone text-charcoal/60">
-                    <th className="pb-3 font-medium">Item</th>
-                    <th className="pb-3 font-medium">Category</th>
-                    <th className="pb-3 font-medium">Project</th>
-                    <th className="pb-3 font-medium">Qty</th>
-                    <th className="pb-3 font-medium">Amount</th>
-                    <th className="pb-3 font-medium">Purchased / Ordered By</th>
-                    <th className="pb-3 font-medium">Date</th>
-                    {isCaptain(profile) && <th className="pb-3 font-medium text-right">Actions</th>}
+                  <tr className="text-slate-500 dark:text-slate-400 font-bold border-b border-slate-100 dark:border-slate-800">
+                    <th className="pb-3 font-bold">Item</th>
+                    <th className="pb-3 font-bold">Category</th>
+                    <th className="pb-3 font-bold">Project</th>
+                    <th className="pb-3 font-bold">Qty</th>
+                    <th className="pb-3 font-bold">Amount</th>
+                    <th className="pb-3 font-bold">Purchased / Ordered By</th>
+                    <th className="pb-3 font-bold">Date</th>
+                    {isCaptain(profile) && <th className="pb-3 font-bold text-right">Actions</th>}
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y-0">
                   {items.map((i) => (
-                    <tr key={i.id} className="border-b border-stone/50 hover:bg-stone/20">
-                      <td className="py-3 font-medium text-charcoal">{i.item}</td>
-                      <td className="py-3">{i.category}</td>
-                      <td className="py-3">{projectName(i.project_id)}</td>
-                      <td className="py-3">{i.quantity}</td>
-                      <td className="py-3 font-semibold text-charcoal">₹{(i.amount * i.quantity).toLocaleString("en-IN")}</td>
-                      <td className="py-3">{i.profile?.full_name || "Team Lead"}</td>
-                      <td className="py-3">{formatDate(i.purchased_at)}</td>
+                    <tr key={i.id} className="hover:bg-slate-100/70 dark:hover:bg-slate-800/50 transition-colors">
+                      <td className="py-3 font-bold text-slate-900 dark:text-slate-100">{i.item}</td>
+                      <td className="py-3 text-slate-600 dark:text-slate-300 font-medium">{i.category}</td>
+                      <td className="py-3 text-slate-700 dark:text-slate-300 font-medium">{projectName(i.project_id)}</td>
+                      <td className="py-3 text-slate-700 dark:text-slate-300 font-semibold">{i.quantity}</td>
+                      <td className="py-3 font-extrabold text-slate-900 dark:text-emerald-400">₹{(i.amount * i.quantity).toLocaleString("en-IN")}</td>
+                      <td className="py-3 text-slate-700 dark:text-slate-300 font-medium">{i.profile?.full_name || "Team Lead"}</td>
+                      <td className="py-3 text-slate-600 dark:text-slate-400 text-xs">{formatDate(i.purchased_at)}</td>
                       {isCaptain(profile) && (
                         <td className="py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => handleOpenEditExpense(i)}
-                              className="p-1.5 text-charcoal/60 hover:text-forest hover:bg-forest/10 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                               title="Edit Expense (Captain Only)"
                             >
                               <Pencil className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteExpense(i.id, i.item)}
-                              className="p-1.5 text-charcoal/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors"
                               title="Delete Expense (Captain Only)"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -820,7 +820,7 @@ export default function BudgetPage() {
                   ))}
                   {items.length === 0 && (
                     <tr>
-                      <td colSpan={isCaptain(profile) ? 8 : 7} className="py-8 text-center text-charcoal/60">
+                      <td colSpan={isCaptain(profile) ? 8 : 7} className="py-8 text-center text-slate-500 dark:text-slate-400">
                         No expenses recorded yet.
                       </td>
                     </tr>
