@@ -43,49 +43,54 @@ export function Sidebar() {
   });
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-stone bg-white lg:flex">
-      <div className="flex h-16 items-center gap-2 border-b border-stone px-6">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-forest text-white text-xs font-bold">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors lg:flex">
+      {/* App Brand Header */}
+      <div className="flex h-16 items-center gap-3 border-b border-slate-100 dark:border-slate-800 px-6">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold text-sm shadow-xs">
           RX
         </span>
-        <span className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-forest">
-          ROXX
+        <span className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          Team ROXX
         </span>
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6">
+      {/* Navigation List */}
+      <nav className="flex-1 space-y-1.5 overflow-y-auto px-4 py-6">
         {visibleNav.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(`${item.href}`));
           return (
             <Link
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold transition-all",
                 active
-                  ? "bg-forest text-white"
-                  : "text-charcoal/70 hover:bg-stone hover:text-charcoal"
+                  ? "bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 hover:text-slate-900 dark:hover:text-white"
               )}
             >
-              <item.icon className="h-4 w-4" />
+              <item.icon className="h-4 w-4 shrink-0" />
               {item.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t border-stone p-4">
-        <div className="mb-3 rounded-xl bg-cream p-3">
-          <p className="text-sm font-semibold text-charcoal">{profile?.full_name || "Loading..."}</p>
-          <p className="text-xs text-charcoal/60">
+      {/* Profile & Logout Footer */}
+      <div className="border-t border-slate-100 dark:border-slate-800 p-4">
+        <div className="mb-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 p-3 border border-slate-100 dark:border-slate-700/50">
+          <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
+            {profile?.full_name || "Loading..."}
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
             {profile ? roleLabel(profile.role) : ""} · {profile?.department}
           </p>
         </div>
         <button
           onClick={signOut}
-          className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50"
+          className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-4 w-4 shrink-0" />
           Sign Out
         </button>
       </div>

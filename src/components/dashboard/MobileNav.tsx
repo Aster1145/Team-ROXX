@@ -38,43 +38,53 @@ export function MobileNav() {
     <div className="lg:hidden">
       <button
         onClick={() => setOpen(true)}
-        className="flex h-10 w-10 items-center justify-center rounded-xl border border-stone bg-white"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 dark:border-slate-700/60 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-2xs"
       >
         <Menu className="h-5 w-5" />
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-cream p-4">
-          <div className="flex items-center justify-between">
-            <span className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-forest">
-              ROXX
-            </span>
-            <button
-              onClick={() => setOpen(false)}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-stone bg-white"
-            >
-              <X className="h-5 w-5" />
-            </button>
+        <div className="fixed inset-0 z-50 bg-white dark:bg-slate-900 p-4 sm:p-6 flex flex-col justify-between overflow-y-auto">
+          <div>
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold text-xs">
+                  RX
+                </span>
+                <span className="text-lg font-extrabold text-slate-900 dark:text-white">
+                  Team ROXX
+                </span>
+              </div>
+              <button
+                onClick={() => setOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <nav className="mt-6 space-y-1.5">
+              {visibleNav.map((item) => {
+                const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(`${item.href}`));
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 rounded-full px-4 py-3 text-sm font-semibold transition-all",
+                      active
+                        ? "bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 shadow-xs"
+                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    )}
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
-          <nav className="mt-8 space-y-2">
-            {visibleNav.map((item) => {
-              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium",
-                    active ? "bg-forest text-white" : "text-charcoal/70"
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
         </div>
       )}
     </div>

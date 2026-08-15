@@ -168,13 +168,16 @@ export default function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((s) => (
           <Link key={s.label} href={s.href}>
-            <Card className="transition-shadow hover:shadow-md">
-              <CardContent className="flex items-center justify-between p-4">
+            <Card className="transition-all hover:scale-[1.01] hover:shadow-md border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <CardContent className="flex items-center justify-between p-4 sm:p-5">
                 <div>
-                  <p className="text-sm text-charcoal/60">{s.label}</p>
-                  <p className="mt-1 text-3xl font-semibold text-charcoal">{s.value}</p>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{s.label}</p>
+                  <p className="mt-1 text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100">{s.value}</p>
+                  <span className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-500/30">
+                    Active
+                  </span>
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-forest/10 text-forest">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-emerald-400 border border-slate-200 dark:border-slate-700 shrink-0">
                   <s.icon className="h-5 w-5" />
                 </div>
               </CardContent>
@@ -184,16 +187,16 @@ export default function DashboardPage() {
       </div>
 
       {/* DEDICATED ASSIGNED TASKS WIDGET FOR LOGGED IN USER */}
-      <Card className="mt-6 border-forest/30 bg-gradient-to-r from-forest/5 via-white to-forest/5 shadow-sm">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-forest/10">
+      <Card className="mt-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2 flex-wrap">
-            <CheckSquare className="h-5 w-5 text-forest shrink-0" />
-            <CardTitle className="text-base text-charcoal">My Assigned Tasks</CardTitle>
-            <span className="rounded-full bg-forest px-2.5 py-0.5 text-xs font-bold text-white">
+            <CheckSquare className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <CardTitle className="text-base text-slate-900 dark:text-slate-100">My Assigned Tasks</CardTitle>
+            <span className="rounded-full bg-slate-900 dark:bg-emerald-500 px-2.5 py-0.5 text-xs font-bold text-white dark:text-slate-950">
               {myTasks.length} Assigned
             </span>
           </div>
-          <span className="text-xs text-charcoal/60 font-medium">Update progress status directly from dashboard</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Update progress status directly from dashboard</span>
         </CardHeader>
 
         <CardContent className="pt-4 p-3.5 sm:p-5">
@@ -201,11 +204,11 @@ export default function DashboardPage() {
             {myTasks.map((t) => (
               <div
                 key={t.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-xl border border-stone/70 bg-white shadow-2xs hover:border-forest/40 transition-all min-w-0"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/60 shadow-2xs hover:border-slate-400 dark:hover:border-slate-600 transition-all min-w-0"
               >
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap min-w-0">
-                    <h4 className="font-bold text-charcoal text-sm break-words [overflow-wrap:anywhere]">{t.title}</h4>
+                    <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm break-words [overflow-wrap:anywhere]">{t.title}</h4>
                     {t.project?.name && (
                       <Badge variant="forest" className="text-[10px] shrink-0">
                         {t.project.name}
@@ -214,22 +217,22 @@ export default function DashboardPage() {
                     {renderTaskStatusBadge(t.status)}
                   </div>
                   {t.description && (
-                    <p className="text-xs text-charcoal/70 line-clamp-2 break-words">{t.description}</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 break-words">{t.description}</p>
                   )}
                   {t.due_date && (
-                    <p className="text-[11px] text-charcoal/50 flex items-center gap-1">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
                       <Clock className="h-3 w-3 text-amber-600 shrink-0" /> Due: {formatDate(t.due_date)}
                     </p>
                   )}
                 </div>
 
                 {/* Direct Interactive Status Selector on Dashboard */}
-                <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone/30">
-                  <span className="text-xs text-charcoal/60 font-medium">Status:</span>
+                <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-700">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Status:</span>
                   <Select
                     value={t.status}
                     onChange={(e) => handleUpdateTaskStatus(t.id, e.target.value as TaskStatus)}
-                    className="w-36 text-xs py-1.5 font-medium border-forest/30 focus:border-forest"
+                    className="w-36 text-xs py-1.5 font-medium border-slate-300 dark:border-slate-700"
                   >
                     <option value="todo">To Do</option>
                     <option value="in_progress">In Progress</option>
@@ -241,8 +244,8 @@ export default function DashboardPage() {
             ))}
 
             {myTasks.length === 0 && (
-              <div className="py-8 text-center text-charcoal/60">
-                <CheckCircle2 className="h-8 w-8 mx-auto text-forest/40 mb-2" />
+              <div className="py-8 text-center text-slate-500 dark:text-slate-400">
+                <CheckCircle2 className="h-8 w-8 mx-auto text-emerald-500/40 mb-2" />
                 <p className="font-medium text-sm">No tasks assigned to you right now.</p>
                 <p className="text-xs mt-1">When team leads assign tasks to you, they will appear here automatically.</p>
               </div>
@@ -267,26 +270,26 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {projects.slice(0, 4).map((p) => (
-                <div key={p.id} className="rounded-xl border border-stone bg-cream p-4">
+                <div key={p.id} className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium text-charcoal">{p.name}</p>
-                      <p className="text-xs text-charcoal/60">{p.department}</p>
+                      <p className="font-bold text-slate-900 dark:text-slate-100">{p.name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{p.department}</p>
                     </div>
                     <Badge variant={p.status === "ongoing" ? "forest" : p.status === "completed" ? "success" : "default"}>
                       {p.status.replace("_", " ")}
                     </Badge>
                   </div>
-                  <div className="mt-3 h-2 w-full rounded-full bg-stone">
+                  <div className="mt-3 h-2 w-full rounded-full bg-slate-200 dark:bg-slate-700">
                     <div
-                      className="h-2 rounded-full bg-forest transition-all"
+                      className="h-2 rounded-full bg-slate-900 dark:bg-emerald-500 transition-all"
                       style={{ width: `${p.progress}%` }}
                     />
                   </div>
                 </div>
               ))}
               {projects.length === 0 && (
-                <p className="text-sm text-charcoal/60">No projects yet.</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">No projects yet.</p>
               )}
             </div>
           </CardContent>
@@ -300,12 +303,12 @@ export default function DashboardPage() {
             <CardContent>
               <div className="space-y-3">
                 {events.map((e) => (
-                  <div key={e.id} className="rounded-xl border border-stone bg-cream p-3">
-                    <p className="font-medium text-charcoal">{e.title}</p>
-                    <p className="text-xs text-charcoal/60">{formatDate(e.event_date)} · {e.location}</p>
+                  <div key={e.id} className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-3.5">
+                    <p className="font-bold text-slate-900 dark:text-slate-100">{e.title}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{formatDate(e.event_date)} · {e.location}</p>
                   </div>
                 ))}
-                {events.length === 0 && <p className="text-sm text-charcoal/60">No events yet.</p>}
+                {events.length === 0 && <p className="text-sm text-slate-500 dark:text-slate-400">No events yet.</p>}
               </div>
             </CardContent>
           </Card>
@@ -317,14 +320,14 @@ export default function DashboardPage() {
             <CardContent>
               <div className="space-y-3">
                 {inventory.map((item) => (
-                  <div key={item.id} className="rounded-xl border border-stone bg-cream p-3">
-                    <p className="font-medium text-charcoal">{item.item_name}</p>
-                    <p className="text-xs text-charcoal/60">
+                  <div key={item.id} className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-3.5">
+                    <p className="font-bold text-slate-900 dark:text-slate-100">{item.item_name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {item.profile?.full_name} · {formatDateTime(item.taken_at)}
                     </p>
                   </div>
                 ))}
-                {inventory.length === 0 && <p className="text-sm text-charcoal/60">All items returned.</p>}
+                {inventory.length === 0 && <p className="text-sm text-slate-500 dark:text-slate-400">All items returned.</p>}
               </div>
             </CardContent>
           </Card>
@@ -345,16 +348,16 @@ export default function DashboardPage() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {reports.map((r) => (
-              <div key={r.id} className="rounded-xl border border-stone bg-cream p-4">
+              <div key={r.id} className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="font-medium text-charcoal">{r.profile?.full_name}</p>
+                  <p className="font-bold text-slate-900 dark:text-slate-100">{r.profile?.full_name}</p>
                   <Badge variant="sage">{r.profile?.department}</Badge>
                 </div>
-                <p className="line-clamp-2 text-sm text-charcoal/70">{r.summary}</p>
-                <p className="mt-2 text-xs text-charcoal/50">Week ending {formatDate(r.week_ending)}</p>
+                <p className="line-clamp-2 text-sm text-slate-600 dark:text-slate-300">{r.summary}</p>
+                <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">Week ending {formatDate(r.week_ending)}</p>
               </div>
             ))}
-            {reports.length === 0 && <p className="text-sm text-charcoal/60">No reports submitted yet.</p>}
+            {reports.length === 0 && <p className="text-sm text-slate-500 dark:text-slate-400">No reports submitted yet.</p>}
           </div>
         </CardContent>
       </Card>
