@@ -579,29 +579,29 @@ export default function BudgetPage() {
               {filteredRequests.map((req) => (
                 <div
                   key={req.id}
-                  className="rounded-xl border border-stone/60 p-4 transition-all hover:border-stone bg-white shadow-sm"
+                  className="rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 transition-all bg-white dark:bg-slate-900 shadow-2xs"
                 >
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-stone/40">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                     <div className="flex items-start gap-3">
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-semibold text-charcoal text-base">{req.item}</h4>
+                          <h4 className="font-bold text-slate-900 dark:text-slate-100 text-base">{req.item}</h4>
                           {renderStatusBadge(req.status)}
                           {renderPriorityBadge(req.priority)}
                         </div>
-                        <p className="text-xs text-charcoal/60 mt-1">
-                          Requested by <span className="font-medium text-charcoal">{req.requester?.full_name || "Team Member"}</span> • {formatDate(req.created_at)}
+                        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                          Requested by <strong className="text-slate-800 dark:text-slate-200">{req.requester?.full_name || "Team Member"}</strong> • {formatDate(req.created_at)}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-4 self-end md:self-auto">
                       <div className="text-right">
-                        <span className="text-xs text-charcoal/50 block">Estimated Total</span>
-                        <span className="text-lg font-bold text-forest">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 block">Estimated Total</span>
+                        <span className="text-lg font-extrabold text-slate-900 dark:text-emerald-400">
                           ₹{(req.amount * req.quantity).toLocaleString("en-IN")}
                         </span>
-                        <span className="text-xs text-charcoal/60 block">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 block">
                           ({req.quantity} x ₹{req.amount.toLocaleString("en-IN")})
                         </span>
                       </div>
@@ -611,22 +611,22 @@ export default function BudgetPage() {
                   {/* Body Info */}
                   <div className="grid md:grid-cols-3 gap-3 py-3 text-xs">
                     <div>
-                      <span className="text-charcoal/50 block font-medium">Category & Project</span>
-                      <span className="text-charcoal font-medium">
+                      <span className="text-slate-500 dark:text-slate-400 block font-medium">Category & Project</span>
+                      <span className="text-slate-800 dark:text-slate-200 font-semibold">
                         {req.category} • {projectName(req.project_id)}
                       </span>
                     </div>
 
                     {req.justification && (
                       <div className="md:col-span-2">
-                        <span className="text-charcoal/50 block font-medium">Justification / Reason</span>
-                        <p className="text-charcoal/80 italic">{req.justification}</p>
+                        <span className="text-slate-500 dark:text-slate-400 block font-medium">Justification / Reason</span>
+                        <p className="text-slate-700 dark:text-slate-300 italic">{req.justification}</p>
                       </div>
                     )}
                   </div>
 
                   {req.link && (
-                    <div className="mt-1 pt-2 border-t border-stone/30 flex items-center gap-1 text-xs text-forest hover:underline">
+                    <div className="mt-1 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline">
                       <ExternalLink className="h-3 w-3" />
                       <a href={req.link} target="_blank" rel="noopener noreferrer" className="truncate max-w-xl">
                         Product Link: {req.link}
@@ -635,8 +635,8 @@ export default function BudgetPage() {
                   )}
 
                   {req.rejection_reason && (
-                    <div className="mt-2 rounded-lg bg-rose-50 p-2.5 text-xs text-rose-800 flex items-start gap-2 border border-rose-200">
-                      <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
+                    <div className="mt-2 rounded-lg bg-rose-50 dark:bg-rose-950/40 p-2.5 text-xs text-rose-800 dark:text-rose-300 flex items-start gap-2 border border-rose-200 dark:border-rose-800">
+                      <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400 mt-0.5" />
                       <div>
                         <span className="font-semibold">Rejection Note:</span> {req.rejection_reason}
                       </div>
@@ -645,10 +645,10 @@ export default function BudgetPage() {
 
                   {/* Team Lead Actions */}
                   {canManageBudget(profile) && (
-                    <div className="mt-4 pt-3 border-t border-stone/40 flex flex-wrap items-center justify-between gap-2">
-                      <div className="text-xs text-charcoal/60">
+                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                      <div className="text-xs text-slate-500 dark:text-slate-400">
                         {req.reviewer?.full_name && (
-                          <span>Reviewed by: <strong>{req.reviewer.full_name}</strong></span>
+                          <span>Reviewed by: <strong className="text-slate-800 dark:text-slate-200">{req.reviewer.full_name}</strong></span>
                         )}
                       </div>
 

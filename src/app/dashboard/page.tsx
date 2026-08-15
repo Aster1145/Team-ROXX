@@ -150,14 +150,14 @@ export default function DashboardPage() {
       )}
 
       {/* Weekly Sunday Report Deadline Alert */}
-      <div className="mb-6 rounded-2xl border border-stone bg-white p-4">
+      <div className="mb-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-2xs">
         <div className="flex items-start gap-3">
-          <AlertCircle className="mt-0.5 h-5 w-5 text-forest shrink-0" />
+          <AlertCircle className="mt-0.5 h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
           <div>
-            <p className="text-sm font-medium text-charcoal">
+            <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
               Sunday Report Deadline
             </p>
-            <p className="text-xs text-charcoal/70">
+            <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
               Members must upload their weekly work report every Sunday before the Monday review meeting.
             </p>
           </div>

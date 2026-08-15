@@ -21,20 +21,33 @@ const ThemeContext = createContext<ThemeContextType>(defaultContext);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("light");
 
+  const applyThemeClass = (t: Theme) => {
+    if (typeof document === "undefined") return;
+    if (t === "dark") {
+      document.documentElement.classList.add("dark");
+      document.body.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      document.body.classList.remove("dark");
+    }
+  };
+
   useEffect(() => {
-    // Check saved theme in localStorage or system preference
     try {
       const savedTheme = localStorage.getItem("roxx_theme") as Theme | null;
       if (savedTheme === "light" || savedTheme === "dark") {
         setThemeState(savedTheme);
-        if (savedTheme === "dark") {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
-      } else if (typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        applyThemeClass(savedTheme);
+      } else if (
+        typeof window !== "undefined" &&
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      ) {
         setThemeState("dark");
-        document.documentElement.classList.add("dark");
+        applyThemeClass("dark");
+      } else {
+        setThemeState("light");
+        applyThemeClass("light");
       }
     } catch (e) {
       // Ignore SSR/localStorage errors
@@ -43,18 +56,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
+    applyThemeClass(newTheme);
     try {
       localStorage.setItem("roxx_theme", newTheme);
     } catch (e) {}
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
   };
 
   const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
   };
 
   return (

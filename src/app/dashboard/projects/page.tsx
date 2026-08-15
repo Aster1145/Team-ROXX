@@ -300,13 +300,13 @@ function ProjectDetailModal({
 
           <div className="space-y-3">
             {tasks.map((t) => (
-              <div key={t.id} className="rounded-xl border border-stone bg-white p-4">
+              <div key={t.id} className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/60 p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="font-medium text-charcoal">{t.title}</p>
-                    <p className="text-sm text-charcoal/70">{t.description}</p>
-                    <p className="mt-1 text-xs text-charcoal/50">
-                      Assigned to: {assignedMember(t.assigned_to)?.full_name || "Unassigned"}
+                    <p className="font-bold text-slate-900 dark:text-slate-100 text-sm">{t.title}</p>
+                    {t.description && <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">{t.description}</p>}
+                    <p className="mt-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                      Assigned to: <strong className="text-slate-800 dark:text-slate-200">{assignedMember(t.assigned_to)?.full_name || "Unassigned"}</strong>
                     </p>
                   </div>
                   <Select

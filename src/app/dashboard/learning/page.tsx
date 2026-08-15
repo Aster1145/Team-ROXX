@@ -264,18 +264,18 @@ export default function LearningPage() {
       {/* Top Banner & Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-charcoal flex items-center gap-2">
-            <GraduationCap className="h-5 w-5 text-forest shrink-0" />
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <GraduationCap className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
             Learning & Knowledge Hub
           </h2>
-          <p className="text-xs text-charcoal/70">
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
             {isUserTrainee
               ? "Study materials and tutorials curated for 1st-year trainees."
               : "Tutorials, Google Drive documents, and YouTube videos for trainees and domain study."}
           </p>
         </div>
         {userCanManage && (
-          <Button onClick={handleOpenCreate} className="gap-2 bg-forest hover:bg-forest/90 text-white font-semibold shrink-0 self-start sm:self-auto">
+          <Button onClick={handleOpenCreate} className="gap-2 shrink-0 self-start sm:self-auto">
             <Plus className="h-4 w-4 shrink-0" /> Add Learning Material
           </Button>
         )}
@@ -283,31 +283,31 @@ export default function LearningPage() {
 
       {/* TRAINEE LEARNING PROGRESS TRACKER CARD (TRAINEES ONLY) */}
       {isUserTrainee && (
-        <Card className="mb-6 border-forest/30 bg-gradient-to-r from-forest/10 via-white to-forest/5 shadow-sm">
+        <Card className="mb-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
           <CardContent className="p-5">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-forest text-white">
-                  <GraduationCap className="h-6 w-6" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold">
+                  <GraduationCap className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-charcoal text-base">My Learning Progress</h3>
-                  <p className="text-xs text-charcoal/70">
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">My Learning Progress</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
                     Track completed study materials and video tutorials.
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-2xl font-bold text-forest">{progressPercentage}%</span>
-                <span className="text-xs text-charcoal/60 block">
+                <span className="text-2xl font-extrabold text-slate-900 dark:text-emerald-400">{progressPercentage}%</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 block">
                   {completedCount} of {totalTraineeMaterials} Materials Completed
                 </span>
               </div>
             </div>
 
-            <div className="h-3 w-full rounded-full bg-stone-200 overflow-hidden">
+            <div className="h-3 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
               <div
-                className="h-3 rounded-full bg-forest transition-all duration-500"
+                className="h-3 rounded-full bg-slate-900 dark:bg-emerald-500 transition-all duration-500"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -316,10 +316,10 @@ export default function LearningPage() {
       )}
 
       {/* Filters Bar */}
-      <div className="mb-6 rounded-2xl border border-stone bg-white p-4 shadow-2xs">
+      <div className="mb-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-2xs">
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-charcoal/40" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-slate-500" />
             <Input
               placeholder="Search tutorials & materials..."
               value={searchQuery}
@@ -365,11 +365,11 @@ export default function LearningPage() {
           const isCompleted = completedResourceIds.includes(res.id);
 
           return (
-            <Card key={res.id} className={`hover:shadow-md transition-all border-stone/70 flex flex-col justify-between min-w-0 ${isCompleted ? "bg-emerald-50/30 border-emerald-300" : ""}`}>
+            <Card key={res.id} className={`hover:shadow-md transition-all border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col justify-between min-w-0 ${isCompleted ? "bg-emerald-50/20 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-700/60" : ""}`}>
               <CardHeader className="pb-3 p-3.5 sm:p-5">
                 <div className="flex items-start justify-between gap-2 mb-2 min-w-0">
                   <div className="flex items-center gap-2">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-stone-100 border border-stone">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700">
                       {renderTypeIcon(res.resource_type)}
                     </div>
                     <div>
@@ -381,7 +381,7 @@ export default function LearningPage() {
                   {renderTypeBadge(res.resource_type)}
                 </div>
 
-                <CardTitle className="text-base font-bold text-charcoal leading-snug">
+                <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 leading-snug">
                   {res.title}
                 </CardTitle>
               </CardHeader>
