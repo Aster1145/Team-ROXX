@@ -103,32 +103,34 @@ export default function EventsPage() {
               <CardContent className="p-3.5 sm:p-5 pt-0 sm:pt-0">
                 <p className="text-sm text-charcoal/70 break-words [overflow-wrap:anywhere]">{e.description}</p>
                 <div className="mt-4">
-                  <p className="mb-2 text-sm font-medium text-charcoal">Participants</p>
+                  <p className="mb-2 text-sm font-bold text-slate-900 dark:text-slate-100">Participants</p>
                   <div className="flex flex-wrap gap-2">
                     {current.map((p) => (
                       <Badge key={p.id} variant="sage">{p.profile?.full_name}</Badge>
                     ))}
-                    {current.length === 0 && <span className="text-xs text-charcoal/50">No participants assigned.</span>}
+                    {current.length === 0 && <span className="text-xs text-slate-500 dark:text-slate-400">No participants assigned.</span>}
                   </div>
                 </div>
                 {canAssignEventParticipants(profile) && (
-                  <div className="mt-4">
-                    <p className="mb-2 text-sm font-medium text-charcoal">Assign members</p>
+                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <p className="mb-2.5 text-sm font-bold text-slate-900 dark:text-slate-100">Assign members</p>
                     <div className="grid gap-2 grid-cols-1 sm:grid-cols-2">
                       {members.map((m) => {
                         const selected = current.some((p) => p.profile_id === m.id);
                         return (
                           <label
                             key={m.id}
-                            className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors ${
-                              selected ? "border-forest bg-forest/5 text-forest" : "border-stone bg-white text-charcoal"
+                            className={`flex cursor-pointer items-center gap-2.5 rounded-2xl border px-3.5 py-2 text-xs sm:text-sm font-bold transition-all ${
+                              selected
+                                ? "border-emerald-500 dark:border-emerald-500 bg-slate-900 dark:bg-slate-800 text-white dark:text-emerald-300 shadow-2xs"
+                                : "border-slate-200/80 dark:border-slate-700/80 bg-slate-100/90 dark:bg-slate-900 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-800"
                             }`}
                           >
                             <input
                               type="checkbox"
                               checked={selected}
                               onChange={() => toggleParticipant(e.id, m.id, e.max_participants)}
-                              className="h-4 w-4 accent-forest shrink-0"
+                              className="h-4 w-4 accent-emerald-500 shrink-0"
                             />
                             <span className="truncate">{m.full_name}</span>
                           </label>

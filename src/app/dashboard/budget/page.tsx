@@ -481,42 +481,40 @@ export default function BudgetPage() {
         </Card>
       </div>
 
-      {/* Tab Switcher */}
-      <div className="mb-6 border-b border-stone/60">
-        <div className="flex gap-6">
-          <button
-            onClick={() => setActiveTab("requests")}
-            className={`pb-3 text-sm font-medium transition-colors border-b-2 ${
-              activeTab === "requests"
-                ? "border-forest text-forest font-semibold"
-                : "border-transparent text-charcoal/60 hover:text-charcoal"
-            }`}
-          >
-            Item Requests ({requests.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("expenses")}
-            className={`pb-3 text-sm font-medium transition-colors border-b-2 ${
-              activeTab === "expenses"
-                ? "border-forest text-forest font-semibold"
-                : "border-transparent text-charcoal/60 hover:text-charcoal"
-            }`}
-          >
-            Recorded Expenses ({items.length})
-          </button>
-        </div>
+      {/* Tab Switcher - Sleek Pill Controls */}
+      <div className="mb-6 flex items-center gap-2 p-1.5 rounded-full bg-slate-100 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/60 w-fit">
+        <button
+          onClick={() => setActiveTab("requests")}
+          className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-full transition-all ${
+            activeTab === "requests"
+              ? "bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+          }`}
+        >
+          Item Requests ({requests.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("expenses")}
+          className={`px-4 py-2 text-xs sm:text-sm font-bold rounded-full transition-all ${
+            activeTab === "expenses"
+              ? "bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
+          }`}
+        >
+          Recorded Expenses ({items.length})
+        </button>
       </div>
 
       {/* ITEM REQUESTS TAB */}
       {activeTab === "requests" && (
         <Card>
-          <CardHeader className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-stone/40">
+          <CardHeader className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800/60">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5 text-forest" />
+              <CardTitle className="flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                <ShoppingCart className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
                 Item Request Queue
               </CardTitle>
-              <p className="text-xs text-charcoal/60 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Showing <strong>{filteredRequests.length}</strong> of {requests.length} requests
                 {statusFilter !== "all" ? ` · Status: ${statusFilter.toUpperCase()}` : ""}
                 {categoryFilter !== "all" ? ` · Category: ${categoryFilter}` : ""}

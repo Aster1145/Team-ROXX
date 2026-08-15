@@ -307,73 +307,74 @@ export default function ReportsPage() {
       </div>
 
       {/* Performance Leaderboard */}
-      <Card className="mb-8 border-amber-200/80 bg-gradient-to-r from-amber-50/40 via-white to-amber-50/20 shadow-sm">
-        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-amber-100 p-3.5 sm:p-5">
+      <Card className="mb-8 border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-slate-100 dark:border-slate-800 p-3.5 sm:p-5">
           <div className="flex items-center gap-2 flex-wrap min-w-0">
             <Trophy className="h-5 w-5 text-amber-500 shrink-0" />
-            <CardTitle className="text-base font-bold text-charcoal leading-snug">
+            <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 leading-snug">
               Team Performance Leaderboard
             </CardTitle>
             <Badge variant="sage" className="text-[10px] shrink-0">
               {leaderboard.length} Teammates
             </Badge>
           </div>
-          <span className="text-xs text-charcoal/60 font-medium shrink-0">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-bold shrink-0">
             5 Stars = 10 Points (Captain Evaluation)
           </span>
         </CardHeader>
         <CardContent className="pt-4 p-3.5 sm:p-5">
-          <div className="max-h-[220px] overflow-y-auto pr-1.5 scrollbar-thin scrollbar-thumb-amber-200 scrollbar-track-transparent">
+          <div className="max-h-[260px] overflow-y-auto pr-1.5 scrollbar-thin">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {leaderboard.map((m, idx) => (
                 <div
                   key={m.id}
-                  className="flex items-center justify-between p-3 rounded-xl border border-stone/60 bg-white shadow-2xs hover:border-amber-300 transition-colors"
+                  className="flex items-center justify-between p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 shadow-2xs hover:border-amber-400 dark:hover:border-amber-500 transition-all"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold shrink-0 ${
+                      className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-extrabold shrink-0 ${
                         idx === 0
-                          ? "bg-amber-100 text-amber-800 border border-amber-300"
+                          ? "bg-amber-400 text-slate-950 border border-amber-500 shadow-2xs"
                           : idx === 1
-                          ? "bg-slate-100 text-slate-700 border border-slate-300"
+                          ? "bg-slate-300 dark:bg-slate-700 text-slate-900 dark:text-slate-100 border border-slate-400"
                           : idx === 2
-                          ? "bg-orange-100 text-orange-800 border border-orange-300"
-                          : "bg-stone-100 text-charcoal/60"
+                          ? "bg-orange-300 dark:bg-amber-900/60 text-orange-950 dark:text-amber-200 border border-orange-400"
+                          : "bg-slate-200/80 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300"
                       }`}
                     >
                       #{idx + 1}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-charcoal flex items-center gap-1 truncate">
+                      <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
                         {m.full_name}
-                        <span className="text-[10px] font-normal text-charcoal/50">({roleLabel(m.role, m.department)})</span>
                       </p>
-                      <p className="text-xs text-charcoal/60 truncate">{m.department}</p>
+                      <p className="text-[11px] font-medium text-slate-600 dark:text-slate-300 truncate">
+                        {roleLabel(m.role, m.department)} • {m.department}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <span className="text-sm font-bold text-amber-600 block">{m.totalPoints} pts</span>
-                    <span className="text-[11px] text-charcoal/60 flex items-center justify-end gap-1">
-                      <Star className="h-3 w-3 fill-amber-400 text-amber-400 inline" /> {m.avgStars}
+                  <div className="text-right shrink-0 ml-2">
+                    <span className="text-xs sm:text-sm font-extrabold text-amber-600 dark:text-amber-400 block">{m.totalPoints} pts</span>
+                    <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center justify-end gap-1">
+                      <Star className="h-3 w-3 fill-amber-400 text-amber-400 inline shrink-0" /> {m.avgStars}
                     </span>
                   </div>
                 </div>
               ))}
 
               {leaderboard.length === 0 && (
-                <p className="text-xs text-charcoal/60 col-span-3 py-3 text-center">
+                <p className="text-xs text-slate-500 dark:text-slate-400 col-span-3 py-3 text-center">
                   No teammate report ratings yet.
                 </p>
               )}
             </div>
           </div>
-          {leaderboard.length > 6 && (
-            <div className="mt-2 text-center text-[11px] text-amber-800/80 font-medium flex items-center justify-center gap-1 border-t border-amber-100/60 pt-2">
-              <span>Scroll inside box to view all {leaderboard.length} members</span> ↓
-            </div>
-          )}
+          <div className="mt-3 text-center">
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+              Scroll inside box to view all {leaderboard.length} teammates ↓
+            </span>
+          </div>
         </CardContent>
       </Card>
 

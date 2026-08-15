@@ -386,15 +386,15 @@ export default function LearningPage() {
                 </CardTitle>
               </CardHeader>
 
-              <CardContent className="space-y-4 pt-0">
+              <CardContent className="space-y-3 pt-0">
                 {res.description && (
-                  <p className="text-xs text-charcoal/70 line-clamp-3 italic">
+                  <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-3 italic">
                     {res.description}
                   </p>
                 )}
 
                 {/* Primary Action Button */}
-                <div className="pt-2 border-t border-stone/40 space-y-2">
+                <div className="space-y-2">
                   {res.resource_type === "youtube" ? (
                     <Button
                       size="sm"
@@ -406,7 +406,7 @@ export default function LearningPage() {
                           window.open(res.url, "_blank");
                         }
                       }}
-                      className="w-full text-xs bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center justify-center gap-1.5"
+                      className="w-full text-xs bg-emerald-600 dark:bg-emerald-500 hover:bg-emerald-700 dark:hover:bg-emerald-400 text-white dark:text-slate-950 font-bold flex items-center justify-center gap-1.5 shadow-2xs"
                     >
                       <PlayCircle className="h-4 w-4" /> Watch YouTube Video
                     </Button>
@@ -415,7 +415,7 @@ export default function LearningPage() {
                       href={res.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 text-xs font-semibold transition-colors"
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 text-xs font-bold transition-colors shadow-2xs"
                     >
                       <Folder className="h-4 w-4" /> Open Google Drive Material <ExternalLink className="h-3 w-3" />
                     </a>
@@ -424,7 +424,7 @@ export default function LearningPage() {
                       href={res.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-xs font-semibold transition-colors"
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 text-xs font-bold transition-colors shadow-2xs"
                     >
                       <LinkIcon className="h-4 w-4" /> Open Reference Link <ExternalLink className="h-3 w-3" />
                     </a>
@@ -434,36 +434,36 @@ export default function LearningPage() {
                   {isUserTrainee && (
                     <button
                       onClick={() => toggleCompleteResource(res.id)}
-                      className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                         isCompleted
-                          ? "bg-emerald-100 text-emerald-950 border border-emerald-300 hover:bg-emerald-200"
-                          : "bg-stone-100 text-charcoal/70 border border-stone-300 hover:bg-stone-200"
+                          ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700"
                       }`}
                     >
-                      <CheckCircle className={`h-3.5 w-3.5 ${isCompleted ? "text-emerald-700" : "text-stone-400"}`} />
+                      <CheckCircle className={`h-3.5 w-3.5 ${isCompleted ? "text-emerald-700 dark:text-emerald-400" : "text-slate-400"}`} />
                       {isCompleted ? "Completed ✓" : "Mark as Completed"}
                     </button>
                   )}
                 </div>
 
                 {/* Footer Info & Admin Actions */}
-                <div className="flex items-center justify-between text-[11px] text-charcoal/50 pt-2 border-t border-stone/30">
+                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1">
                   <span>
-                    Added by: <strong>{res.author?.full_name || "Team Lead"}</strong>
+                    Added by: <strong className="text-slate-800 dark:text-slate-200">{res.author?.full_name || "Team Lead"}</strong>
                   </span>
 
                   {userCanManage && (
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleOpenEdit(res)}
-                        className="p-1 text-charcoal/60 hover:text-forest hover:bg-forest/10 rounded transition-colors"
+                        className="p-1 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors"
                         title="Edit Material"
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => handleDelete(res.id, res.title)}
-                        className="p-1 text-charcoal/40 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                        className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded transition-colors"
                         title="Delete Material"
                       >
                         <Trash2 className="h-3.5 w-3.5" />

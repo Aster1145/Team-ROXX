@@ -200,24 +200,24 @@ export default function InventoryPage() {
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-sm min-w-[700px]">
               <thead>
-                <tr className="border-b border-stone text-charcoal/60">
-                  <th className="pb-3 font-medium">Item</th>
-                  <th className="pb-3 font-medium">Purpose / Intended Use</th>
-                  <th className="pb-3 font-medium">Taken By</th>
-                  <th className="pb-3 font-medium">Taken At</th>
-                  <th className="pb-3 font-medium">Returned At</th>
-                  <th className="pb-3 font-medium">Status</th>
-                  <th className="pb-3 font-medium">Action</th>
+                <tr className="text-slate-500 dark:text-slate-400 font-bold border-b border-slate-100 dark:border-slate-800">
+                  <th className="pb-3 font-bold">Item</th>
+                  <th className="pb-3 font-bold">Purpose / Intended Use</th>
+                  <th className="pb-3 font-bold">Taken By</th>
+                  <th className="pb-3 font-bold">Taken At</th>
+                  <th className="pb-3 font-bold">Returned At</th>
+                  <th className="pb-3 font-bold">Status</th>
+                  <th className="pb-3 font-bold">Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y-0">
                 {logs.map((l) => (
-                  <tr key={l.id} className="border-b border-stone/50 hover:bg-stone/20">
-                    <td className="py-3 font-medium text-charcoal">{l.item_name}</td>
-                    <td className="py-3 text-charcoal/80">{l.purpose || "—"}</td>
-                    <td className="py-3">{l.profile?.full_name || "Team Member"}</td>
-                    <td className="py-3">{formatDateTime(l.taken_at)}</td>
-                    <td className="py-3">{formatDateTime(l.returned_at)}</td>
+                  <tr key={l.id} className="hover:bg-slate-100/70 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="py-3 font-bold text-slate-900 dark:text-slate-100">{l.item_name}</td>
+                    <td className="py-3 text-slate-600 dark:text-slate-300 font-medium">{l.purpose || "—"}</td>
+                    <td className="py-3 text-slate-700 dark:text-slate-300 font-medium">{l.profile?.full_name || "Team Member"}</td>
+                    <td className="py-3 text-slate-600 dark:text-slate-400 text-xs">{formatDateTime(l.taken_at)}</td>
+                    <td className="py-3 text-slate-600 dark:text-slate-400 text-xs">{formatDateTime(l.returned_at)}</td>
                     <td className="py-3">
                       <Badge variant={l.returned_at ? "success" : "warning"}>
                         {l.returned_at ? "Returned" : "Out"}
@@ -234,7 +234,7 @@ export default function InventoryPage() {
                 ))}
                 {logs.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-charcoal/60">
+                    <td colSpan={7} className="py-8 text-center text-slate-500 dark:text-slate-400">
                       No inventory logs recorded yet.
                     </td>
                   </tr>
