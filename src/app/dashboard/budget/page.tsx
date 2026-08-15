@@ -11,8 +11,9 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { canManageBudget, isCaptain } from "@/lib/roles";
 import { BudgetItem, BudgetItemRequest, Project, RequestPriority, RequestStatus } from "@/types";
-import { Plus, IndianRupee, Wallet, ShoppingCart, CheckCircle, XCircle, ExternalLink, Clock, PackageCheck, AlertCircle, Pencil, Trash2 } from "lucide-react";
+import { Plus, IndianRupee, Wallet, ShoppingCart, CheckCircle, XCircle, ExternalLink, Clock, PackageCheck, AlertCircle, Pencil, Trash2, Download } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import * as XLSX from "xlsx";
 
 export default function BudgetPage() {
   const { profile } = useAuth();
@@ -93,7 +94,6 @@ export default function BudgetPage() {
   const totalSpent = items.reduce((sum, i) => sum + i.amount * i.quantity, 0);
   const pendingRequests = requests.filter((r) => r.status === "pending");
   const pendingTotal = pendingRequests.reduce((sum, r) => sum + r.amount * r.quantity, 0);
-  const approvedRequests = requests.filter((r) => r.status === "approved" || r.status === "ordered");
 
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -229,10 +229,18 @@ export default function BudgetPage() {
     }
   };
 
+  // Fixed: Prevents duplicate logging if request was already ordered
   const handleOrderRequest = async (req: BudgetItemRequest) => {
     if (!profile?.id) return;
+    if (req.status === "ordered") {
+      alert("This item has already been ordered and recorded in expenses.");
+      return;
+    }
     try {
-      // 1. Insert into budget_items as an official expense
+      // 1. Mark request status as 'ordered' FIRST
+      await handleUpdateRequestStatus(req.id, "ordered");
+
+      // 2. Insert into budget_items as an official expense ONCE
       await supabase.from("budget_items").insert({
         item: req.item,
         amount: req.amount,
@@ -242,8 +250,7 @@ export default function BudgetPage() {
         purchased_by: profile.id,
       });
 
-      // 2. Mark request status as 'ordered'
-      await handleUpdateRequestStatus(req.id, "ordered");
+      await fetchData();
     } catch (err) {
       console.error("Error ordering request:", err);
     }
@@ -256,6 +263,23 @@ export default function BudgetPage() {
     setRejectModalOpen(false);
     setSelectedRequestId(null);
     setRejectionReason("");
+  };
+
+  const exportExpensesExcel = () => {
+    const rows = items.map((i) => ({
+      Item: i.item,
+      Category: i.category,
+      Project: projectName(i.project_id),
+      Quantity: i.quantity,
+      "Unit Price (₹)": i.amount,
+      "Total Amount (₹)": i.amount * i.quantity,
+      "Purchased / Ordered By": i.profile?.full_name || "Team Lead",
+      Date: formatDate(i.purchased_at),
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Recorded Expenses");
+    XLSX.writeFile(wb, `recorded-expenses-${new Date().toISOString().split("T")[0]}.xlsx`);
   };
 
   const filteredRequests = requests.filter((r) => {
@@ -317,6 +341,9 @@ export default function BudgetPage() {
           Request hardware/materials, manage team lead approvals, and track budget expenses.
         </p>
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={exportExpensesExcel} className="gap-1.5">
+            <Download className="h-4 w-4" /> Export Excel
+          </Button>
           <Button
             onClick={() => setRequestModalOpen(true)}
             className="bg-forest hover:bg-forest/90 text-white font-semibold shadow-md"
@@ -567,8 +594,11 @@ export default function BudgetPage() {
       {/* RECORDED EXPENSES TAB */}
       {activeTab === "expenses" && (
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between pb-4">
             <CardTitle>Expenses & Purchases Log</CardTitle>
+            <Button variant="outline" size="sm" onClick={exportExpensesExcel} className="text-xs font-medium gap-1.5">
+              <Download className="h-3.5 w-3.5" /> Export Excel
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
