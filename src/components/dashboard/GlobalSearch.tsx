@@ -213,7 +213,7 @@ export function GlobalSearch() {
 
       {/* Live Search Results Dropdown */}
       {isOpen && query.trim() !== "" && (
-        <div className="absolute left-0 right-0 top-12 z-50 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 p-3 shadow-xl backdrop-blur-md transition-all">
+        <div className="fixed sm:absolute left-4 right-4 sm:left-0 sm:right-0 top-20 sm:top-12 z-50 w-auto sm:w-full rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/98 dark:bg-slate-900/98 p-3 shadow-2xl backdrop-blur-md transition-all">
           <div className="flex items-center justify-between px-2 pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               Search Results ({results.length})

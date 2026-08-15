@@ -72,9 +72,9 @@ export function NotificationsPopover() {
         )}
       </button>
 
-      {/* Notifications Glassmorphic Popover Dropdown */}
+      {/* Notifications Glassmorphic Popover Dropdown - Viewport safe positioning for mobile */}
       {isOpen && (
-        <div className="absolute right-0 top-12 z-50 w-80 sm:w-96 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 p-4 shadow-xl backdrop-blur-md transition-all">
+        <div className="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-20 sm:top-12 z-50 w-auto sm:w-96 max-w-md rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white/98 dark:bg-slate-900/98 p-4 shadow-2xl backdrop-blur-md transition-all">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100">
