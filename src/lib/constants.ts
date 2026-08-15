@@ -9,6 +9,13 @@ export const DEPARTMENTS: Department[] = [
   "Research",
   "Drone Controller",
   "Trainee",
+  "Social Media",
+  "Documentation",
+  "CAD/CAM",
+  "Technical Integration",
+  "Avionics",
+  "Autonomy Stack",
+  "Testing & Flight Operations",
   "General",
 ];
 
