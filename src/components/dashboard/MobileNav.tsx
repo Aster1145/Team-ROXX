@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Menu, X, LayoutDashboard, FolderKanban, Users, CalendarDays, FlaskConical, FileText, Package, Wallet, BookOpen } from "lucide-react";
 
+import { useAuth } from "@/hooks/useAuth";
+
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
@@ -21,6 +23,15 @@ const NAV = [
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { profile } = useAuth();
+
+  const isUserTrainee = profile?.role === "trainee";
+  const visibleNav = NAV.filter((item) => {
+    if (isUserTrainee) {
+      return !["/dashboard/inventory", "/dashboard/budget", "/dashboard/members"].includes(item.href);
+    }
+    return true;
+  });
 
   return (
     <div className="lg:hidden">
@@ -45,7 +56,7 @@ export function MobileNav() {
             </button>
           </div>
           <nav className="mt-8 space-y-2">
-            {NAV.map((item) => {
+            {visibleNav.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
                 <Link

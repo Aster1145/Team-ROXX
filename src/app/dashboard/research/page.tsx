@@ -12,7 +12,7 @@ import { Select } from "@/components/ui/Select";
 import { ResearchDoc, Project } from "@/types";
 import { Plus, BookOpen, Pencil, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
-import { isCaptain } from "@/lib/roles";
+import { isCaptain, canCreateOrEdit } from "@/lib/roles";
 
 export default function ResearchPage() {
   const { user, profile } = useAuth();
@@ -110,6 +110,7 @@ export default function ResearchPage() {
 
   const canModifyDoc = (doc: ResearchDoc) => {
     if (!profile && !user) return false;
+    if (profile?.role === "trainee") return false;
     const isTeamCaptain = profile?.role === "captain";
     const isDocAuthor = Boolean(
       doc.author_id && (doc.author_id === profile?.id || doc.author_id === user?.id)
@@ -126,9 +127,11 @@ export default function ResearchPage() {
           <h2 className="text-lg font-semibold text-charcoal">Research Log</h2>
           <p className="text-xs text-charcoal/60">Document engineering improvements, experiments, and technical notes</p>
         </div>
-        <Button onClick={handleOpenAddModal} className="gap-2">
-          <Plus className="h-4 w-4" /> Add Doc
-        </Button>
+        {canCreateOrEdit(profile) && (
+          <Button onClick={handleOpenAddModal} className="gap-2">
+            <Plus className="h-4 w-4" /> Add Doc
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-5 md:grid-cols-2">

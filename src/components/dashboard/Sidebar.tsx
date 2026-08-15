@@ -34,6 +34,14 @@ export function Sidebar() {
   const pathname = usePathname();
   const { profile, signOut } = useAuth();
 
+  const isUserTrainee = profile?.role === "trainee";
+  const visibleNav = NAV.filter((item) => {
+    if (isUserTrainee) {
+      return !["/dashboard/inventory", "/dashboard/budget", "/dashboard/members"].includes(item.href);
+    }
+    return true;
+  });
+
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-stone bg-white lg:flex">
       <div className="flex h-16 items-center gap-2 border-b border-stone px-6">
@@ -46,7 +54,7 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-4 py-6">
-        {NAV.map((item) => {
+        {visibleNav.map((item) => {
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link

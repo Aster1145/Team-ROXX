@@ -25,6 +25,7 @@ import {
   Search,
   GraduationCap,
   PlayCircle,
+  CheckCircle,
   X,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -58,6 +59,9 @@ export default function LearningPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+
+  // Learning Progress state
+  const [completedResourceIds, setCompletedResourceIds] = useState<string[]>([]);
 
   // Modals state
   const [modalOpen, setModalOpen] = useState(false);
@@ -94,7 +98,27 @@ export default function LearningPage() {
 
   useEffect(() => {
     fetchResources();
-  }, [supabase]);
+    if (profile?.id) {
+      const saved = localStorage.getItem(`roxx_completed_learning_${profile.id}`);
+      if (saved) {
+        try {
+          setCompletedResourceIds(JSON.parse(saved));
+        } catch (e) {
+          console.error("Failed to parse completed materials:", e);
+        }
+      }
+    }
+  }, [profile?.id, supabase]);
+
+  const toggleCompleteResource = (id: string) => {
+    setCompletedResourceIds((prev) => {
+      const updated = prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id];
+      if (profile?.id) {
+        localStorage.setItem(`roxx_completed_learning_${profile.id}`, JSON.stringify(updated));
+      }
+      return updated;
+    });
+  };
 
   const handleOpenCreate = () => {
     setEditingResource(null);
@@ -103,7 +127,7 @@ export default function LearningPage() {
       description: "",
       resource_type: "youtube",
       url: "",
-      category: profile?.department === "Trainee" ? "Trainee" : "General",
+      category: profile?.role === "trainee" || profile?.department === "Trainee" ? "Trainee" : "General",
     });
     setModalOpen(true);
   };
@@ -172,7 +196,17 @@ export default function LearningPage() {
     }
   };
 
-  const filteredResources = resources.filter((r) => {
+  const isUserTrainee = profile?.role === "trainee";
+
+  // Trainees can ONLY see Trainee materials. Members/Captains can see ALL materials.
+  const visibleResources = resources.filter((r) => {
+    if (isUserTrainee) {
+      return r.category === "Trainee";
+    }
+    return true;
+  });
+
+  const filteredResources = visibleResources.filter((r) => {
     const matchesSearch =
       r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (r.description && r.description.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -180,6 +214,12 @@ export default function LearningPage() {
     const matchesType = typeFilter === "all" || r.resource_type === typeFilter;
     return matchesSearch && matchesCategory && matchesType;
   });
+
+  // Calculate Learning Progress
+  const totalTraineeMaterials = visibleResources.length;
+  const completedCount = visibleResources.filter((r) => completedResourceIds.includes(r.id)).length;
+  const progressPercentage =
+    totalTraineeMaterials > 0 ? Math.round((completedCount / totalTraineeMaterials) * 100) : 0;
 
   const renderTypeIcon = (type: ResourceType) => {
     switch (type) {
@@ -229,7 +269,9 @@ export default function LearningPage() {
             Learning & Knowledge Hub
           </h2>
           <p className="text-xs text-charcoal/70">
-            Tutorials, Google Drive documents, and YouTube videos for 1st-year trainees and team domain learning.
+            {isUserTrainee
+              ? "Study materials and tutorials curated for 1st-year trainees."
+              : "Tutorials, Google Drive documents, and YouTube videos for trainees and domain study."}
           </p>
         </div>
         {userCanManage && (
@@ -238,6 +280,40 @@ export default function LearningPage() {
           </Button>
         )}
       </div>
+
+      {/* TRAINEE LEARNING PROGRESS TRACKER CARD */}
+      <Card className="mb-6 border-forest/30 bg-gradient-to-r from-forest/10 via-white to-forest/5 shadow-sm">
+        <CardContent className="p-5">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-forest text-white">
+                <GraduationCap className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-charcoal text-base">
+                  {isUserTrainee ? "My Learning Progress" : "Trainee Materials Completion"}
+                </h3>
+                <p className="text-xs text-charcoal/70">
+                  Track completed study materials and video tutorials.
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-2xl font-bold text-forest">{progressPercentage}%</span>
+              <span className="text-xs text-charcoal/60 block">
+                {completedCount} of {totalTraineeMaterials} Materials Completed
+              </span>
+            </div>
+          </div>
+
+          <div className="h-3 w-full rounded-full bg-stone-200 overflow-hidden">
+            <div
+              className="h-3 rounded-full bg-forest transition-all duration-500"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Filters Bar */}
       <div className="mb-6 rounded-2xl border border-stone bg-white p-4 shadow-2xs">
@@ -252,20 +328,22 @@ export default function LearningPage() {
             />
           </div>
 
-          <div>
-            <Select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="text-xs py-2"
-            >
-              <option value="all">All Domains / Categories</option>
-              {DEPARTMENTS.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </Select>
-          </div>
+          {!isUserTrainee && (
+            <div>
+              <Select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="text-xs py-2"
+              >
+                <option value="all">All Domains / Categories</option>
+                {DEPARTMENTS.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </Select>
+            </div>
+          )}
 
-          <div>
+          <div className={isUserTrainee ? "sm:col-span-2" : ""}>
             <Select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
@@ -284,9 +362,10 @@ export default function LearningPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredResources.map((res) => {
           const embedUrl = res.resource_type === "youtube" ? getYouTubeEmbedUrl(res.url) : null;
+          const isCompleted = completedResourceIds.includes(res.id);
 
           return (
-            <Card key={res.id} className="hover:shadow-md transition-all border-stone/70 flex flex-col justify-between">
+            <Card key={res.id} className={`hover:shadow-md transition-all border-stone/70 flex flex-col justify-between ${isCompleted ? "bg-emerald-50/30 border-emerald-300" : ""}`}>
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="flex items-center gap-2">
@@ -315,7 +394,7 @@ export default function LearningPage() {
                 )}
 
                 {/* Primary Action Button */}
-                <div className="pt-2 border-t border-stone/40">
+                <div className="pt-2 border-t border-stone/40 space-y-2">
                   {res.resource_type === "youtube" ? (
                     <Button
                       size="sm"
@@ -350,6 +429,19 @@ export default function LearningPage() {
                       <LinkIcon className="h-4 w-4" /> Open Reference Link <ExternalLink className="h-3 w-3" />
                     </a>
                   )}
+
+                  {/* Mark as Completed Toggle Button */}
+                  <button
+                    onClick={() => toggleCompleteResource(res.id)}
+                    className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      isCompleted
+                        ? "bg-emerald-100 text-emerald-950 border border-emerald-300 hover:bg-emerald-200"
+                        : "bg-stone-100 text-charcoal/70 border border-stone-300 hover:bg-stone-200"
+                    }`}
+                  >
+                    <CheckCircle className={`h-3.5 w-3.5 ${isCompleted ? "text-emerald-700" : "text-stone-400"}`} />
+                    {isCompleted ? "Completed ✓" : "Mark as Completed"}
+                  </button>
                 </div>
 
                 {/* Footer Info & Admin Actions */}
@@ -387,7 +479,9 @@ export default function LearningPage() {
             <BookOpen className="h-10 w-10 mx-auto text-charcoal/30 mb-2" />
             <p className="font-bold text-base">No learning materials found.</p>
             <p className="text-xs mt-1">
-              Team leads can add Google Drive files and YouTube tutorials for trainee learning.
+              {isUserTrainee
+                ? "No trainee materials have been uploaded yet."
+                : "Team leads can add Google Drive files and YouTube tutorials for trainee learning."}
             </p>
           </div>
         )}
@@ -452,7 +546,7 @@ export default function LearningPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-charcoal/70 block mb-1">Domain / Category *</label>
+                <label className="text-xs font-semibold text-charcoal/70 block mb-1">Target Domain / Category *</label>
                 <Select
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}

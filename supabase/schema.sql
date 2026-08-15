@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   full_name TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('captain', 'vice_captain', 'member')),
+  role TEXT NOT NULL CHECK (role IN ('captain', 'vice_captain', 'member', 'trainee')),
   department TEXT NOT NULL DEFAULT 'General',
   project_id UUID,
   phone_number TEXT,
@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone_number TEXT;
+ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_role_check CHECK (role IN ('captain', 'vice_captain', 'member', 'trainee'));
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 

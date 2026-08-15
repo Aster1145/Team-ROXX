@@ -211,9 +211,11 @@ export default function ReportsPage() {
               <Download className="h-4 w-4" /> Export Excel
             </Button>
           )}
-          <Button onClick={() => setModalOpen(true)}>
-            <Plus className="h-4 w-4" /> Submit Report
-          </Button>
+          {profile?.role !== "trainee" && (
+            <Button onClick={() => setModalOpen(true)}>
+              <Plus className="h-4 w-4" /> Submit Report
+            </Button>
+          )}
         </div>
       </div>
 

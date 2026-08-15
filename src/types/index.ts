@@ -1,4 +1,4 @@
-export type Role = "captain" | "vice_captain" | "member";
+export type Role = "captain" | "vice_captain" | "member" | "trainee";
 
 export type Department =
   | "Aero Mechanics"

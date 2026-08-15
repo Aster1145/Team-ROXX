@@ -23,4 +23,5 @@ export const ROLES = [
   { value: "captain", label: "Captain" },
   { value: "vice_captain", label: "Vice Captain" },
   { value: "member", label: "Member" },
+  { value: "trainee", label: "Trainee (1st Year)" },
 ];
