@@ -281,39 +281,39 @@ export default function LearningPage() {
         )}
       </div>
 
-      {/* TRAINEE LEARNING PROGRESS TRACKER CARD */}
-      <Card className="mb-6 border-forest/30 bg-gradient-to-r from-forest/10 via-white to-forest/5 shadow-sm">
-        <CardContent className="p-5">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-forest text-white">
-                <GraduationCap className="h-6 w-6" />
+      {/* TRAINEE LEARNING PROGRESS TRACKER CARD (TRAINEES ONLY) */}
+      {isUserTrainee && (
+        <Card className="mb-6 border-forest/30 bg-gradient-to-r from-forest/10 via-white to-forest/5 shadow-sm">
+          <CardContent className="p-5">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-forest text-white">
+                  <GraduationCap className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-charcoal text-base">My Learning Progress</h3>
+                  <p className="text-xs text-charcoal/70">
+                    Track completed study materials and video tutorials.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-charcoal text-base">
-                  {isUserTrainee ? "My Learning Progress" : "Trainee Materials Completion"}
-                </h3>
-                <p className="text-xs text-charcoal/70">
-                  Track completed study materials and video tutorials.
-                </p>
+              <div className="text-right">
+                <span className="text-2xl font-bold text-forest">{progressPercentage}%</span>
+                <span className="text-xs text-charcoal/60 block">
+                  {completedCount} of {totalTraineeMaterials} Materials Completed
+                </span>
               </div>
             </div>
-            <div className="text-right">
-              <span className="text-2xl font-bold text-forest">{progressPercentage}%</span>
-              <span className="text-xs text-charcoal/60 block">
-                {completedCount} of {totalTraineeMaterials} Materials Completed
-              </span>
-            </div>
-          </div>
 
-          <div className="h-3 w-full rounded-full bg-stone-200 overflow-hidden">
-            <div
-              className="h-3 rounded-full bg-forest transition-all duration-500"
-              style={{ width: `${progressPercentage}%` }}
-            />
-          </div>
-        </CardContent>
-      </Card>
+            <div className="h-3 w-full rounded-full bg-stone-200 overflow-hidden">
+              <div
+                className="h-3 rounded-full bg-forest transition-all duration-500"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Filters Bar */}
       <div className="mb-6 rounded-2xl border border-stone bg-white p-4 shadow-2xs">
@@ -430,18 +430,20 @@ export default function LearningPage() {
                     </a>
                   )}
 
-                  {/* Mark as Completed Toggle Button */}
-                  <button
-                    onClick={() => toggleCompleteResource(res.id)}
-                    className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      isCompleted
-                        ? "bg-emerald-100 text-emerald-950 border border-emerald-300 hover:bg-emerald-200"
-                        : "bg-stone-100 text-charcoal/70 border border-stone-300 hover:bg-stone-200"
-                    }`}
-                  >
-                    <CheckCircle className={`h-3.5 w-3.5 ${isCompleted ? "text-emerald-700" : "text-stone-400"}`} />
-                    {isCompleted ? "Completed ✓" : "Mark as Completed"}
-                  </button>
+                  {/* Mark as Completed Toggle Button (Trainees Only) */}
+                  {isUserTrainee && (
+                    <button
+                      onClick={() => toggleCompleteResource(res.id)}
+                      className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        isCompleted
+                          ? "bg-emerald-100 text-emerald-950 border border-emerald-300 hover:bg-emerald-200"
+                          : "bg-stone-100 text-charcoal/70 border border-stone-300 hover:bg-stone-200"
+                      }`}
+                    >
+                      <CheckCircle className={`h-3.5 w-3.5 ${isCompleted ? "text-emerald-700" : "text-stone-400"}`} />
+                      {isCompleted ? "Completed ✓" : "Mark as Completed"}
+                    </button>
+                  )}
                 </div>
 
                 {/* Footer Info & Admin Actions */}
