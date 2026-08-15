@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Input, Textarea } from "@/components/ui/Input";
 import { WeeklyReport, Profile } from "@/types";
-import { isCaptain, isViceCaptain, roleLabel } from "@/lib/roles";
+import { isCaptain, isViceCaptain, isTrainee, roleLabel } from "@/lib/roles";
 import { Plus, Download, FileText, Star, Trophy, Award, MessageSquare, CheckCircle2, AlertTriangle } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import * as XLSX from "xlsx";
@@ -162,9 +162,9 @@ export default function ReportsPage() {
   const userIsCaptain = isCaptain(profile);
   const canDownload = isCaptain(profile) || isViceCaptain(profile);
 
-  // Leaderboard Calculation (Excludes Captain, ranks Members & Vice Captains)
+  // Leaderboard Calculation (Excludes Captain and Trainees, ranks Members & Vice Captains)
   const leaderboard = members
-    .filter((m) => m.role !== "captain")
+    .filter((m) => m.role !== "captain" && !isTrainee(m))
     .map((m) => {
       const mReports = reports.filter((r) => r.profile_id === m.id && r.points != null);
       const totalPoints = mReports.reduce((sum, r) => sum + (r.points || 0), 0);
