@@ -16,7 +16,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { isCaptain, isViceCaptain, roleLabel } from "@/lib/roles";
+import { isCaptain, isViceCaptain, isTrainee, roleLabel } from "@/lib/roles";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -34,10 +34,10 @@ export function Sidebar() {
   const pathname = usePathname();
   const { profile, signOut } = useAuth();
 
-  const isUserTrainee = profile?.role === "trainee";
+  const isUserTrainee = isTrainee(profile);
   const visibleNav = NAV.filter((item) => {
     if (isUserTrainee) {
-      return !["/dashboard/inventory", "/dashboard/budget", "/dashboard/members"].includes(item.href);
+      return !["/dashboard/inventory", "/dashboard/budget"].includes(item.href);
     }
     return true;
   });

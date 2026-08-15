@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Menu, X, LayoutDashboard, FolderKanban, Users, CalendarDays, FlaskConical, FileText, Package, Wallet, BookOpen } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
+import { isTrainee } from "@/lib/roles";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -25,10 +26,10 @@ export function MobileNav() {
   const pathname = usePathname();
   const { profile } = useAuth();
 
-  const isUserTrainee = profile?.role === "trainee";
+  const isUserTrainee = isTrainee(profile);
   const visibleNav = NAV.filter((item) => {
     if (isUserTrainee) {
-      return !["/dashboard/inventory", "/dashboard/budget", "/dashboard/members"].includes(item.href);
+      return !["/dashboard/inventory", "/dashboard/budget"].includes(item.href);
     }
     return true;
   });

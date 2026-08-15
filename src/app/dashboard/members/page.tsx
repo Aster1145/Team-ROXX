@@ -11,7 +11,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DEPARTMENTS, ROLES } from "@/lib/constants";
-import { isCaptain, roleLabel } from "@/lib/roles";
+import { isCaptain, isTrainee, roleLabel } from "@/lib/roles";
 import { Profile, Project, Role, Department } from "@/types";
 import { Plus, Trash2, Mail, Phone, Building, FolderGit2, Pencil, Crown, ShieldAlert } from "lucide-react";
 
@@ -265,6 +265,10 @@ export default function MembersPage() {
           const isCurrentCaptain = m.role === "captain";
           const isSelf = m.id === profile?.id;
 
+          const isTeammateTeamLead = m.role === "captain" || m.role === "vice_captain";
+          const isUserTrainee = isTrainee(profile);
+          const canSeeContactDetails = !isUserTrainee || isTeammateTeamLead || isSelf;
+
           return (
             <Card key={m.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -284,12 +288,18 @@ export default function MembersPage() {
                   <div className="flex flex-wrap items-center gap-4 text-xs text-charcoal/70">
                     <div className="flex items-center gap-1.5">
                       <Mail className="h-3.5 w-3.5 text-forest" />
-                      <span>{m.email}</span>
+                      <span>
+                        {canSeeContactDetails ? m.email : "••••••@••••• (Restricted)"}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-1.5">
                       <Phone className="h-3.5 w-3.5 text-forest" />
-                      <span>{m.phone_number || "No phone listed"}</span>
+                      <span>
+                        {canSeeContactDetails
+                          ? m.phone_number || "No phone listed"
+                          : "Restricted (Team Leads Only)"}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-1.5">
