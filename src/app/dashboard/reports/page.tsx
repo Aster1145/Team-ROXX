@@ -308,17 +308,21 @@ export default function ReportsPage() {
 
       {/* Performance Leaderboard */}
       <Card className="mb-8 border-amber-200/80 bg-gradient-to-r from-amber-50/40 via-white to-amber-50/20 shadow-sm">
-        <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-amber-100">
-          <div className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-amber-500" />
-            <CardTitle className="text-base text-charcoal">Team Performance Leaderboard</CardTitle>
-            <Badge variant="sage" className="text-[10px] ml-1">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-amber-100 p-3.5 sm:p-5">
+          <div className="flex items-center gap-2 flex-wrap min-w-0">
+            <Trophy className="h-5 w-5 text-amber-500 shrink-0" />
+            <CardTitle className="text-base font-bold text-charcoal leading-snug">
+              Team Performance Leaderboard
+            </CardTitle>
+            <Badge variant="sage" className="text-[10px] shrink-0">
               {leaderboard.length} Teammates
             </Badge>
           </div>
-          <span className="text-xs text-charcoal/60 font-medium">5 Stars = 10 Points (Captain Evaluation)</span>
+          <span className="text-xs text-charcoal/60 font-medium shrink-0">
+            5 Stars = 10 Points (Captain Evaluation)
+          </span>
         </CardHeader>
-        <CardContent className="pt-4">
+        <CardContent className="pt-4 p-3.5 sm:p-5">
           <div className="max-h-[220px] overflow-y-auto pr-1.5 scrollbar-thin scrollbar-thumb-amber-200 scrollbar-track-transparent">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {leaderboard.map((m, idx) => (
