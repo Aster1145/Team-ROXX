@@ -1,40 +1,44 @@
--- Run this SQL in the Supabase SQL Editor to create tables and RLS policies.
+-- ====================================================================
+-- STUDENT PROJECT MANAGEMENT PLATFORM (TEAM ROXX) - COMPLETE SQL SCHEMA
+-- Run this complete SQL script in your Supabase SQL Editor from start to end.
+-- ====================================================================
 
--- Enable UUID extension
+-- 1. Enable UUID Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Profiles table (extends auth.users)
+-- 2. Profiles Table (Extends auth.users with Captain, Vice Captain, Member & Trainee roles)
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   full_name TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('captain', 'vice_captain', 'member', 'trainee')),
+  role TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('captain', 'vice_captain', 'member', 'trainee')),
   department TEXT NOT NULL DEFAULT 'General',
   project_id UUID,
   phone_number TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Ensure columns & constraints exist
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone_number TEXT;
 ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
 ALTER TABLE public.profiles ADD CONSTRAINT profiles_role_check CHECK (role IN ('captain', 'vice_captain', 'member', 'trainee'));
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Profiles are viewable by authenticated users" ON public.profiles;
 CREATE POLICY "Profiles are viewable by authenticated users"
-  ON public.profiles FOR SELECT
-  TO authenticated USING (true);
+  ON public.profiles FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "Authenticated users can manage profiles" ON public.profiles;
 CREATE POLICY "Authenticated users can manage profiles"
-  ON public.profiles FOR ALL
-  TO authenticated USING (true) WITH CHECK (true);
+  ON public.profiles FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
--- Projects table
+-- 3. Projects Table
 CREATE TABLE IF NOT EXISTS public.projects (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
   description TEXT,
-  status TEXT NOT NULL CHECK (status IN ('planned', 'ongoing', 'on_hold', 'completed')),
+  status TEXT NOT NULL DEFAULT 'ongoing' CHECK (status IN ('planned', 'ongoing', 'on_hold', 'completed')),
   department TEXT NOT NULL DEFAULT 'General',
   progress INTEGER NOT NULL DEFAULT 0 CHECK (progress BETWEEN 0 AND 100),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -42,14 +46,16 @@ CREATE TABLE IF NOT EXISTS public.projects (
 
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Projects are viewable by authenticated users" ON public.projects;
 CREATE POLICY "Projects are viewable by authenticated users"
   ON public.projects FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "Captains and vice captains can manage projects" ON public.projects;
 CREATE POLICY "Captains and vice captains can manage projects"
   ON public.projects FOR ALL TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
 
--- Tasks table
+-- 4. Tasks Table
 CREATE TABLE IF NOT EXISTS public.tasks (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   project_id UUID REFERENCES public.projects(id) ON DELETE CASCADE,
@@ -64,22 +70,22 @@ CREATE TABLE IF NOT EXISTS public.tasks (
 
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Tasks are viewable by authenticated users" ON public.tasks;
 CREATE POLICY "Tasks are viewable by authenticated users"
   ON public.tasks FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "Captains and vice captains can manage tasks" ON public.tasks;
 CREATE POLICY "Captains and vice captains can manage tasks"
   ON public.tasks FOR ALL TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
 
+DROP POLICY IF EXISTS "Members can update own task status" ON public.tasks;
 CREATE POLICY "Members can update own task status"
   ON public.tasks FOR UPDATE TO authenticated
   USING (assigned_to = auth.uid())
-  WITH CHECK (
-    assigned_to = auth.uid() AND
-    status IN ('todo', 'in_progress', 'review', 'done')
-  );
+  WITH CHECK (assigned_to = auth.uid() AND status IN ('todo', 'in_progress', 'review', 'done'));
 
--- Events table
+-- 5. Events Table (Viewable by Trainees; Creation by Captain)
 CREATE TABLE IF NOT EXISTS public.events (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
@@ -93,54 +99,58 @@ CREATE TABLE IF NOT EXISTS public.events (
 
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Events are viewable by authenticated users" ON public.events;
 CREATE POLICY "Events are viewable by authenticated users"
   ON public.events FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "Captains can manage events" ON public.events;
 CREATE POLICY "Captains can manage events"
   ON public.events FOR ALL TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'captain'));
 
--- Event participants
+-- 6. Event Participants Table
 CREATE TABLE IF NOT EXISTS public.event_participants (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   event_id UUID REFERENCES public.events(id) ON DELETE CASCADE,
   profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  registered_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (event_id, profile_id)
 );
 
 ALTER TABLE public.event_participants ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Event participants are viewable by authenticated users" ON public.event_participants;
 CREATE POLICY "Event participants are viewable by authenticated users"
   ON public.event_participants FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY "Captains can manage event participants"
+DROP POLICY IF EXISTS "Authenticated non-trainee users can manage event registration" ON public.event_participants;
+CREATE POLICY "Authenticated non-trainee users can manage event registration"
   ON public.event_participants FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'captain'));
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role != 'trainee'));
 
--- Research docs
+-- 7. Research Docs Table (Viewable by Trainees; Created/edited by non-trainees)
 CREATE TABLE IF NOT EXISTS public.research_docs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   author_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE public.research_docs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Research docs are viewable by authenticated users" ON public.research_docs;
 CREATE POLICY "Research docs are viewable by authenticated users"
   ON public.research_docs FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY "Authenticated users can create research docs"
-  ON public.research_docs FOR INSERT TO authenticated WITH CHECK (auth.uid() = author_id);
-
-CREATE POLICY "Authors can update/delete own docs"
+DROP POLICY IF EXISTS "Authenticated non-trainees can create and manage research docs" ON public.research_docs;
+CREATE POLICY "Authenticated non-trainees can create and manage research docs"
   ON public.research_docs FOR ALL TO authenticated
-  USING (auth.uid() = author_id);
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role != 'trainee'));
 
--- Weekly reports
+-- 8. Weekly Reports Table (Viewable by Trainees for Leaderboard rankings; Submitted by non-trainees; Rated by Captain)
 CREATE TABLE IF NOT EXISTS public.weekly_reports (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -166,75 +176,92 @@ ALTER TABLE public.weekly_reports ADD CONSTRAINT unique_weekly_report_per_user_w
 
 ALTER TABLE public.weekly_reports ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Weekly reports are viewable by authenticated users" ON public.weekly_reports;
 CREATE POLICY "Weekly reports are viewable by authenticated users"
   ON public.weekly_reports FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY "Members can create own reports"
-  ON public.weekly_reports FOR INSERT TO authenticated WITH CHECK (auth.uid() = profile_id);
+DROP POLICY IF EXISTS "Non-trainee members can create own reports" ON public.weekly_reports;
+CREATE POLICY "Non-trainee members can create own reports"
+  ON public.weekly_reports FOR INSERT TO authenticated
+  WITH CHECK (
+    auth.uid() = profile_id AND
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role != 'trainee')
+  );
 
+DROP POLICY IF EXISTS "Captains can rate weekly reports" ON public.weekly_reports;
 CREATE POLICY "Captains can rate weekly reports"
   ON public.weekly_reports FOR UPDATE TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'captain'));
 
--- Inventory logs
+-- 9. Inventory Logs Table (Restricted for Trainees)
 CREATE TABLE IF NOT EXISTS public.inventory_logs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   item_name TEXT NOT NULL,
-  purpose TEXT,
-  taken_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+  profile_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   taken_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   returned_at TIMESTAMPTZ,
-  condition_notes TEXT,
+  notes TEXT,
+  purpose TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
 ALTER TABLE public.inventory_logs ADD COLUMN IF NOT EXISTS purpose TEXT;
 
 ALTER TABLE public.inventory_logs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Inventory logs are viewable by authenticated users"
-  ON public.inventory_logs FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Non-trainees can view inventory" ON public.inventory_logs;
+CREATE POLICY "Non-trainees can view inventory"
+  ON public.inventory_logs FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role != 'trainee'));
 
-CREATE POLICY "Authenticated users can create inventory logs"
-  ON public.inventory_logs FOR INSERT TO authenticated WITH CHECK (auth.uid() = taken_by);
+DROP POLICY IF EXISTS "Non-trainees can manage inventory" ON public.inventory_logs;
+CREATE POLICY "Non-trainees can manage inventory"
+  ON public.inventory_logs FOR ALL TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role != 'trainee'));
 
-CREATE POLICY "Takers can update own logs"
-  ON public.inventory_logs FOR UPDATE TO authenticated
-  USING (auth.uid() = taken_by);
-
--- Budget items
+-- 10. Budget Items Table (Recorded Expenses; Edit/Delete strictly Captain-only)
 CREATE TABLE IF NOT EXISTS public.budget_items (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
   item TEXT NOT NULL,
-  amount NUMERIC NOT NULL CHECK (amount >= 0),
+  amount NUMERIC(10, 2) NOT NULL CHECK (amount >= 0),
   quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
   category TEXT NOT NULL DEFAULT 'Components',
+  project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
   purchased_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   purchased_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE public.budget_items ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Budget items are viewable by authenticated users"
-  ON public.budget_items FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Non-trainees can view budget items" ON public.budget_items;
+CREATE POLICY "Non-trainees can view budget items"
+  ON public.budget_items FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role != 'trainee'));
 
-CREATE POLICY "Captains and vice captains can manage budget items"
-  ON public.budget_items FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
+DROP POLICY IF EXISTS "Team leads can insert budget items" ON public.budget_items;
+CREATE POLICY "Team leads can insert budget items"
+  ON public.budget_items FOR INSERT TO authenticated
+  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
 
--- Budget requests
+DROP POLICY IF EXISTS "Captains exclusively can update or delete budget items" ON public.budget_items;
+CREATE POLICY "Captains exclusively can update or delete budget items"
+  ON public.budget_items FOR UPDATE TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'captain'));
+
+-- 11. Budget Requests Table (Item Requests Queue)
 CREATE TABLE IF NOT EXISTS public.budget_requests (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   requested_by UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
-  project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
   item TEXT NOT NULL,
-  amount NUMERIC NOT NULL CHECK (amount >= 0),
+  amount NUMERIC(10, 2) NOT NULL CHECK (amount >= 0),
   quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
   category TEXT NOT NULL DEFAULT 'Components',
   priority TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'ordered')),
+  project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
   justification TEXT,
   link TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'ordered', 'rejected')),
   rejection_reason TEXT,
   reviewed_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -243,42 +270,48 @@ CREATE TABLE IF NOT EXISTS public.budget_requests (
 
 ALTER TABLE public.budget_requests ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Budget requests are viewable by authenticated users"
-  ON public.budget_requests FOR SELECT TO authenticated USING (true);
+DROP POLICY IF EXISTS "Non-trainees can view budget requests" ON public.budget_requests;
+CREATE POLICY "Non-trainees can view budget requests"
+  ON public.budget_requests FOR SELECT TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role != 'trainee'));
 
-CREATE POLICY "Authenticated users can create budget requests"
-  ON public.budget_requests FOR INSERT TO authenticated WITH CHECK (auth.uid() = requested_by);
+DROP POLICY IF EXISTS "Non-trainees can create budget requests" ON public.budget_requests;
+CREATE POLICY "Non-trainees can create budget requests"
+  ON public.budget_requests FOR INSERT TO authenticated
+  WITH CHECK (
+    auth.uid() = requested_by AND
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role != 'trainee')
+  );
 
-CREATE POLICY "Requesters can update pending requests"
-  ON public.budget_requests FOR UPDATE TO authenticated
-  USING (auth.uid() = requested_by AND status = 'pending');
-
+DROP POLICY IF EXISTS "Captains and vice captains can manage budget requests" ON public.budget_requests;
 CREATE POLICY "Captains and vice captains can manage budget requests"
   ON public.budget_requests FOR ALL TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
 
--- Learning resources (Google Drive links, YouTube videos & docs)
+-- 12. Learning Resources Table (Google Drive links, YouTube videos & docs)
 CREATE TABLE IF NOT EXISTS public.learning_resources (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   title TEXT NOT NULL,
   description TEXT,
   resource_type TEXT NOT NULL CHECK (resource_type IN ('youtube', 'drive', 'link')),
   url TEXT NOT NULL,
-  category TEXT NOT NULL DEFAULT 'General',
+  category TEXT NOT NULL DEFAULT 'Trainee',
   added_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE public.learning_resources ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Learning resources are viewable by authenticated users" ON public.learning_resources;
 CREATE POLICY "Learning resources are viewable by authenticated users"
   ON public.learning_resources FOR SELECT TO authenticated USING (true);
 
+DROP POLICY IF EXISTS "Captains and vice captains can manage learning resources" ON public.learning_resources;
 CREATE POLICY "Captains and vice captains can manage learning resources"
   ON public.learning_resources FOR ALL TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
 
--- Trigger to auto-create profile on signup
+-- 13. Auto Profile Signup Trigger
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
