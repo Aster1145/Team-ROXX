@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { canManageBudget } from "@/lib/roles";
+import { canManageBudget, isCaptain } from "@/lib/roles";
 import { BudgetItem, BudgetItemRequest, Project, RequestPriority, RequestStatus } from "@/types";
-import { Plus, IndianRupee, Wallet, ShoppingCart, CheckCircle, XCircle, ExternalLink, Clock, PackageCheck, AlertCircle } from "lucide-react";
+import { Plus, IndianRupee, Wallet, ShoppingCart, CheckCircle, XCircle, ExternalLink, Clock, PackageCheck, AlertCircle, Pencil, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 export default function BudgetPage() {
@@ -26,14 +26,24 @@ export default function BudgetPage() {
   
   // Modals state
   const [expenseModalOpen, setExpenseModalOpen] = useState(false);
+  const [editExpenseModalOpen, setEditExpenseModalOpen] = useState(false);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+  const [editingExpense, setEditingExpense] = useState<BudgetItem | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // Forms
   const [expenseForm, setExpenseForm] = useState({
+    item: "",
+    amount: "",
+    quantity: 1,
+    category: "Components",
+    project_id: "",
+  });
+
+  const [editExpenseForm, setEditExpenseForm] = useState({
     item: "",
     amount: "",
     quantity: 1,
@@ -104,6 +114,57 @@ export default function BudgetPage() {
       console.error("Error adding expense:", err);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleOpenEditExpense = (item: BudgetItem) => {
+    setEditingExpense(item);
+    setEditExpenseForm({
+      item: item.item,
+      amount: item.amount.toString(),
+      quantity: item.quantity,
+      category: item.category,
+      project_id: item.project_id || "",
+    });
+    setEditExpenseModalOpen(true);
+  };
+
+  const handleSaveExpenseEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingExpense) return;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("budget_items")
+        .update({
+          item: editExpenseForm.item,
+          amount: Number(editExpenseForm.amount),
+          quantity: Number(editExpenseForm.quantity),
+          category: editExpenseForm.category,
+          project_id: editExpenseForm.project_id || null,
+        })
+        .eq("id", editingExpense.id);
+
+      if (error) throw error;
+
+      setEditExpenseModalOpen(false);
+      setEditingExpense(null);
+      await fetchData();
+    } catch (err: any) {
+      alert("Failed to update expense: " + err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteExpense = async (id: string, itemName: string) => {
+    if (!confirm(`Are you sure you want to delete expense "${itemName}"?`)) return;
+    try {
+      const { error } = await supabase.from("budget_items").delete().eq("id", id);
+      if (error) throw error;
+      await fetchData();
+    } catch (err: any) {
+      alert("Failed to delete expense: " + err.message);
     }
   };
 
@@ -521,11 +582,12 @@ export default function BudgetPage() {
                     <th className="pb-3 font-medium">Amount</th>
                     <th className="pb-3 font-medium">Purchased / Ordered By</th>
                     <th className="pb-3 font-medium">Date</th>
+                    {isCaptain(profile) && <th className="pb-3 font-medium text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((i) => (
-                    <tr key={i.id} className="border-b border-stone/50">
+                    <tr key={i.id} className="border-b border-stone/50 hover:bg-stone/20">
                       <td className="py-3 font-medium text-charcoal">{i.item}</td>
                       <td className="py-3">{i.category}</td>
                       <td className="py-3">{projectName(i.project_id)}</td>
@@ -533,11 +595,31 @@ export default function BudgetPage() {
                       <td className="py-3 font-semibold text-charcoal">₹{(i.amount * i.quantity).toLocaleString("en-IN")}</td>
                       <td className="py-3">{i.profile?.full_name || "Team Lead"}</td>
                       <td className="py-3">{formatDate(i.purchased_at)}</td>
+                      {isCaptain(profile) && (
+                        <td className="py-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => handleOpenEditExpense(i)}
+                              className="p-1.5 text-charcoal/60 hover:text-forest hover:bg-forest/10 rounded-lg transition-colors"
+                              title="Edit Expense (Captain Only)"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteExpense(i.id, i.item)}
+                              className="p-1.5 text-charcoal/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete Expense (Captain Only)"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                   {items.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-charcoal/60">
+                      <td colSpan={isCaptain(profile) ? 8 : 7} className="py-8 text-center text-charcoal/60">
                         No expenses recorded yet.
                       </td>
                     </tr>
@@ -700,6 +782,73 @@ export default function BudgetPage() {
             </Select>
             <Button type="submit" className="w-full" disabled={submitting}>
               {submitting ? "Saving..." : "Save Expense"}
+            </Button>
+          </form>
+        </Modal>
+      )}
+
+      {/* MODAL: Edit Expense (Captain Only) */}
+      {isCaptain(profile) && editingExpense && (
+        <Modal isOpen={editExpenseModalOpen} onClose={() => setEditExpenseModalOpen(false)} title="Edit Recorded Expense">
+          <form onSubmit={handleSaveExpenseEdit} className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-charcoal/70 block mb-1">Item Name *</label>
+              <Input
+                placeholder="Item name"
+                required
+                value={editExpenseForm.item}
+                onChange={(e) => setEditExpenseForm({ ...editExpenseForm, item: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-charcoal/70 block mb-1">Unit Price (₹) *</label>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="Amount (₹)"
+                  required
+                  value={editExpenseForm.amount}
+                  onChange={(e) => setEditExpenseForm({ ...editExpenseForm, amount: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-charcoal/70 block mb-1">Quantity *</label>
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Quantity"
+                  required
+                  value={editExpenseForm.quantity}
+                  onChange={(e) => setEditExpenseForm({ ...editExpenseForm, quantity: Number(e.target.value) })}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-charcoal/70 block mb-1">Category</label>
+              <Select
+                value={editExpenseForm.category}
+                onChange={(e) => setEditExpenseForm({ ...editExpenseForm, category: e.target.value })}
+              >
+                {["Components", "Tools", "Travel", "Registration", "Materials", "Other"].map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-charcoal/70 block mb-1">Associated Project</label>
+              <Select
+                value={editExpenseForm.project_id}
+                onChange={(e) => setEditExpenseForm({ ...editExpenseForm, project_id: e.target.value })}
+              >
+                <option value="">General / No project</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </Select>
+            </div>
+            <Button type="submit" className="w-full" disabled={submitting}>
+              {submitting ? "Saving Changes..." : "Save Expense Changes"}
             </Button>
           </form>
         </Modal>
