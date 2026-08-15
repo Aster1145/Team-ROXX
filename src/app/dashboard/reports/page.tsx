@@ -61,10 +61,44 @@ export default function ReportsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await supabase.from("weekly_reports").insert({ ...form, profile_id: profile?.id });
-    setModalOpen(false);
-    setForm({ week_ending: "", summary: "", accomplishments: "", blockers: "", next_steps: "" });
-    fetchData();
+    if (!profile?.id) return;
+
+    // Check if member has already submitted a report for this week_ending
+    const existing = reports.find(
+      (r) => r.profile_id === profile.id && r.week_ending === form.week_ending
+    );
+
+    if (existing) {
+      alert(
+        `You have already submitted a weekly report for the week ending ${formatDate(
+          form.week_ending
+        )}. Each member is allowed only 1 report per week to maintain an accurate performance leaderboard.`
+      );
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("weekly_reports").insert({ ...form, profile_id: profile.id });
+
+      if (error) {
+        if (error.code === "23505" || error.message.includes("unique") || error.message.includes("duplicate")) {
+          alert(
+            `You have already submitted a weekly report for the week ending ${formatDate(
+              form.week_ending
+            )}. Each member is allowed only 1 report per week.`
+          );
+        } else {
+          alert("Error submitting report: " + error.message);
+        }
+        return;
+      }
+
+      setModalOpen(false);
+      setForm({ week_ending: "", summary: "", accomplishments: "", blockers: "", next_steps: "" });
+      await fetchData();
+    } catch (err: any) {
+      alert("Failed to submit report: " + err.message);
+    }
   };
 
   const handleOpenRatingModal = (report: WeeklyReport) => {

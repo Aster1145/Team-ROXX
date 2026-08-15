@@ -151,13 +151,16 @@ CREATE TABLE IF NOT EXISTS public.weekly_reports (
   points INTEGER CHECK (points BETWEEN 2 AND 10),
   rated_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   rating_feedback TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (profile_id, week_ending)
 );
 
 ALTER TABLE public.weekly_reports ADD COLUMN IF NOT EXISTS rating_stars INTEGER CHECK (rating_stars BETWEEN 1 AND 5);
 ALTER TABLE public.weekly_reports ADD COLUMN IF NOT EXISTS points INTEGER CHECK (points BETWEEN 2 AND 10);
 ALTER TABLE public.weekly_reports ADD COLUMN IF NOT EXISTS rated_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
 ALTER TABLE public.weekly_reports ADD COLUMN IF NOT EXISTS rating_feedback TEXT;
+ALTER TABLE public.weekly_reports DROP CONSTRAINT IF EXISTS unique_weekly_report_per_user_week;
+ALTER TABLE public.weekly_reports ADD CONSTRAINT unique_weekly_report_per_user_week UNIQUE (profile_id, week_ending);
 
 ALTER TABLE public.weekly_reports ENABLE ROW LEVEL SECURITY;
 
