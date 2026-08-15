@@ -416,12 +416,13 @@ export default function BudgetPage() {
           Request hardware/materials, manage team lead approvals, and track budget expenses.
         </p>
         <div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-auto">
-          <Button variant="outline" onClick={exportExpensesExcel} className="gap-1.5 shrink-0 text-xs font-semibold whitespace-nowrap">
+          <Button variant="outline" onClick={exportExpensesExcel} className="gap-1.5 shrink-0 text-xs whitespace-nowrap">
             <Download className="h-4 w-4 shrink-0" /> Export Excel
           </Button>
           <Button
+            variant="primary"
             onClick={() => setRequestModalOpen(true)}
-            className="bg-forest hover:bg-forest/90 text-white font-semibold shadow-md gap-1.5 shrink-0 text-xs whitespace-nowrap"
+            className="gap-1.5 shrink-0 text-xs whitespace-nowrap"
           >
             <ShoppingCart className="h-4 w-4 shrink-0" /> Request Item
           </Button>
@@ -429,7 +430,7 @@ export default function BudgetPage() {
             <Button
               variant="outline"
               onClick={() => setExpenseModalOpen(true)}
-              className="border-charcoal/30 text-charcoal hover:bg-stone/50 font-semibold gap-1.5 shrink-0 text-xs whitespace-nowrap"
+              className="gap-1.5 shrink-0 text-xs whitespace-nowrap"
             >
               <Plus className="h-4 w-4 shrink-0" /> Direct Expense
             </Button>
