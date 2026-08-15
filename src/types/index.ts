@@ -147,3 +147,17 @@ export interface Comment {
   created_at: string;
   author?: { full_name: string };
 }
+
+export type ResourceType = "youtube" | "drive" | "link";
+
+export interface LearningResource {
+  id: string;
+  title: string;
+  description?: string | null;
+  resource_type: ResourceType;
+  url: string;
+  category: string;
+  added_by?: string | null;
+  created_at: string;
+  author?: { full_name: string };
+}

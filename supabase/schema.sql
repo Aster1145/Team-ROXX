@@ -255,6 +255,27 @@ CREATE POLICY "Captains and vice captains can manage budget requests"
   ON public.budget_requests FOR ALL TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
 
+-- Learning resources (Google Drive links, YouTube videos & docs)
+CREATE TABLE IF NOT EXISTS public.learning_resources (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  title TEXT NOT NULL,
+  description TEXT,
+  resource_type TEXT NOT NULL CHECK (resource_type IN ('youtube', 'drive', 'link')),
+  url TEXT NOT NULL,
+  category TEXT NOT NULL DEFAULT 'General',
+  added_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.learning_resources ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Learning resources are viewable by authenticated users"
+  ON public.learning_resources FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "Captains and vice captains can manage learning resources"
+  ON public.learning_resources FOR ALL TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
+
 -- Trigger to auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$

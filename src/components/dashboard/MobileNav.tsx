@@ -4,11 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Menu, X, LayoutDashboard, FolderKanban, Users, CalendarDays, FlaskConical, FileText, Package, Wallet } from "lucide-react";
+import { Menu, X, LayoutDashboard, FolderKanban, Users, CalendarDays, FlaskConical, FileText, Package, Wallet, BookOpen } from "lucide-react";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
+  { href: "/dashboard/learning", label: "Learning Hub", icon: BookOpen },
   { href: "/dashboard/events", label: "Events", icon: CalendarDays },
   { href: "/dashboard/research", label: "Research", icon: FlaskConical },
   { href: "/dashboard/reports", label: "Reports", icon: FileText },
