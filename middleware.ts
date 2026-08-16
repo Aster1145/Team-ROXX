@@ -1,21 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
+const PUBLIC_ROUTES = ["/", "/login", "/auth/callback", "/api/health"];
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const { response, user } = await updateSession(request);
 
-  // If user visits the root landing page path "/", take them directly to Dashboard or Login
-  if (pathname === "/") {
-    if (user) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    } else {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
-  }
+  const isPublic = PUBLIC_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith("/auth/")
+  );
 
-  const isPublic = pathname === "/login" || pathname.startsWith("/auth/") || pathname === "/api/health";
   if (isPublic) return response;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
