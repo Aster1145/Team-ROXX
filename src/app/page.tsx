@@ -28,6 +28,7 @@ export default function HomePage() {
       meshRef.current?.destroy();
       themeScrollRef.current?.destroy();
       simulatorRef.current?.unmount();
+      document.body.classList.remove("theme-contrast");
     };
   }, []);
 

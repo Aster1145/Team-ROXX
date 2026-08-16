@@ -133,8 +133,8 @@ export class AntigravityMesh {
       n.propAngle += 0.3; // Spin propellers
     }
 
-    // Determine line & point color based on current body theme (High Contrast)
-    const isDarkTheme = document.body.classList.contains("theme-contrast");
+    const landingRoot = document.querySelector(".landing-root");
+    const isDarkTheme = landingRoot?.classList.contains("theme-contrast") || false;
     const strokeColor = isDarkTheme ? "rgba(108, 232, 167, 0.38)" : "rgba(27, 59, 43, 0.28)";
     const droneBodyColor = isDarkTheme ? "#6CE8A7" : "#1B3B2B";
     const propColor = isDarkTheme ? "#85F5B9" : "#5C7C66";
