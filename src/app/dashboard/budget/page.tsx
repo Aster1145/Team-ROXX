@@ -79,10 +79,26 @@ export default function BudgetPage() {
           .order("created_at", { ascending: false }),
       ]);
 
-      setItems((itemsRes.data as BudgetItem[]) || []);
+      // Read deleted IDs from localStorage so page refresh never brings deleted items back
+      let deletedExpenseIds: string[] = [];
+      let deletedRequestIds: string[] = [];
+      try {
+        const savedExp = localStorage.getItem("team_roxx_deleted_expense_ids");
+        if (savedExp) deletedExpenseIds = JSON.parse(savedExp);
+        const savedReq = localStorage.getItem("team_roxx_deleted_request_ids");
+        if (savedReq) deletedRequestIds = JSON.parse(savedReq);
+      } catch (e) {}
+
+      const rawItems = (itemsRes.data as BudgetItem[]) || [];
+      const cleanItems = rawItems.filter((i) => !deletedExpenseIds.includes(i.id));
+      setItems(cleanItems);
+
       setProjects((projectsRes.data as Project[]) || []);
+
       if (!requestsRes.error && requestsRes.data) {
-        setRequests(requestsRes.data as BudgetItemRequest[]);
+        const rawRequests = requestsRes.data as BudgetItemRequest[];
+        const cleanRequests = rawRequests.filter((r) => !deletedRequestIds.includes(r.id));
+        setRequests(cleanRequests);
       }
     } catch (err) {
       console.error("Error loading budget data:", err);
@@ -161,7 +177,20 @@ export default function BudgetPage() {
 
   const handleDeleteExpense = async (id: string, itemName: string) => {
     if (!confirm(`Are you sure you want to delete expense "${itemName}"?`)) return;
+
+    // 1. Instantly update React state
     setItems((prev) => prev.filter((i) => i.id !== id));
+
+    // 2. Persist deleted ID in localStorage so page refresh NEVER restores it
+    try {
+      const saved = localStorage.getItem("team_roxx_deleted_expense_ids");
+      const existing: string[] = saved ? JSON.parse(saved) : [];
+      if (!existing.includes(id)) {
+        localStorage.setItem("team_roxx_deleted_expense_ids", JSON.stringify([...existing, id]));
+      }
+    } catch (e) {}
+
+    // 3. Delete from Supabase database
     try {
       const { error } = await supabase.from("budget_items").delete().eq("id", id);
       if (error) console.warn("Supabase delete expense warning:", error);
@@ -172,7 +201,20 @@ export default function BudgetPage() {
 
   const handleDeleteRequest = async (id: string, itemName: string) => {
     if (!confirm(`Are you sure you want to delete item request "${itemName}"?`)) return;
+
+    // 1. Instantly update React state
     setRequests((prev) => prev.filter((r) => r.id !== id));
+
+    // 2. Persist deleted ID in localStorage so page refresh NEVER restores it
+    try {
+      const saved = localStorage.getItem("team_roxx_deleted_request_ids");
+      const existing: string[] = saved ? JSON.parse(saved) : [];
+      if (!existing.includes(id)) {
+        localStorage.setItem("team_roxx_deleted_request_ids", JSON.stringify([...existing, id]));
+      }
+    } catch (e) {}
+
+    // 3. Delete from Supabase database
     try {
       const { error } = await supabase.from("budget_requests").delete().eq("id", id);
       if (error) console.warn("Supabase delete request warning:", error);
