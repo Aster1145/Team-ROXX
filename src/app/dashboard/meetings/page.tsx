@@ -111,6 +111,14 @@ export default function MeetingsPage() {
   async function fetchMeetings() {
     try {
       setLoading(true);
+
+      // Read deleted meeting IDs from localStorage so deleted items NEVER return upon refresh
+      let deletedIds: string[] = [];
+      try {
+        const savedDel = localStorage.getItem("team_roxx_deleted_meeting_ids");
+        if (savedDel) deletedIds = JSON.parse(savedDel);
+      } catch (e) {}
+
       // Attempt to load from Supabase scheduled_meetings table
       const { data, error } = await supabase
         .from("scheduled_meetings")
@@ -120,17 +128,19 @@ export default function MeetingsPage() {
       if (error || !data || data.length === 0) {
         // Fallback to local state / initial meetings
         const saved = localStorage.getItem("team_roxx_meetings");
+        let baseList: ScheduledMeeting[] = INITIAL_MEETINGS;
         if (saved) {
           try {
-            setMeetings(JSON.parse(saved));
+            baseList = JSON.parse(saved);
           } catch (e) {
-            setMeetings(INITIAL_MEETINGS);
+            baseList = INITIAL_MEETINGS;
           }
-        } else {
-          setMeetings(INITIAL_MEETINGS);
         }
+        const cleanList = baseList.filter((m) => !deletedIds.includes(m.id));
+        setMeetings(cleanList);
       } else {
-        setMeetings(data);
+        const cleanData = data.filter((m: any) => !deletedIds.includes(m.id));
+        setMeetings(cleanData);
       }
     } catch (e) {
       setMeetings(INITIAL_MEETINGS);
@@ -263,14 +273,26 @@ export default function MeetingsPage() {
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Are you sure you want to delete the scheduled meeting "${title}"?`)) return;
 
-    try {
-      await supabase.from("scheduled_meetings").delete().eq("id", id);
-    } catch (e) {
-      // Ignore
-    }
+    // 1. Instantly update React state & save remaining meetings
+    const remaining = meetings.filter((m) => m.id !== id);
+    saveMeetingsState(remaining);
 
-    const filtered = meetings.filter((m) => m.id !== id);
-    saveMeetingsState(filtered);
+    // 2. Persist deleted ID in localStorage so page refresh NEVER restores it
+    try {
+      const saved = localStorage.getItem("team_roxx_deleted_meeting_ids");
+      const existing: string[] = saved ? JSON.parse(saved) : [];
+      if (!existing.includes(id)) {
+        localStorage.setItem("team_roxx_deleted_meeting_ids", JSON.stringify([...existing, id]));
+      }
+    } catch (e) {}
+
+    // 3. Delete from Supabase database table
+    try {
+      const { error } = await supabase.from("scheduled_meetings").delete().eq("id", id);
+      if (error) console.warn("Supabase delete meeting warning:", error);
+    } catch (e) {
+      console.warn("Failed to delete meeting:", e);
+    }
   };
 
   // Helper to calculate status (Live, Upcoming, Past)
