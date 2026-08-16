@@ -15,13 +15,11 @@ import {
   BookOpen,
   Video,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { isCaptain, isViceCaptain, isTrainee, roleLabel } from "@/lib/roles";
+import { isTrainee, roleLabel } from "@/lib/roles";
 import { useSidebar } from "@/context/SidebarContext";
 
 const NAV = [
@@ -57,35 +55,50 @@ export function Sidebar() {
         isCollapsed ? "w-20" : "w-64"
       )}
     >
-      {/* App Brand Header & Toggle Button */}
-      <div
-        className={cn(
-          "flex h-16 items-center border-b border-slate-100 dark:border-slate-800 transition-all px-4",
-          isCollapsed ? "justify-center gap-0" : "justify-between"
-        )}
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold text-sm shadow-xs">
-            RX
-          </span>
-          {!isCollapsed && (
+      {/* App Brand Header */}
+      {!isCollapsed ? (
+        // EXPANDED HEADER
+        <div className="flex h-16 items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold text-sm shadow-xs">
+              RX
+            </span>
             <span className="font-[family-name:var(--font-playfair)] text-xl font-semibold text-slate-900 dark:text-white truncate">
               Team ROXX
             </span>
-          )}
+          </div>
+
+          <button
+            onClick={toggleSidebar}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
+            title="Minimize Sidebar"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </button>
         </div>
+      ) : (
+        // MINIMIZED HEADER (Clean centered expand button, no overlap)
+        <div className="flex h-16 items-center justify-center border-b border-slate-100 dark:border-slate-800 px-2">
+          <button
+            onClick={toggleSidebar}
+            className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold text-xs shadow-xs hover:scale-110 transition-all"
+            title="Expand Sidebar"
+          >
+            <span>RX</span>
+            <span className="absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 shadow-2xs">
+              <PanelLeftOpen className="h-2.5 w-2.5" />
+            </span>
 
-        {/* Minimize / Expand Toggle Button */}
-        <button
-          onClick={toggleSidebar}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
-          title={isCollapsed ? "Expand Sidebar (⌘B)" : "Minimize Sidebar (⌘B)"}
-        >
-          {isCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-        </button>
-      </div>
+            {/* Fixed Tooltip for Brand Toggle */}
+            <div className="fixed left-20 z-[100] ml-3 hidden group-hover:flex items-center px-3 py-1.5 text-xs font-bold font-[family-name:var(--font-playfair)] rounded-xl bg-slate-900 dark:bg-slate-800 text-white dark:text-slate-100 shadow-2xl border border-slate-700/80 whitespace-nowrap pointer-events-none animate-in fade-in duration-150">
+              Expand Sidebar (Team ROXX)
+              <span className="absolute -left-1 top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900 dark:border-r-slate-800" />
+            </div>
+          </button>
+        </div>
+      )}
 
-      {/* Navigation List - Apple macOS Dock Style for Minimized View */}
+      {/* Navigation List */}
       <nav
         className={cn(
           "flex-1 space-y-2 overflow-y-auto py-6 transition-all",
@@ -96,13 +109,13 @@ export function Sidebar() {
           const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(`${item.href}`));
 
           if (isCollapsed) {
-            // MINIMIZED DOCK MODE: Apple macOS Dock Style Icon with Magnification & Glassmorphic Tooltip
+            // MINIMIZED DOCK MODE: Apple macOS Dock Style Icon with Magnification & Fixed Glassmorphic Tooltip
             return (
-              <div key={item.href} className="relative flex justify-center group py-1">
+              <div key={item.href} className="relative flex justify-center group py-1.5">
                 <Link
                   href={item.href}
                   className={cn(
-                    "relative flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ease-out transform group-hover:scale-125 group-hover:z-50 shadow-2xs",
+                    "flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ease-out transform group-hover:scale-125 group-hover:z-50 shadow-2xs",
                     active
                       ? "bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 shadow-md"
                       : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
@@ -111,11 +124,11 @@ export function Sidebar() {
                   <item.icon className="h-5 w-5 shrink-0" />
                 </Link>
 
-                {/* Apple macOS Dock Floating Tooltip Pill */}
-                <span className="absolute left-16 top-1/2 -translate-y-1/2 z-50 ml-3 hidden group-hover:flex items-center px-3 py-1.5 text-xs font-bold font-[family-name:var(--font-playfair)] rounded-xl bg-slate-900/95 dark:bg-slate-800/95 text-white dark:text-slate-100 shadow-2xl backdrop-blur-md border border-slate-700/60 whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-150 pointer-events-none">
+                {/* Apple macOS Dock Floating Tooltip Pill (Fixed positioning prevents clipping) */}
+                <div className="fixed left-20 z-[100] ml-3 hidden group-hover:flex items-center px-3 py-1.5 text-xs font-bold font-[family-name:var(--font-playfair)] rounded-xl bg-slate-900 dark:bg-slate-800 text-white dark:text-slate-100 shadow-2xl border border-slate-700/80 whitespace-nowrap pointer-events-none animate-in fade-in duration-150">
                   {item.label}
-                  <span className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 border-4 border-transparent border-r-slate-900 dark:border-r-slate-800" />
-                </span>
+                  <span className="absolute -left-1 top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900 dark:border-r-slate-800" />
+                </div>
               </div>
             );
           }
@@ -160,17 +173,18 @@ export function Sidebar() {
             </button>
           </>
         ) : (
-          <div className="flex flex-col items-center gap-2 py-1">
+          <div className="flex flex-col items-center justify-center py-2">
             <button
               onClick={signOut}
               className="group relative flex h-11 w-11 items-center justify-center rounded-full text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-all duration-200 transform hover:scale-125"
               title="Sign Out"
             >
               <LogOut className="h-5 w-5 shrink-0" />
-              {/* macOS Tooltip for Sign Out */}
-              <span className="absolute left-16 top-1/2 -translate-y-1/2 z-50 ml-3 hidden group-hover:flex items-center px-3 py-1.5 text-xs font-bold rounded-xl bg-red-600 text-white shadow-xl backdrop-blur-md whitespace-nowrap animate-in fade-in duration-150 pointer-events-none">
+              {/* Fixed Tooltip for Sign Out */}
+              <div className="fixed left-20 z-[100] ml-3 hidden group-hover:flex items-center px-3 py-1.5 text-xs font-bold rounded-xl bg-red-600 text-white shadow-2xl border border-red-700 whitespace-nowrap pointer-events-none animate-in fade-in duration-150">
                 Sign Out
-              </span>
+                <span className="absolute -left-1 top-1/2 -translate-y-1/2 border-4 border-transparent border-r-red-600" />
+              </div>
             </button>
           </div>
         )}
