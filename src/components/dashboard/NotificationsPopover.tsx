@@ -13,6 +13,7 @@ import {
   CheckSquare,
   Sparkles,
   Info,
+  Video,
 } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 
@@ -51,6 +52,8 @@ export function NotificationsPopover() {
         return <Calendar className="h-4 w-4 text-emerald-500" />;
       case "budget":
         return <Wallet className="h-4 w-4 text-blue-500" />;
+      case "meeting":
+        return <Video className="h-4 w-4 text-emerald-500" />;
       default:
         return <Info className="h-4 w-4 text-amber-500" />;
     }

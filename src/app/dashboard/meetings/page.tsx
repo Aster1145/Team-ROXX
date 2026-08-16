@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/context/NotificationContext";
 import { Header } from "@/components/dashboard/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -76,6 +77,7 @@ const INITIAL_MEETINGS: ScheduledMeeting[] = [
 
 export default function MeetingsPage() {
   const { profile } = useAuth();
+  const { addNotification } = useNotifications();
   const supabase = createClient();
 
   const [meetings, setMeetings] = useState<ScheduledMeeting[]>([]);
@@ -245,6 +247,14 @@ export default function MeetingsPage() {
       }
 
       saveMeetingsState([newMeeting, ...meetings]);
+
+      // Push notification to team members in Notification Center
+      addNotification({
+        title: `📅 Scheduled Meeting: ${form.title}`,
+        message: `Google Meet call set for ${form.meeting_date} at ${form.start_time} IST (${form.target_department}). Click to join call!`,
+        type: "meeting",
+        link: "/dashboard/meetings",
+      });
     }
 
     setModalOpen(false);

@@ -8,7 +8,7 @@ export interface NotificationItem {
   id: string;
   title: string;
   message: string;
-  type: "task" | "report" | "budget" | "inventory" | "system";
+  type: "task" | "report" | "budget" | "inventory" | "system" | "meeting";
   created_at: string;
   read: boolean;
   link?: string;
@@ -17,6 +17,7 @@ export interface NotificationItem {
 interface NotificationContextType {
   notifications: NotificationItem[];
   unreadCount: number;
+  addNotification: (item: Omit<NotificationItem, "id" | "created_at" | "read">) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   clearNotification: (id: string) => void;
@@ -32,13 +33,89 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const addNotification = (item: Omit<NotificationItem, "id" | "created_at" | "read">) => {
+    const newNotif: NotificationItem = {
+      ...item,
+      id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      created_at: new Date().toISOString(),
+      read: false,
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+
+    // Save dynamic notification to local storage so it persists across pages
+    try {
+      const saved = localStorage.getItem("team_roxx_custom_notifs");
+      const existing = saved ? JSON.parse(saved) : [];
+      localStorage.setItem("team_roxx_custom_notifs", JSON.stringify([newNotif, ...existing]));
+    } catch (e) {
+      // Ignore storage errors
+    }
+  };
+
   const fetchLiveNotifications = async () => {
     if (!profile?.id) return;
 
     try {
       const items: NotificationItem[] = [];
 
-      // 1. Fetch assigned tasks
+      // 0. Load custom scheduled meeting notifications from local storage if any
+      try {
+        const savedCustomNotifs = localStorage.getItem("team_roxx_custom_notifs");
+        if (savedCustomNotifs) {
+          const parsed = JSON.parse(savedCustomNotifs);
+          if (Array.isArray(parsed)) {
+            items.push(...parsed);
+          }
+        }
+      } catch (e) {
+        // Ignore
+      }
+
+      // 1. Fetch scheduled meetings
+      try {
+        const { data: meetings } = await supabase
+          .from("scheduled_meetings")
+          .select("id, title, meeting_date, start_time, created_at, target_department")
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        if (meetings && meetings.length > 0) {
+          meetings.forEach((m: any) => {
+            items.push({
+              id: `meet-${m.id}`,
+              title: `📅 Scheduled Meeting: ${m.title}`,
+              message: `Google Meet call set for ${m.meeting_date} at ${m.start_time} IST. Click to join call.`,
+              type: "meeting",
+              created_at: m.created_at || new Date().toISOString(),
+              read: false,
+              link: "/dashboard/meetings",
+            });
+          });
+        }
+      } catch (e) {
+        // Check local storage fallback meetings
+        try {
+          const savedMeetings = localStorage.getItem("team_roxx_meetings");
+          if (savedMeetings) {
+            const parsed = JSON.parse(savedMeetings);
+            parsed.slice(0, 3).forEach((m: any) => {
+              items.push({
+                id: `meet-fallback-${m.id}`,
+                title: `📅 Scheduled Meeting: ${m.title}`,
+                message: `Google Meet call set for ${m.meeting_date} at ${m.start_time} IST (${m.target_department || "All Team"}). Click to join call.`,
+                type: "meeting",
+                created_at: m.created_at || new Date().toISOString(),
+                read: false,
+                link: "/dashboard/meetings",
+              });
+            });
+          }
+        } catch (err) {
+          // Ignore
+        }
+      }
+
+      // 2. Fetch assigned tasks
       const { data: tasks } = await supabase
         .from("tasks")
         .select("id, title, status, due_date, created_at")
@@ -61,7 +138,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         });
       }
 
-      // 2. Sunday Weekly Report Deadline Notification
+      // 3. Sunday Weekly Report Deadline Notification
       const today = new Date();
       const dayOfWeek = today.getDay(); // 0 is Sunday
       if (dayOfWeek === 0 || dayOfWeek === 6) {
@@ -76,7 +153,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         });
       }
 
-      // 3. Budget & Item Requests Updates
+      // 4. Budget & Item Requests Updates
       const { data: itemRequests } = await supabase
         .from("budget_item_requests")
         .select("id, item, status, created_at")
@@ -100,18 +177,9 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         });
       }
 
-      // 4. Default welcome / system notification if list is sparse
-      items.push({
-        id: "welcome-system-alert",
-        title: "ROXX Platform Workspace Active",
-        message: `Welcome back, ${profile.full_name || "Teammate"}! You are signed in as ${profile.role?.toUpperCase() || "MEMBER"}.`,
-        type: "system",
-        created_at: new Date(Date.now() - 3600000).toISOString(),
-        read: true,
-        link: "/dashboard",
-      });
-
-      setNotifications(items);
+      // Deduplicate items by ID
+      const uniqueItems = Array.from(new Map(items.map((item) => [item.id, item])).values());
+      setNotifications(uniqueItems);
     } catch (err) {
       console.error("Error loading notifications:", err);
     } finally {
@@ -141,6 +209,11 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const clearAll = () => {
     setNotifications([]);
+    try {
+      localStorage.removeItem("team_roxx_custom_notifs");
+    } catch (e) {
+      // Ignore
+    }
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -150,6 +223,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       value={{
         notifications,
         unreadCount,
+        addNotification,
         markAsRead,
         markAllAsRead,
         clearNotification,
@@ -165,6 +239,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 const defaultNotificationContext: NotificationContextType = {
   notifications: [],
   unreadCount: 0,
+  addNotification: () => {},
   markAsRead: () => {},
   markAllAsRead: () => {},
   clearNotification: () => {},
