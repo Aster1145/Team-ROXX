@@ -161,12 +161,23 @@ export default function BudgetPage() {
 
   const handleDeleteExpense = async (id: string, itemName: string) => {
     if (!confirm(`Are you sure you want to delete expense "${itemName}"?`)) return;
+    setItems((prev) => prev.filter((i) => i.id !== id));
     try {
       const { error } = await supabase.from("budget_items").delete().eq("id", id);
-      if (error) throw error;
-      await fetchData();
+      if (error) console.warn("Supabase delete expense warning:", error);
     } catch (err: any) {
-      alert("Failed to delete expense: " + err.message);
+      console.warn("Failed to delete expense:", err);
+    }
+  };
+
+  const handleDeleteRequest = async (id: string, itemName: string) => {
+    if (!confirm(`Are you sure you want to delete item request "${itemName}"?`)) return;
+    setRequests((prev) => prev.filter((r) => r.id !== id));
+    try {
+      const { error } = await supabase.from("budget_requests").delete().eq("id", id);
+      if (error) console.warn("Supabase delete request warning:", error);
+    } catch (err: any) {
+      console.warn("Failed to delete request:", err);
     }
   };
 
@@ -694,6 +705,14 @@ export default function BudgetPage() {
                             <PackageCheck className="h-3.5 w-3.5" /> Order Item & Record Expense
                           </Button>
                         )}
+
+                        <button
+                          onClick={() => handleDeleteRequest(req.id, req.item)}
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors border border-slate-200 dark:border-slate-700"
+                          title="Delete Item Request"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                     </div>
                   )}
@@ -745,19 +764,19 @@ export default function BudgetPage() {
                       <span className="text-charcoal/50 block text-[11px]">{formatDate(i.purchased_at)}</span>
                     </div>
 
-                    {isCaptain(profile) && (
+                    {canManageBudget(profile) && (
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleOpenEditExpense(i)}
-                          className="p-1.5 text-charcoal/60 hover:text-forest hover:bg-forest/10 rounded-lg transition-colors border border-stone/40"
-                          title="Edit Expense (Captain Only)"
+                          className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                          title="Edit Expense"
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteExpense(i.id, i.item)}
-                          className="p-1.5 text-charcoal/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-stone/40"
-                          title="Delete Expense (Captain Only)"
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors"
+                          title="Delete Expense"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -768,7 +787,7 @@ export default function BudgetPage() {
               ))}
 
               {items.length === 0 && (
-                <p className="py-8 text-center text-xs text-charcoal/60">No expenses recorded yet.</p>
+                <p className="py-8 text-center text-xs text-slate-500 dark:text-slate-400">No expenses recorded yet.</p>
               )}
             </div>
 
@@ -784,7 +803,7 @@ export default function BudgetPage() {
                     <th className="pb-3 font-bold">Amount</th>
                     <th className="pb-3 font-bold">Purchased / Ordered By</th>
                     <th className="pb-3 font-bold">Date</th>
-                    {isCaptain(profile) && <th className="pb-3 font-bold text-right">Actions</th>}
+                    {canManageBudget(profile) && <th className="pb-3 font-bold text-right">Actions</th>}
                   </tr>
                 </thead>
                 <tbody className="divide-y-0">
@@ -797,20 +816,20 @@ export default function BudgetPage() {
                       <td className="py-3 font-extrabold text-slate-900 dark:text-emerald-400">₹{(i.amount * i.quantity).toLocaleString("en-IN")}</td>
                       <td className="py-3 text-slate-700 dark:text-slate-300 font-medium">{i.profile?.full_name || "Team Lead"}</td>
                       <td className="py-3 text-slate-600 dark:text-slate-400 text-xs">{formatDate(i.purchased_at)}</td>
-                      {isCaptain(profile) && (
+                      {canManageBudget(profile) && (
                         <td className="py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => handleOpenEditExpense(i)}
                               className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                              title="Edit Expense (Captain Only)"
+                              title="Edit Expense"
                             >
                               <Pencil className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => handleDeleteExpense(i.id, i.item)}
                               className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors"
-                              title="Delete Expense (Captain Only)"
+                              title="Delete Expense"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -821,7 +840,7 @@ export default function BudgetPage() {
                   ))}
                   {items.length === 0 && (
                     <tr>
-                      <td colSpan={isCaptain(profile) ? 8 : 7} className="py-8 text-center text-slate-500 dark:text-slate-400">
+                      <td colSpan={canManageBudget(profile) ? 8 : 7} className="py-8 text-center text-slate-500 dark:text-slate-400">
                         No expenses recorded yet.
                       </td>
                     </tr>
