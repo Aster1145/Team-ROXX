@@ -4,6 +4,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { NotificationProvider } from "@/context/NotificationContext";
+import { SidebarProvider } from "@/context/SidebarContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,7 +29,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="bg-[#F4F6FA] dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 font-sans antialiased transition-colors">
         <ThemeProvider>
           <NotificationProvider>
-            {children}
+            <SidebarProvider>
+              {children}
+            </SidebarProvider>
           </NotificationProvider>
         </ThemeProvider>
       </body>
