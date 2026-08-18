@@ -54,8 +54,8 @@ const teamLeads = [
     bio: "Driving electronics innovation and cross-team technical strategy.",
   },
   {
-    name: "David Okafor",
-    role: "Technical Lead",
+    name: "Shreyas R",
+    role: "Vice Captain",
     department: "Integration",
     bio: "Architecting systems that bring hardware, software, and mission goals together.",
   },
@@ -184,8 +184,8 @@ const teamCards = [
     image: "/images/team-2.jpg",
   },
   {
-    name: "David Okafor",
-    role: "Technical Integration Lead",
+    name: "Shreyas R",
+    role: "Vice Captain & Integration Lead",
     quote: "Integration is where individual brilliance becomes a symphony of systems.",
     image: "/images/team-3.jpg",
   },
