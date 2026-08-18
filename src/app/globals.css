@@ -4,6 +4,12 @@
 @theme {
   --font-inter: var(--font-inter), sans-serif;
   --font-playfair: var(--font-playfair), Georgia, serif;
+  --color-ocean-900: #0a1628;
+  --color-ocean-800: #0f2440;
+  --color-ocean-700: #163559;
+  --color-ocean-500: #2563eb;
+  --color-energy-500: #f97316;
+  --color-energy-400: #fb923c;
 }
 
 @layer base {
