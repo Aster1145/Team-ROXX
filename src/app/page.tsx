@@ -1,440 +1,676 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import {
+  ChevronRight,
+  Cpu,
+  Zap,
+  Settings,
+  FlaskConical,
+  Plane,
+  Share2,
+  Search,
+  Mail,
+  ExternalLink,
+  Award,
+  Trophy,
+  Target,
+  Rocket,
+  Users,
+  Car,
+  Droplets,
+  Wind,
+  ChevronDown,
+  Menu,
+  X,
+} from "lucide-react";
 import "./landing.css";
-import { AntigravityMesh } from "@/lib/landing/AntigravityMesh";
-import { ThemeScrollManager } from "@/lib/landing/ThemeScrollManager";
-import { DroneSimulator } from "@/lib/landing/DroneSimulator";
 
-export default function HomePage() {
-  const meshRef = useRef<AntigravityMesh | null>(null);
-  const themeScrollRef = useRef<ThemeScrollManager | null>(null);
-  const simulatorRef = useRef<DroneSimulator | null>(null);
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
+const departments = [
+  {
+    id: "avionics",
+    name: "Avionics",
+    lead: "Arjun Mehta",
+    role: "Avionics Lead",
+    image: "/images/team-1.jpg",
+    icon: Plane,
+    color: "from-blue-500 to-cyan-400",
+    description: "Flight control systems, autopilot integration, and aerial navigation.",
+  },
+  {
+    id: "electronics",
+    name: "Electronics",
+    lead: "Priya Sharma",
+    role: "Electronics Lead",
+    image: "/images/team-2.jpg",
+    icon: Zap,
+    color: "from-yellow-500 to-orange-400",
+    description: "PCB design, power distribution, sensor interfacing, and embedded hardware.",
+  },
+  {
+    id: "software",
+    name: "Software & AI",
+    lead: "Rahul Verma",
+    role: "Software Lead",
+    image: "/images/team-3.jpg",
+    icon: Cpu,
+    color: "from-purple-500 to-indigo-400",
+    description: "Computer vision, ROS 2 algorithms, path planning, and autonomous decision-making.",
+  },
+  {
+    id: "mechanics",
+    name: "Mechanics",
+    lead: "Vikram Singh",
+    role: "Mechanics Lead",
+    image: "/images/team-4.jpg",
+    icon: Settings,
+    color: "from-red-500 to-rose-400",
+    description: "Airframe design, structural analysis, CAD modeling, and CFD simulations.",
+  },
+  {
+    id: "agritech",
+    name: "Research & AgriTech",
+    lead: "Hansika Rao",
+    role: "AgriTech Lead",
+    image: "/images/team-hansika.jpg",
+    icon: Droplets,
+    color: "from-emerald-500 to-teal-400",
+    description: "Hydroponics automation, crop monitoring, and sustainable agricultural robotics.",
+  },
+  {
+    id: "operations",
+    name: "Field Operations",
+    lead: "Ananya Patel",
+    role: "Ops Lead",
+    image: "/images/team-1.jpg",
+    icon: Wind,
+    color: "from-orange-500 to-amber-400",
+    description: "Field testing, mission planning, safety protocols, and competition logistics.",
+  },
+];
+
+const projects = [
+  {
+    id: 1,
+    title: "AeroScout VTOL",
+    category: "Aerial",
+    image: "/images/hero-drone-ocean.jpg",
+    description: "Autonomous hybrid VTOL drone for long-range surveillance and mapping.",
+    specs: ["120 min Endurance", "15 km Range", "AI Object Tracking"],
+  },
+  {
+    id: 2,
+    title: "TerraRover Alpha",
+    category: "Ground",
+    image: "/images/car-bot.jpg",
+    description: "All-terrain autonomous ground vehicle for hazardous environment exploration.",
+    specs: ["LiDAR Mapping", "4WD Electric Drive", "ROS 2 Navigation"],
+  },
+  {
+    id: 3,
+    title: "AquaGrow Pod",
+    category: "AgriTech",
+    image: "/images/hydroponics.jpg",
+    description: "Automated vertical hydroponics system with AI nutrient management.",
+    specs: ["90% Water Savings", "IoT Telemetry", "Auto Dosage"],
+  },
+  {
+    id: 4,
+    title: "SkySentinel Hexacopter",
+    category: "Aerial",
+    image: "/images/aerial-vehicle.jpg",
+    description: "Heavy-lift payload drone designed for industrial inspection and rescue missions.",
+    specs: ["10 kg Payload", "Failsafe Flight Controller", "Thermal Payload"],
+  },
+];
+
+const achievements = [
+  {
+    year: "2024",
+    title: "1st Place - National Drone Challenge",
+    description: "Secured top position in autonomous obstacle course and precision payload drop.",
+    icon: Trophy,
+  },
+  {
+    year: "2023",
+    title: "Best Innovation Award - AgriTech Summit",
+    description: "Recognized for HydroBot automated crop monitoring and dosing system.",
+    icon: Award,
+  },
+  {
+    year: "2023",
+    title: "Top 5 Finalist - International Robotics Expo",
+    description: "Competed against 50+ global university teams in autonomous rover navigation.",
+    icon: Target,
+  },
+  {
+    year: "2022",
+    title: "Team ROXX Founded",
+    description: "Established with a vision to build cutting-edge autonomous aerial & ground robotics.",
+    icon: Rocket,
+  },
+];
+
+const teamCards = [
+  {
+    name: "Akshay M",
+    role: "Team Captain & Systems Architect",
+    image: "/images/team-1.jpg",
+    quote: "Building autonomous systems isn't just engineering — it's creating intelligent machines that shape the future.",
+  },
+  {
+    name: "Hansika Rao",
+    role: "Vice Captain & AgriTech Lead",
+    image: "/images/team-hansika.jpg",
+    quote: "Merging robotics with agriculture creates sustainable solutions for real-world global challenges.",
+  },
+  {
+    name: "Arjun Mehta",
+    role: "Avionics & Flight Systems Lead",
+    image: "/images/team-2.jpg",
+    quote: "Precision avionics and reliable telemetry are the heartbeat of every successful mission.",
+  },
+];
+
+function Nav() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // 1. Initialize Antigravity Interactive 3D Canvas Mesh
-    meshRef.current = new AntigravityMesh("mesh-canvas");
-
-    // 2. Initialize Scroll Contrast Theme Shift Manager
-    themeScrollRef.current = new ThemeScrollManager();
-    themeScrollRef.current.init();
-
-    // 3. Initialize Interactive Flight Simulator
-    simulatorRef.current = new DroneSimulator();
-    simulatorRef.current.mount();
-
-    return () => {
-      meshRef.current?.destroy();
-      themeScrollRef.current?.destroy();
-      simulatorRef.current?.unmount();
-      document.body.classList.remove("theme-contrast");
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
     };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <main className="landing-root">
-      {/* Background Interactive 3D Mesh Canvas */}
-      <canvas id="mesh-canvas" />
-
-      {/* Top Navigation Bar */}
-      <nav className="nav-bar">
-        <div className="nav-container">
-          <Link href="/" className="logo-group">
-            <span className="logo-badge">RX</span>
-            <div className="logo-text-group">
-              <span className="logo-title">TEAM ROXX</span>
-              <span className="logo-subtitle">Autonomous Engineering</span>
-            </div>
-          </Link>
-
-          <div className="nav-links">
-            <a href="#about" className="nav-link">About Us</a>
-            <a href="#projects" className="nav-link">Innovations</a>
-            <a href="#domains" className="nav-link">Engineering Domains</a>
-            <a href="#achievements" className="nav-link">Competitions</a>
-            <a href="#simulator" className="nav-link">Flight Simulator</a>
+    <nav
+      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-ocean-900/90 py-3 backdrop-blur-md border-b border-white/10 shadow-xl"
+          : "bg-transparent py-6"
+      }`}
+    >
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-white/10 shadow-lg shadow-orange-500/20 ring-1 ring-white/20">
+            <img
+              src="/images/roxx-logo.png"
+              alt="ROXX Logo"
+              className="h-full w-full object-cover"
+            />
           </div>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold tracking-tight text-white">
+              Team <span className="text-orange-400">ROXX</span>
+            </span>
+            <span className="text-[10px] tracking-widest text-slate-400 uppercase">
+              Autonomous Systems
+            </span>
+          </div>
+        </Link>
 
-          <Link href="/dashboard" className="btn-primary">
+        {/* Desktop Links */}
+        <div className="hidden items-center gap-8 md:flex">
+          {["About", "Founder", "Leads", "Departments", "Projects", "Achievements"].map(
+            (item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="text-sm font-medium text-slate-300 transition-colors hover:text-orange-400"
+              >
+                {item}
+              </a>
+            )
+          )}
+        </div>
+
+        {/* Action Button */}
+        <div className="hidden items-center gap-4 md:flex">
+          <Link
+            href="/dashboard"
+            className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2.5 text-sm font-semibold text-white transition-all shadow-lg shadow-orange-500/30 hover:scale-105"
+          >
             Member Portal
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
-            </svg>
+            <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
-      </nav>
 
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="container hero-grid">
-          <div className="hero-content">
-            <div className="hero-tag">
-              <span className="pulsing-dot" />
-              Autonomous Robotics & Agri-Tech Team
-            </div>
-            <h1 className="hero-title">
-              Pioneering Next-Gen <span className="highlight-text">Autonomous Drones</span> &{" "}
-              <span className="italic-text">Smart Robotics</span>.
-            </h1>
-            <p className="hero-description">
-              Team ROXX is an elite student engineering team pushing the boundaries of autonomous systems, custom UAV avionics, AI computer vision, and automated hydroponic technology.
-            </p>
-            <div className="hero-actions">
-              <a href="#projects" className="btn-primary">
-                Explore Our Work
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14" />
-                  <path d="m12 5 7 7-7 7" />
-                </svg>
-              </a>
-              <Link href="/dashboard" className="btn-secondary">
-                Internal Team Portal
+        {/* Mobile Toggle */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="text-white md:hidden"
+        >
+          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="border-b border-white/10 bg-ocean-900/95 backdrop-blur-xl md:hidden"
+          >
+            <div className="flex flex-col gap-4 px-6 py-6">
+              {["About", "Founder", "Leads", "Departments", "Projects", "Achievements"].map(
+                (item) => (
+                  <a
+                    key={item}
+                    href={`#${item.toLowerCase()}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-lg font-medium text-slate-300 transition-colors hover:text-orange-400"
+                  >
+                    {item}
+                  </a>
+                )
+              )}
+              <Link
+                href="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="mt-2 flex justify-center rounded-full bg-gradient-to-r from-orange-500 to-red-500 py-3 font-semibold text-white shadow-lg"
+              >
+                Member Portal
               </Link>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
+  );
+}
+
+function Hero() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <section
+      ref={containerRef}
+      className="relative min-h-screen overflow-hidden bg-ocean-900 pb-20 pt-32 lg:pt-40"
+    >
+      {/* Background Canvas & Animated Rings */}
+      <div className="mesh-bg absolute inset-0" />
+
+      <div className="pointer-events-none absolute right-0 top-1/4 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-1/4 left-0 h-96 w-96 rounded-full bg-orange-500/10 blur-3xl" />
+
+      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="lg:col-span-7"
+        >
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1.5 backdrop-blur-md">
+            <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-orange-400">
+              Autonomous Robotics & AI Engineering
+            </span>
           </div>
 
-          <div className="hero-card-wrap">
-            <div className="stats-card">
-              <div className="stats-header">
-                <div className="stats-header-title">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect width="18" height="18" x="3" y="3" rx="2" />
-                    <path d="M9 8h6" />
-                    <path d="M9 12h6" />
-                    <path d="M9 16h6" />
-                  </svg>
-                  <span>Team ROXX Stats</span>
-                </div>
-                <span className="badge-active">Active R&D</span>
-              </div>
+          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl">
+            Pioneering <span className="text-gradient">Autonomous</span> Intelligent Systems.
+          </h1>
 
-              <div className="stats-grid">
-                <div className="stat-box">
-                  <span className="stat-icon">⚡</span>
-                  <p className="stat-number">6+</p>
-                  <p className="stat-label">R&D Systems Built</p>
-                </div>
-
-                <div className="stat-box">
-                  <span className="stat-icon">🧭</span>
-                  <p className="stat-number">150+</p>
-                  <p className="stat-label">Autonomous Flight Hrs</p>
-                </div>
-
-                <div className="stat-box">
-                  <span className="stat-icon">⚙️</span>
-                  <p className="stat-number">6</p>
-                  <p className="stat-label">Specialized Domains</p>
-                </div>
-
-                <div className="stat-box">
-                  <span className="stat-icon">🏆</span>
-                  <p className="stat-number">12+</p>
-                  <p className="stat-label">Expos & Competitions</p>
-                </div>
-              </div>
-
-              <div className="accuracy-meter">
-                <div className="accuracy-label">
-                  <span>Autonomous Navigation Accuracy</span>
-                  <span>99.4%</span>
-                </div>
-                <div className="accuracy-bar-track">
-                  <div className="accuracy-bar-fill" style={{ width: "99.4%" }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* About Us Section */}
-      <section id="about" className="section" data-theme="dark">
-        <div className="container">
-          <div className="about-grid">
-            <div className="about-content">
-              <p className="section-subtitle">About Team ROXX</p>
-              <h2 className="section-heading">
-                Engineering intelligent systems from concept to real-world deployment.
-              </h2>
-              <p className="section-desc">
-                Founded by passionate student researchers and engineers, Team ROXX develops fully integrated autonomous solutions. From CAD modeling and carbon-fiber fabrication to custom PCB design and ROS 2 navigation pipelines, our team designs every subsystem in-house.
-              </p>
-
-              <div className="feature-list">
-                {[
-                  "In-house flight controller & telemetry firmware",
-                  "Closed-loop automated hydroponic nutrient dosing",
-                  "Jetson-powered edge AI computer vision & pest analytics",
-                  "Multi-rover swarm navigation & obstacle avoidance",
-                ].map((item) => (
-                  <div key={item} className="feature-item">
-                    <span className="check-icon">✓</span>
-                    <span className="feature-text">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="tech-grid">
-              <div className="tech-card">
-                <span className="tech-icon font-bold text-xl text-emerald-400">🤖</span>
-                <h3 className="tech-title">Autonomous Drones</h3>
-                <p className="tech-desc">Precision aerial mapping & thermal imaging payload integration.</p>
-              </div>
-
-              <div className="tech-card">
-                <span className="tech-icon font-bold text-xl text-emerald-400">🌱</span>
-                <h3 className="tech-title">Smart Hydroponics</h3>
-                <p className="tech-desc">IoT telemetry & automated pH/EC nutrient regulation.</p>
-              </div>
-
-              <div className="tech-card">
-                <span className="tech-icon font-bold text-xl text-emerald-400">⚡</span>
-                <h3 className="tech-title">Avionics & PCB</h3>
-                <p className="tech-desc">Custom power distribution & sensor fusion hardware.</p>
-              </div>
-
-              <div className="tech-card">
-                <span className="tech-icon font-bold text-xl text-emerald-400">🧠</span>
-                <h3 className="tech-title">ROS 2 & AI Vision</h3>
-                <p className="tech-desc">Edge computing & real-time SLAM trajectory planning.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* R&D Projects Section */}
-      <section id="projects" className="section" data-theme="light">
-        <div className="container">
-          <div className="section-header">
-            <p className="section-subtitle">R&D Projects</p>
-            <h2 className="section-heading">Our Core Innovations</h2>
-            <p className="section-desc">Discover the engineering projects built and tested by Team ROXX.</p>
-          </div>
-
-          <div className="projects-grid">
-            {[
-              {
-                title: "AeroScout Autonomous Quadcopter",
-                category: "Unmanned Aerial Systems",
-                desc: "Custom carbon-fiber drone platform equipped with multispectral camera payloads, waypoint navigation, and auto-landing algorithms.",
-                tag: "Autonomous Flight",
-              },
-              {
-                title: "HydroPod Automated Farming Unit",
-                category: "Agri-Tech & IoT",
-                desc: "Smart closed-loop hydroponics pod with automated dosage pumps, ambient climate sensors, and real-time cloud data logging.",
-                tag: "Smart Agri-Tech",
-              },
-              {
-                title: "TerraSLAM Autonomous Rover",
-                category: "Ground Robotics",
-                desc: "Heavy-duty ground rover utilizing 3D LiDAR SLAM for GPS-denied navigation, obstacle avoidance, and field mapping.",
-                tag: "Robotics & SLAM",
-              },
-              {
-                title: "AgriVision Pest AI Detector",
-                category: "Computer Vision & AI",
-                desc: "NVIDIA Jetson Orin deep-learning model trained to detect crop diseases and pest infestations with 98% accuracy in real-time.",
-                tag: "Deep Learning",
-              },
-              {
-                title: "Custom Power & Flight Avionics",
-                category: "Electronics Engineering",
-                desc: "In-house designed power distribution boards, failsafe telemetry modules, and high-current motor ESC controllers.",
-                tag: "Avionics PCB",
-              },
-              {
-                title: "Swarm Trajectory Protocol",
-                category: "Swarm Intelligence",
-                desc: "Distributed mesh communication protocol enabling multi-agent drone and rover coordinated search & rescue simulation.",
-                tag: "Swarm Robotics",
-              },
-            ].map((p) => (
-              <div key={p.title} className="project-card">
-                <div>
-                  <div className="project-header">
-                    <span className="project-tag">{p.tag}</span>
-                  </div>
-                  <p className="project-category">{p.category}</p>
-                  <h3 className="project-title">{p.title}</h3>
-                  <p className="project-desc">{p.desc}</p>
-                </div>
-                <div className="project-footer">
-                  <span className="project-link">View Project Details →</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Engineering Domains Section */}
-      <section id="domains" className="section" data-theme="light">
-        <div className="container">
-          <div className="section-header">
-            <p className="section-subtitle">Multidisciplinary Team</p>
-            <h2 className="section-heading">Our 6 Engineering Domains</h2>
-            <p className="section-desc">Team ROXX operates in synchronized sub-teams to build complex autonomous systems.</p>
-          </div>
-
-          <div className="domains-grid">
-            {[
-              { title: "Aero Mechanics", desc: "Aerodynamics, structural CAD design, carbon-fiber fabrication, and thrust optimization." },
-              { title: "Electronics & Avionics", desc: "Custom PCB design, sensor integration, battery management, and telemetry hardware." },
-              { title: "System Integration", desc: "Hardware-in-the-Loop (HIL) testing, safety overrides, and physical assembly." },
-              { title: "Software & AI", desc: "ROS 2 navigation, computer vision models, path planning, and cloud analytics dashboards." },
-              { title: "Implementation & Field Ops", desc: "Field flight tests, hydroponic pod maintenance, and real-world data collection." },
-              { title: "Research & Agritech", desc: "Plant science integration, nutrient balancing formulas, and technical paper documentation." },
-            ].map((d) => (
-              <div key={d.title} className="domain-card">
-                <div className="domain-header">
-                  <span className="domain-icon">✓</span>
-                  <h3 className="domain-title">{d.title}</h3>
-                </div>
-                <p className="domain-desc">{d.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Achievements Section */}
-      <section id="achievements" className="achievements-section" data-theme="dark">
-        <div style={{ textAlign: "center", maxWidth: "640px", margin: "0 auto" }}>
-          <p style={{ fontSize: "12px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px", opacity: 0.8 }}>
-            Excellence & Competitions
+          <p className="mt-6 max-w-2xl text-lg text-slate-300 lg:text-xl">
+            Team ROXX designs, builds, and deploys next-generation unmanned aerial vehicles, autonomous ground rovers, and smart agricultural robotics.
           </p>
-          <h2 style={{ fontFamily: "var(--font-serif)", fontSize: "clamp(2rem, 3.5vw, 2.5rem)", marginTop: "8px" }}>
-            Recognized Engineering Impact
-          </h2>
+
+          <div className="mt-10 flex flex-wrap items-center gap-4">
+            <Link
+              href="/dashboard"
+              className="group flex items-center gap-3 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 font-bold text-white shadow-xl shadow-orange-500/30 transition-all hover:scale-105"
+            >
+              Access Member Portal
+              <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Link>
+            <a
+              href="#projects"
+              className="flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-4 font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10"
+            >
+              Explore Innovations
+            </a>
+          </div>
+
+          <div className="mt-16 grid grid-cols-3 gap-6 border-t border-white/10 pt-8">
+            <div>
+              <p className="text-3xl font-extrabold text-white sm:text-4xl">6+</p>
+              <p className="text-xs text-slate-400 sm:text-sm">R&D Projects Built</p>
+            </div>
+            <div>
+              <p className="text-3xl font-extrabold text-white sm:text-4xl">150+</p>
+              <p className="text-xs text-slate-400 sm:text-sm">Autonomous Flight Hrs</p>
+            </div>
+            <div>
+              <p className="text-3xl font-extrabold text-white sm:text-4xl">99.4%</p>
+              <p className="text-xs text-slate-400 sm:text-sm">Navigation Accuracy</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Hero Visual Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="relative lg:col-span-5"
+        >
+          <div className="relative mx-auto max-w-md overflow-hidden rounded-3xl border border-white/15 bg-ocean-800/80 p-4 shadow-2xl backdrop-blur-xl">
+            <div className="relative h-96 overflow-hidden rounded-2xl">
+              <img
+                src="/images/hero-drone-ocean.jpg"
+                alt="AeroScout Drone"
+                className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ocean-900 via-transparent to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6">
+                <span className="rounded-full bg-orange-500 px-3 py-1 text-xs font-bold text-white uppercase">
+                  Flagship UAV
+                </span>
+                <h3 className="mt-2 text-2xl font-bold text-white">AeroScout Autonomous VTOL</h3>
+                <p className="mt-1 text-xs text-slate-300">
+                  Hybrid aerial platform with edge AI computer vision & thermal sensors.
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+function Founder() {
+  return (
+    <section id="founder" className="relative bg-ocean-900 py-24">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="mb-12 text-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Team Leadership</span>
+          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Meet Our Founder</h2>
         </div>
 
-        <div className="achievements-grid">
-          {[
-            {
-              rank: "1st Place",
-              title: "National Autonomous Drone League",
-              desc: "Achieved top score in autonomous precision landing and obstacle course navigation.",
-            },
-            {
-              rank: "Best Prototype",
-              title: "AgriTech Innovation Summit",
-              desc: "Awarded for the Smart HydroPod automated closed-loop nutrient dosing system.",
-            },
-            {
-              rank: "Top Research Finalist",
-              title: "Robotics & AI Symposium",
-              desc: "Published research paper on edge AI pest detection using Jetson vision pipelines.",
-            },
-          ].map((a) => (
-            <div key={a.title} className="achievement-card">
-              <span className="achievement-rank">{a.rank}</span>
-              <h3 className="achievement-title">{a.title}</h3>
-              <p className="achievement-desc">{a.desc}</p>
+        <div className="mx-auto grid max-w-5xl items-center gap-12 overflow-hidden rounded-3xl border border-white/10 bg-ocean-800/50 p-8 backdrop-blur-xl lg:grid-cols-12">
+          <div className="relative lg:col-span-5">
+            <div className="relative h-80 overflow-hidden rounded-2xl shadow-xl sm:h-96">
+              <img
+                src="/images/team-1.jpg"
+                alt="Akshay M"
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ocean-900/90 via-transparent to-transparent" />
+              <div className="absolute bottom-6 left-6">
+                <h3 className="text-2xl font-bold text-white">Akshay M</h3>
+                <p className="text-sm font-semibold text-orange-400">Founder & Captain</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:col-span-7">
+            <h3 className="text-2xl font-bold text-white">Architecting Autonomous Innovations</h3>
+            <p className="mt-4 leading-relaxed text-slate-300">
+              Under Akshay&apos;s leadership, Team ROXX grew from a student research initiative into a competitive robotics team designing autonomous drones, ground vehicles, and automated agricultural systems.
+            </p>
+            <div className="mt-6 space-y-3">
+              {[
+                "Pioneered ROS 2 navigation pipelines for GPS-denied field operations",
+                "Led team to 1st place in National Autonomous Drone League",
+                "Designed custom power avionics & flight controller firmware",
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center gap-3">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-500/20 text-orange-400 font-bold text-xs">
+                    ✓
+                  </div>
+                  <span className="text-sm text-slate-200">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TeamLeads() {
+  return (
+    <section id="leads" className="bg-ocean-900/80 py-24">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="mb-16 text-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Domain Leadership</span>
+          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Team Leads</h2>
+        </div>
+
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {departments.map((dept) => (
+            <div
+              key={dept.id}
+              className="group overflow-hidden rounded-2xl border border-white/10 bg-ocean-800/40 p-6 backdrop-blur-md transition-all hover:border-orange-500/50 hover:shadow-xl"
+            >
+              <div className="mb-4 flex items-center gap-4">
+                <div className="h-16 w-16 overflow-hidden rounded-xl">
+                  <img src={dept.image} alt={dept.lead} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">{dept.lead}</h3>
+                  <p className="text-xs font-medium text-orange-400">{dept.role}</p>
+                  <p className="text-xs text-slate-400">{dept.name} Domain</p>
+                </div>
+              </div>
+              <p className="text-xs leading-relaxed text-slate-300">{dept.description}</p>
             </div>
           ))}
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* Interactive Drone Flight Simulator Section */}
-      <section id="simulator" className="section" data-theme="dark">
-        <div className="container">
-          <div className="simulator-preview-card">
-            <span className="simulator-badge">🎮 Interactive Flight Simulator</span>
-            <h2 className="simulator-title">Interactive Flight Simulator</h2>
-            <h3 className="simulator-subheading">Arcade Flight Training</h3>
-            <p className="simulator-description">
-              Navigate obstacles, collect battery power-ups, and execute precision landings in full-screen arcade mode.
-            </p>
+function Departments() {
+  return (
+    <section id="departments" className="bg-ocean-900 py-24">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="mb-16 text-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Engineering Specializations</span>
+          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Our 6 Core Departments</h2>
+        </div>
 
-            <div className="simulator-controls-preview">
-              <div className="ctrl-badge"><span className="ctrl-key">W A S D</span> / <span className="ctrl-key">↑ ↓ ← →</span> Thrust & Steering</div>
-              <div className="ctrl-badge"><span className="ctrl-key">H</span> Toggle Hover Mode</div>
-              <div className="ctrl-badge"><span className="ctrl-key">⚡</span> Collect Energy Batteries</div>
-              <div className="ctrl-badge"><span className="ctrl-key">🎯</span> Touchdown on Landing Pad</div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { title: "Avionics & Flight Systems", icon: Plane, desc: "Autopilot configuration, aerial telemetry, sensor fusion, and high-altitude flight stability." },
+            { title: "Electronics & Embedded PCB", icon: Zap, desc: "Custom PCB design, power distribution boards, ESC controllers, and embedded microcontroller firmware." },
+            { title: "Software & Edge AI", icon: Cpu, desc: "ROS 2 trajectory planning, Jetson Orin deep learning vision models, and cloud data dashboards." },
+            { title: "Airframe & CAD Mechanics", icon: Settings, desc: "Carbon-fiber manufacturing, structural FEA analysis, aerodynamic wing modeling, and CFD testing." },
+            { title: "AgriTech & Hydroponics", icon: Droplets, desc: "Automated nutrient dosing pumps, pH/EC closed-loop regulation, and indoor crop pods." },
+            { title: "Field Operations & Testing", icon: Wind, desc: "Flight safety protocols, mission field trials, battery log tracking, and competition logistics." },
+          ].map((d) => (
+            <div key={d.title} className="rounded-2xl border border-white/10 bg-ocean-800/40 p-6 backdrop-blur-md">
+              <d.icon className="mb-3 h-8 w-8 text-orange-400" />
+              <h3 className="font-bold text-white">{d.title}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-slate-300">{d.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Projects() {
+  const [filter, setFilter] = useState("All");
+  const filtered = filter === "All" ? projects : projects.filter((p) => p.category === filter);
+
+  return (
+    <section id="projects" className="bg-ocean-900/90 py-24">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="mb-12 text-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Research & Development</span>
+          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Innovations & Projects</h2>
+        </div>
+
+        <div className="mb-10 flex justify-center gap-3">
+          {["All", "Aerial", "Ground", "AgriTech"].map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              className={`rounded-full px-5 py-2 text-xs font-semibold transition-all ${
+                filter === cat
+                  ? "bg-orange-500 text-white shadow-lg"
+                  : "border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {filtered.map((p) => (
+            <div key={p.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-ocean-800/50 shadow-xl backdrop-blur-md">
+              <div className="relative h-48 overflow-hidden">
+                <img src={p.image} alt={p.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <span className="absolute left-3 top-3 rounded-full bg-orange-500 px-2.5 py-0.5 text-[10px] font-bold text-white uppercase">
+                  {p.category}
+                </span>
+              </div>
+              <div className="p-5">
+                <h3 className="font-bold text-white">{p.title}</h3>
+                <p className="mt-2 text-xs leading-relaxed text-slate-300">{p.description}</p>
+                <div className="mt-4 flex flex-wrap gap-1">
+                  {p.specs.map((spec, i) => (
+                    <span key={i} className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-medium text-orange-300 border border-white/10">
+                      {spec}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Achievements() {
+  return (
+    <section id="achievements" className="bg-ocean-900 py-24">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="mb-16 text-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Excellence & Recognition</span>
+          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Achievements & Milestones</h2>
+        </div>
+
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {achievements.map((item, idx) => (
+            <div key={idx} className="relative rounded-2xl border border-white/10 bg-ocean-800/40 p-6 backdrop-blur-md">
+              <item.icon className="mb-3 h-8 w-8 text-orange-400" />
+              <span className="text-xs font-bold uppercase tracking-wider text-orange-400">{item.year}</span>
+              <h3 className="mt-1 font-bold text-white">{item.title}</h3>
+              <p className="mt-2 text-xs leading-relaxed text-slate-300">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TeamCards() {
+  const [activeCard, setActiveCard] = useState(0);
+
+  return (
+    <section className="bg-ocean-900/80 py-24">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="mb-16 text-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Team Vision</span>
+          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Messages from Core Members</h2>
+        </div>
+
+        <div className="mx-auto max-w-xl">
+          <div className="relative rounded-3xl border border-white/10 bg-ocean-800/60 p-8 shadow-2xl backdrop-blur-xl">
+            <div className="mb-6 flex items-center gap-4">
+              <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-orange-500">
+                <img src={teamCards[activeCard].image} alt={teamCards[activeCard].name} className="h-full w-full object-cover" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">{teamCards[activeCard].name}</h3>
+                <p className="text-xs font-semibold text-orange-400">{teamCards[activeCard].role}</p>
+              </div>
             </div>
 
-            <button className="btn-launch-simulator">
-              Launch Full Screen Mode
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-            </button>
+            <p className="text-sm italic leading-relaxed text-slate-200">
+              &ldquo;{teamCards[activeCard].quote}&rdquo;
+            </p>
+
+            <div className="mt-8 flex justify-center gap-2">
+              {teamCards.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveCard(idx)}
+                  className={`h-2 rounded-full transition-all ${
+                    idx === activeCard ? "w-8 bg-orange-500" : "w-2 bg-white/20"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* Member Portal Callout Section */}
-      <section className="section" style={{ backgroundColor: "var(--bg-secondary)", borderTop: "1px solid var(--stone)" }} data-theme="light">
-        <div className="container" style={{ textAlign: "center", maxWidth: "600px" }}>
-          <h2 className="section-heading">Team ROXX Member Portal</h2>
-          <p className="section-desc">
-            Are you a member of Team ROXX? Access our internal workspace to manage projects, log lab inventory, submit weekly reports, and update budget logs.
+function Footer() {
+  return (
+    <footer className="border-t border-white/10 bg-ocean-900 py-12">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white/10 shadow-md">
+              <img src="/images/roxx-logo.png" alt="ROXX Logo" className="h-full w-full object-cover" />
+            </div>
+            <span className="font-bold text-white">Team ROXX Autonomous Systems</span>
+          </div>
+
+          <p className="text-xs text-slate-400">
+            © {new Date().getFullYear()} Team ROXX. All rights reserved.
           </p>
 
-          <div style={{ marginTop: "24px" }}>
-            <Link href="/dashboard" className="btn-primary btn-portal">
-              Access Member Portal
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Full Screen Arcade Drone Simulator Overlay Modal */}
-      <div id="simulator-modal" className="simulator-modal">
-        <button id="modal-close-btn" className="modal-close-btn" title="Close Full Screen Arcade">✕</button>
-
-        <div className="game-hud">
-          <div className="hud-panel">
-            <span>SCORE:</span>
-            <span id="hud-score" className="hud-val">0</span>
-          </div>
-          <div className="hud-panel">
-            <span>BATTERY:</span>
-            <span id="hud-battery" className="hud-val">100%</span>
-          </div>
-          <div className="hud-panel">
-            <span>ALTITUDE:</span>
-            <span id="hud-alt" className="hud-val">0m</span>
-          </div>
-          <div className="hud-panel">
-            <span>HOVER MODE:</span>
-            <span id="hud-hover" className="hover-indicator inactive">H: OFF</span>
-          </div>
-        </div>
-
-        <div className="game-instructions-bar">
-          <span><strong>WASD / Arrow Keys</strong> Fly Drone</span>
-          <span><strong>&apos;H&apos; Key</strong> Hover Hold Mode</span>
-          <span><strong>Collect ⚡</strong> Refill Battery & Score</span>
-          <span><strong>Esc / ✕</strong> Close Simulator</span>
-        </div>
-
-        <canvas id="game-canvas" />
-      </div>
-
-      {/* Footer */}
-      <footer>
-        <div className="footer-container">
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span className="logo-badge" style={{ width: "28px", height: "28px", fontSize: "11px" }}>RX</span>
-            <strong style={{ fontSize: "14px" }}>Team ROXX — Autonomous Systems Engineering</strong>
-          </div>
-          <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>© 2026 Team ROXX. All rights reserved.</p>
-          <Link href="/dashboard" style={{ fontSize: "13px", fontWeight: 600, color: "var(--forest)", textDecoration: "none" }}>
-            Member Portal Login
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 text-xs font-semibold text-orange-400 hover:underline"
+          >
+            Access Member Workspace →
           </Link>
         </div>
-      </footer>
+      </div>
+    </footer>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <main className="bg-ocean-900 font-sans antialiased text-white selection:bg-orange-500 selection:text-white">
+      <Nav />
+      <Hero />
+      <Founder />
+      <TeamLeads />
+      <Departments />
+      <Projects />
+      <Achievements />
+      <TeamCards />
+      <Footer />
     </main>
   );
 }
