@@ -42,7 +42,7 @@ const teamLeads = [
     bio: "Guiding ROXX with passion for autonomous systems and aerial innovation.",
   },
   {
-    name: "Arjun Mehta",
+    name: "Shashi Kumar C",
     role: "Team Captain",
     department: "Avionics",
     bio: "Leading ROXX with vision and precision in autonomous aerial systems.",
@@ -172,10 +172,10 @@ const achievements = [
 
 const teamCards = [
   {
-    name: "Arjun Mehta",
+    name: "Shashi Kumar C",
     role: "Founder & Captain",
     quote: "Building ROXX has been about turning impossible ideas into flying machines.",
-    image: "/images/team-1.jpg",
+    image: "/images/founder.jpg",
   },
   {
     name: "Priya Sharma",
@@ -508,7 +508,7 @@ function Founder() {
             transition={{ duration: 0.8 }}
           >
             <h3 className="mb-2 text-3xl font-bold text-white md:text-5xl">
-              Arjun Mehta
+              Shashi Kumar C
             </h3>
             <p className="mb-6 text-lg font-semibold text-orange-400 md:text-xl">
               Founder, Team ROXX
