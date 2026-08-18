@@ -492,7 +492,7 @@ function Founder() {
 
               <div className="relative h-64 w-64 overflow-hidden rounded-full border-4 border-white/10 md:h-80 md:w-80">
                 <img
-                  src="/images/team-1.jpg"
+                  src="/images/founder.jpg"
                   alt="Founder"
                   className="h-full w-full object-cover"
                 />
