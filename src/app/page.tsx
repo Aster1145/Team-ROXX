@@ -48,7 +48,7 @@ const teamLeads = [
     bio: "Leading ROXX with vision and precision in autonomous aerial systems.",
   },
   {
-    name: "Priya Sharma",
+    name: "Akshay M",
     role: "Vice Captain",
     department: "Electronics",
     bio: "Driving electronics innovation and cross-team technical strategy.",
@@ -178,7 +178,7 @@ const teamCards = [
     image: "/images/founder.jpg",
   },
   {
-    name: "Priya Sharma",
+    name: "Akshay M",
     role: "Vice Captain & Electronics Lead",
     quote: "Every circuit we solder carries the spark of our collective ambition.",
     image: "/images/team-2.jpg",
