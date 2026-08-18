@@ -34,11 +34,38 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
+const teamLeads = [
+  {
+    name: "Hansika M",
+    role: "Team Lead",
+    department: "Avionics",
+    bio: "Guiding ROXX with passion for autonomous systems and aerial innovation.",
+  },
+  {
+    name: "Arjun Mehta",
+    role: "Team Captain",
+    department: "Avionics",
+    bio: "Leading ROXX with vision and precision in autonomous aerial systems.",
+  },
+  {
+    name: "Priya Sharma",
+    role: "Vice Captain",
+    department: "Electronics",
+    bio: "Driving electronics innovation and cross-team technical strategy.",
+  },
+  {
+    name: "David Okafor",
+    role: "Technical Lead",
+    department: "Integration",
+    bio: "Architecting systems that bring hardware, software, and mission goals together.",
+  },
+];
+
 const departments = [
   {
     id: "avionics",
     name: "Avionics",
-    lead: "Arjun Mehta",
+    lead: "Avionics Lead",
     role: "Avionics Lead",
     image: "/images/team-1.jpg",
     icon: Plane,
@@ -48,7 +75,7 @@ const departments = [
   {
     id: "electronics",
     name: "Electronics",
-    lead: "Priya Sharma",
+    lead: "Electronics Lead",
     role: "Electronics Lead",
     image: "/images/team-2.jpg",
     icon: Zap,
@@ -56,386 +83,462 @@ const departments = [
     description: "PCB design, power distribution, sensor interfacing, and embedded hardware.",
   },
   {
-    id: "software",
-    name: "Software & AI",
-    lead: "Rahul Verma",
-    role: "Software Lead",
+    id: "technical-integration",
+    name: "Technical Integration",
+    lead: "Integration Lead",
+    role: "Integration Lead",
     image: "/images/team-3.jpg",
-    icon: Cpu,
-    color: "from-purple-500 to-indigo-400",
-    description: "Computer vision, ROS 2 algorithms, path planning, and autonomous decision-making.",
-  },
-  {
-    id: "mechanics",
-    name: "Mechanics",
-    lead: "Vikram Singh",
-    role: "Mechanics Lead",
-    image: "/images/team-4.jpg",
     icon: Settings,
-    color: "from-red-500 to-rose-400",
-    description: "Airframe design, structural analysis, CAD modeling, and CFD simulations.",
+    color: "from-purple-500 to-indigo-400",
+    description: "Architecting systems that bring hardware, software, and mission goals together.",
   },
   {
-    id: "agritech",
-    name: "Research & AgriTech",
-    lead: "Hansika Rao",
-    role: "AgriTech Lead",
-    image: "/images/team-hansika.jpg",
-    icon: Droplets,
-    color: "from-emerald-500 to-teal-400",
-    description: "Hydroponics automation, crop monitoring, and sustainable agricultural robotics.",
+    id: "testing",
+    name: "Testing",
+    lead: "Testing Lead",
+    role: "Testing Lead",
+    image: "/images/team-4.jpg",
+    icon: FlaskConical,
+    color: "from-green-500 to-emerald-400",
+    description: "Validation protocols, simulation, and field-test analysis.",
   },
   {
-    id: "operations",
-    name: "Field Operations",
-    lead: "Ananya Patel",
-    role: "Ops Lead",
+    id: "flight-operations",
+    name: "Flight Operations",
+    lead: "Operations Lead",
+    role: "Operations Lead",
     image: "/images/team-1.jpg",
     icon: Wind,
-    color: "from-orange-500 to-amber-400",
-    description: "Field testing, mission planning, safety protocols, and competition logistics.",
+    color: "from-sky-500 to-indigo-400",
+    description: "Mission planning, flight safety, and operational logistics.",
+  },
+  {
+    id: "social-media",
+    name: "Social Media",
+    lead: "Media Lead",
+    role: "Media Lead",
+    image: "/images/team-2.jpg",
+    icon: Share2,
+    color: "from-rose-500 to-red-400",
+    description: "Content creation, community engagement, and brand storytelling.",
+  },
+  {
+    id: "research",
+    name: "Research",
+    lead: "Research Lead",
+    role: "Research Lead",
+    image: "/images/team-3.jpg",
+    icon: Search,
+    color: "from-violet-500 to-fuchsia-400",
+    description: "Emerging tech exploration, whitepapers, and innovation strategy.",
   },
 ];
 
 const projects = [
   {
-    id: 1,
-    title: "AeroScout VTOL",
-    category: "Aerial",
-    image: "/images/hero-drone-ocean.jpg",
-    description: "Autonomous hybrid VTOL drone for long-range surveillance and mapping.",
-    specs: ["120 min Endurance", "15 km Range", "AI Object Tracking"],
-  },
-  {
-    id: 2,
-    title: "TerraRover Alpha",
-    category: "Ground",
-    image: "/images/car-bot.jpg",
-    description: "All-terrain autonomous ground vehicle for hazardous environment exploration.",
-    specs: ["LiDAR Mapping", "4WD Electric Drive", "ROS 2 Navigation"],
-  },
-  {
-    id: 3,
-    title: "AquaGrow Pod",
-    category: "AgriTech",
-    image: "/images/hydroponics.jpg",
-    description: "Automated vertical hydroponics system with AI nutrient management.",
-    specs: ["90% Water Savings", "IoT Telemetry", "Auto Dosage"],
-  },
-  {
-    id: 4,
-    title: "SkySentinel Hexacopter",
-    category: "Aerial",
+    title: "Autonomous Drones",
+    description: "GPS-denied navigation, swarm coordination, and payload delivery systems.",
     image: "/images/aerial-vehicle.jpg",
-    description: "Heavy-lift payload drone designed for industrial inspection and rescue missions.",
-    specs: ["10 kg Payload", "Failsafe Flight Controller", "Thermal Payload"],
+    icon: Plane,
+  },
+  {
+    title: "Four-Wheeler Bots",
+    description: "Terrain-aware rovers for surveillance, logistics, and competition arenas.",
+    image: "/images/car-bot.jpg",
+    icon: Car,
+  },
+  {
+    title: "Aerial Vehicles",
+    description: "VTOL platforms and fixed-wing systems for long-range missions.",
+    image: "/images/hero-drone-ocean.jpg",
+    icon: Wind,
+  },
+  {
+    title: "Hydroponic Automation",
+    description: "Smart nutrient dosing, environmental monitoring, and IoT-controlled growth.",
+    image: "/images/hydroponics.jpg",
+    icon: Droplets,
   },
 ];
 
 const achievements = [
-  {
-    year: "2024",
-    title: "1st Place - National Drone Challenge",
-    description: "Secured top position in autonomous obstacle course and precision payload drop.",
-    icon: Trophy,
-  },
-  {
-    year: "2023",
-    title: "Best Innovation Award - AgriTech Summit",
-    description: "Recognized for HydroBot automated crop monitoring and dosing system.",
-    icon: Award,
-  },
-  {
-    year: "2023",
-    title: "Top 5 Finalist - International Robotics Expo",
-    description: "Competed against 50+ global university teams in autonomous rover navigation.",
-    icon: Target,
-  },
-  {
-    year: "2022",
-    title: "Team ROXX Founded",
-    description: "Established with a vision to build cutting-edge autonomous aerial & ground robotics.",
-    icon: Rocket,
-  },
+  { title: "National Drone Champions", org: "AVIATHON 2024", icon: Trophy },
+  { title: "Best Innovation Award", org: "TechFest IIT Bombay", icon: Award },
+  { title: "Top 5 Global Finalist", org: "IARC Challenge", icon: Target },
+  { title: "Research Grant Winner", org: "DST India", icon: Rocket },
+  { title: "500+ Community Members", org: "Student Network", icon: Users },
+  { title: "Published 3 Papers", org: "IEEE Xplore", icon: Cpu },
 ];
 
 const teamCards = [
   {
-    name: "Akshay M",
-    role: "Team Captain & Systems Architect",
-    image: "/images/team-1.jpg",
-    quote: "Building autonomous systems isn't just engineering — it's creating intelligent machines that shape the future.",
-  },
-  {
-    name: "Hansika Rao",
-    role: "Vice Captain & AgriTech Lead",
-    image: "/images/team-hansika.jpg",
-    quote: "Merging robotics with agriculture creates sustainable solutions for real-world global challenges.",
-  },
-  {
     name: "Arjun Mehta",
-    role: "Avionics & Flight Systems Lead",
+    role: "Founder & Captain",
+    quote: "Building ROXX has been about turning impossible ideas into flying machines.",
+    image: "/images/team-1.jpg",
+  },
+  {
+    name: "Priya Sharma",
+    role: "Vice Captain & Electronics Lead",
+    quote: "Every circuit we solder carries the spark of our collective ambition.",
     image: "/images/team-2.jpg",
-    quote: "Precision avionics and reliable telemetry are the heartbeat of every successful mission.",
+  },
+  {
+    name: "David Okafor",
+    role: "Technical Integration Lead",
+    quote: "Integration is where individual brilliance becomes a symphony of systems.",
+    image: "/images/team-3.jpg",
+  },
+  {
+    name: "Emily Chen",
+    role: "Testing & Quality Lead",
+    quote: "We don't just build robots; we build trust through rigorous testing.",
+    image: "/images/team-4.jpg",
   },
 ];
 
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handle = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", handle);
+    return () => window.removeEventListener("scroll", handle);
   }, []);
 
+  const links = [
+    { name: "Home", href: "#home" },
+    { name: "Founder", href: "#founder" },
+    { name: "Leads", href: "#leads" },
+    { name: "Departments", href: "#departments" },
+    { name: "Projects", href: "#projects" },
+    { name: "Achievements", href: "#achievements" },
+    { name: "Team", href: "#team" },
+  ];
+
   return (
-    <nav
-      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-ocean-900/90 py-3 backdrop-blur-md border-b border-white/10 shadow-xl"
-          : "bg-transparent py-6"
+    <motion.nav
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className={`fixed left-0 right-0 z-50 px-4 transition-all duration-300 ${
+        scrolled ? "top-4" : "top-5"
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-white/10 shadow-lg shadow-orange-500/20 ring-1 ring-white/20">
+      <div className={`mx-auto flex max-w-4xl items-center justify-between rounded-full border border-white/10 px-3 py-2 shadow-2xl transition-all duration-300 md:px-5 md:py-3 ${
+        scrolled ? "glass-dark shadow-orange-500/10" : "glass"
+      }`}>
+        <a href="#home" className="flex items-center gap-2 md:gap-3">
+          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/20 md:h-12 md:w-12">
             <img
               src="/images/roxx-logo.png"
               alt="ROXX Logo"
               className="h-full w-full object-cover"
             />
           </div>
-          <div className="flex flex-col">
-            <span className="text-xl font-bold tracking-tight text-white">
-              Team <span className="text-orange-400">ROXX</span>
-            </span>
-            <span className="text-[10px] tracking-widest text-slate-400 uppercase">
-              Autonomous Systems
-            </span>
-          </div>
+          <span className="text-lg font-bold tracking-tight text-white md:text-xl">
+            Team <span className="text-orange-400">ROXX</span>
+          </span>
+        </a>
+
+        <div className="hidden items-center gap-6 lg:flex">
+          {links.map((link) => (
+            <a
+              key={link.name}
+              href={link.href}
+              className="text-sm font-medium text-slate-300 transition-colors hover:text-orange-400"
+            >
+              {link.name}
+            </a>
+          ))}
+        </div>
+
+        <Link
+          href="/dashboard"
+          className="hidden items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-orange-500/30 md:flex"
+        >
+          Portal <ExternalLink className="h-4 w-4" />
         </Link>
 
-        {/* Desktop Links */}
-        <div className="hidden items-center gap-8 md:flex">
-          {["About", "Founder", "Leads", "Departments", "Projects", "Achievements"].map(
-            (item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                className="text-sm font-medium text-slate-300 transition-colors hover:text-orange-400"
-              >
-                {item}
-              </a>
-            )
-          )}
-        </div>
-
-        {/* Action Button */}
-        <div className="hidden items-center gap-4 md:flex">
-          <Link
-            href="/dashboard"
-            className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-6 py-2.5 text-sm font-semibold text-white transition-all shadow-lg shadow-orange-500/30 hover:scale-105"
-          >
-            Member Portal
-            <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </div>
-
-        {/* Mobile Toggle */}
         <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="text-white md:hidden"
+          className="rounded-full bg-white/10 p-2 text-white lg:hidden"
+          onClick={() => setMobileOpen(!mobileOpen)}
         >
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
-        {mobileMenuOpen && (
+        {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="border-b border-white/10 bg-ocean-900/95 backdrop-blur-xl md:hidden"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="mx-auto mt-3 max-w-md rounded-3xl glass-dark border border-white/10 p-5 lg:hidden"
           >
-            <div className="flex flex-col gap-4 px-6 py-6">
-              {["About", "Founder", "Leads", "Departments", "Projects", "Achievements"].map(
-                (item) => (
-                  <a
-                    key={item}
-                    href={`#${item.toLowerCase()}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-lg font-medium text-slate-300 transition-colors hover:text-orange-400"
-                  >
-                    {item}
-                  </a>
-                )
-              )}
+            <div className="flex flex-col gap-3">
+              {links.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-xl px-4 py-2 text-base font-medium text-slate-200 transition-colors hover:bg-white/10"
+                >
+                  {link.name}
+                </a>
+              ))}
               <Link
                 href="/dashboard"
-                onClick={() => setMobileMenuOpen(false)}
-                className="mt-2 flex justify-center rounded-full bg-gradient-to-r from-orange-500 to-red-500 py-3 font-semibold text-white shadow-lg"
+                onClick={() => setMobileOpen(false)}
+                className="mt-2 flex items-center justify-center gap-2 rounded-full bg-orange-500 px-5 py-3 font-semibold text-white"
               >
-                Member Portal
+                Team Portal <ExternalLink className="h-4 w-4" />
               </Link>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </motion.nav>
   );
 }
 
 function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
 
   return (
     <section
+      id="home"
       ref={containerRef}
-      className="relative min-h-screen overflow-hidden bg-ocean-900 pb-20 pt-32 lg:pt-40"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden"
     >
-      {/* Background Canvas & Animated Rings */}
-      <div className="mesh-bg absolute inset-0" />
+      {/* Ocean Background */}
+      <motion.div style={{ y, scale }} className="absolute inset-0 z-0">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url('/images/hero-drone-ocean.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-ocean-900/70 via-ocean-900/50 to-ocean-900" />
+        <div className="mesh-bg absolute inset-0" />
+      </motion.div>
 
-      <div className="pointer-events-none absolute right-0 top-1/4 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-1/4 left-0 h-96 w-96 rounded-full bg-orange-500/10 blur-3xl" />
+      {/* Animated Waves */}
+      <div className="absolute bottom-0 left-0 right-0 z-0 opacity-40">
+        <svg
+          viewBox="0 0 1440 320"
+          className="w-full animate-wave"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="#2563eb"
+            fillOpacity="0.3"
+            d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          />
+        </svg>
+      </div>
 
-      <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-12">
+      {/* Content */}
+      <motion.div
+        style={{ opacity }}
+        className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-6 text-center"
+      >
+        {/* Drone Fly-in */}
+        <motion.div
+          initial={{ x: -300, y: 150, scale: 0.1, opacity: 0, rotate: -15 }}
+          animate={{ x: 0, y: 0, scale: 1, opacity: 1, rotate: 0 }}
+          transition={{ duration: 2.4, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.2 }}
+          className="mb-8"
+        >
+          <div className="relative">
+            <div className="absolute -inset-8 rounded-full bg-orange-500/20 blur-2xl animate-pulse-glow" />
+            <Plane className="relative h-20 w-20 text-orange-400 drop-shadow-[0_0_30px_rgba(249,115,22,0.6)] md:h-28 md:w-28" />
+          </div>
+        </motion.div>
+
+        {/* ROXX Animated Logo */}
+        <div className="relative mb-8 flex items-center justify-center">
+          {/* Spinning Rings */}
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1, delay: 1.5 }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="absolute h-64 w-64 rounded-full border-2 border-dashed border-orange-400/40 animate-spin-slow md:h-96 md:w-96" />
+            <div className="absolute h-52 w-52 rounded-full border border-blue-400/30 animate-spin-reverse md:h-80 md:w-80" />
+            <div className="absolute h-72 w-72 rounded-full border border-white/10 md:h-[28rem] md:w-[28rem]" />
+          </motion.div>
+
+          <div className="relative flex items-center text-[6rem] font-black leading-none tracking-tighter text-white md:text-[10rem] lg:text-[14rem]">
+            {/* R moves left */}
+            <motion.span
+              initial={{ x: 0, opacity: 0 }}
+              animate={{ x: -30, opacity: 1 }}
+              transition={{ duration: 1, delay: 2, ease: "easeOut" }}
+              className="text-gradient"
+            >
+              R
+            </motion.span>
+
+            {/* O grows from small */}
+            <motion.span
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.2, delay: 2.3, ease: [0.34, 1.56, 0.64, 1] }}
+              className="bg-gradient-to-br from-blue-400 to-cyan-300 bg-clip-text text-transparent"
+            >
+              O
+            </motion.span>
+
+            {/* XX moves right */}
+            <motion.span
+              initial={{ x: 0, opacity: 0 }}
+              animate={{ x: 30, opacity: 1 }}
+              transition={{ duration: 1, delay: 2, ease: "easeOut" }}
+              className="text-gradient"
+            >
+              XX
+            </motion.span>
+          </div>
+        </div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 3.2 }}
+          className="mb-6 max-w-2xl text-lg text-slate-300 md:text-2xl"
+        >
+          Student Innovation Group building autonomous systems for drones, rovers,
+          aerial vehicles, and hydroponics.
+        </motion.p>
+
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="lg:col-span-7"
+          transition={{ duration: 0.8, delay: 3.4 }}
+          className="flex flex-wrap items-center justify-center gap-4"
         >
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/10 px-4 py-1.5 backdrop-blur-md">
-            <span className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-orange-400">
-              Autonomous Robotics & AI Engineering
-            </span>
-          </div>
-
-          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-7xl">
-            Pioneering <span className="text-gradient">Autonomous</span> Intelligent Systems.
-          </h1>
-
-          <p className="mt-6 max-w-2xl text-lg text-slate-300 lg:text-xl">
-            Team ROXX designs, builds, and deploys next-generation unmanned aerial vehicles, autonomous ground rovers, and smart agricultural robotics.
-          </p>
-
-          <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Link
-              href="/dashboard"
-              className="group flex items-center gap-3 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 font-bold text-white shadow-xl shadow-orange-500/30 transition-all hover:scale-105"
-            >
-              Access Member Portal
-              <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Link>
-            <a
-              href="#projects"
-              className="flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-4 font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10"
-            >
-              Explore Innovations
-            </a>
-          </div>
-
-          <div className="mt-16 grid grid-cols-3 gap-6 border-t border-white/10 pt-8">
-            <div>
-              <p className="text-3xl font-extrabold text-white sm:text-4xl">6+</p>
-              <p className="text-xs text-slate-400 sm:text-sm">R&D Projects Built</p>
-            </div>
-            <div>
-              <p className="text-3xl font-extrabold text-white sm:text-4xl">150+</p>
-              <p className="text-xs text-slate-400 sm:text-sm">Autonomous Flight Hrs</p>
-            </div>
-            <div>
-              <p className="text-3xl font-extrabold text-white sm:text-4xl">99.4%</p>
-              <p className="text-xs text-slate-400 sm:text-sm">Navigation Accuracy</p>
-            </div>
-          </div>
+          <a
+            href="#departments"
+            className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 font-semibold text-white shadow-lg shadow-orange-500/30 transition-all hover:scale-105 hover:shadow-orange-500/50"
+          >
+            Explore Team <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+          </a>
+          <a
+            href="#projects"
+            className="rounded-full border border-white/20 glass px-8 py-4 font-semibold text-white transition-all hover:bg-white/10"
+          >
+            Our Projects
+          </a>
         </motion.div>
 
-        {/* Hero Visual Card */}
+        {/* Scroll Indicator */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative lg:col-span-5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 4 }}
+          className="mt-16 flex flex-col items-center gap-2 text-slate-400"
         >
-          <div className="relative mx-auto max-w-md overflow-hidden rounded-3xl border border-white/15 bg-ocean-800/80 p-4 shadow-2xl backdrop-blur-xl">
-            <div className="relative h-96 overflow-hidden rounded-2xl">
-              <img
-                src="/images/hero-drone-ocean.jpg"
-                alt="AeroScout Drone"
-                className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-ocean-900 via-transparent to-transparent" />
-              <div className="absolute bottom-6 left-6 right-6">
-                <span className="rounded-full bg-orange-500 px-3 py-1 text-xs font-bold text-white uppercase">
-                  Flagship UAV
-                </span>
-                <h3 className="mt-2 text-2xl font-bold text-white">AeroScout Autonomous VTOL</h3>
-                <p className="mt-1 text-xs text-slate-300">
-                  Hybrid aerial platform with edge AI computer vision & thermal sensors.
-                </p>
-              </div>
-            </div>
-          </div>
+          <span className="text-xs font-semibold uppercase tracking-widest">
+            SCROLL
+          </span>
+          <ChevronDown className="h-4 w-4 animate-bounce text-orange-400" />
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }
 
 function Founder() {
   return (
-    <section id="founder" className="relative bg-ocean-900 py-24">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-12 text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Team Leadership</span>
-          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Meet Our Founder</h2>
-        </div>
+    <section id="founder" className="relative overflow-hidden bg-ocean-900 py-32">
+      <div className="mesh-bg absolute inset-0" />
 
-        <div className="mx-auto grid max-w-5xl items-center gap-12 overflow-hidden rounded-3xl border border-white/10 bg-ocean-800/50 p-8 backdrop-blur-xl lg:grid-cols-12">
-          <div className="relative lg:col-span-5">
-            <div className="relative h-80 overflow-hidden rounded-2xl shadow-xl sm:h-96">
-              <img
-                src="/images/team-1.jpg"
-                alt="Akshay M"
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-ocean-900/90 via-transparent to-transparent" />
-              <div className="absolute bottom-6 left-6">
-                <h3 className="text-2xl font-bold text-white">Akshay M</h3>
-                <p className="text-sm font-semibold text-orange-400">Founder & Captain</p>
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="mb-20 text-center"
+        >
+          <span className="mb-4 inline-block rounded-full bg-orange-500/10 px-4 py-1.5 text-sm font-semibold text-orange-400">
+            Vision
+          </span>
+          <h2 className="mb-6 text-4xl font-bold text-white md:text-6xl">
+            Founder
+          </h2>
+        </motion.div>
+
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          {/* Founder Image */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className="flex justify-center"
+          >
+            <div className="relative">
+              {/* Spinning Ring behind picture */}
+              <div className="absolute inset-[-1.5rem] rounded-full border border-dashed border-orange-500/40 animate-spin-slow" />
+
+              <div className="relative h-64 w-64 overflow-hidden rounded-full border-4 border-white/10 md:h-80 md:w-80">
+                <img
+                  src="/images/team-1.jpg"
+                  alt="Founder"
+                  className="h-full w-full object-cover"
+                />
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="lg:col-span-7">
-            <h3 className="text-2xl font-bold text-white">Architecting Autonomous Innovations</h3>
-            <p className="mt-4 leading-relaxed text-slate-300">
-              Under Akshay&apos;s leadership, Team ROXX grew from a student research initiative into a competitive robotics team designing autonomous drones, ground vehicles, and automated agricultural systems.
+          {/* Founder Details */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+          >
+            <h3 className="mb-2 text-3xl font-bold text-white md:text-5xl">
+              Arjun Mehta
+            </h3>
+            <p className="mb-6 text-lg font-semibold text-orange-400 md:text-xl">
+              Founder, Team ROXX
             </p>
-            <div className="mt-6 space-y-3">
-              {[
-                "Pioneered ROS 2 navigation pipelines for GPS-denied field operations",
-                "Led team to 1st place in National Autonomous Drone League",
-                "Designed custom power avionics & flight controller firmware",
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center gap-3">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-orange-500/20 text-orange-400 font-bold text-xs">
-                    ✓
-                  </div>
-                  <span className="text-sm text-slate-200">{item}</span>
-                </div>
+            <p className="mb-6 text-lg leading-relaxed text-slate-300">
+              A passionate innovator in autonomous systems and aerial robotics,
+              driven to build technology that pushes the boundaries of what student
+              teams can achieve.
+            </p>
+
+            <div className="mb-8 rounded-2xl bg-gradient-to-r from-blue-600/20 to-orange-500/20 p-6 border border-white/10">
+              <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-slate-400">
+                Current Role
+              </p>
+              <p className="text-xl font-bold text-white md:text-2xl">
+                Research Intern at TiHAN, IIT Hyderabad
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              {["Leadership", "Research", "Robotics", "Innovation"].map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-white/5 px-4 py-2 text-sm text-slate-300 border border-white/10"
+                >
+                  {tag}
+                </span>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -444,31 +547,57 @@ function Founder() {
 
 function TeamLeads() {
   return (
-    <section id="leads" className="bg-ocean-900/80 py-24">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-16 text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Domain Leadership</span>
-          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Team Leads</h2>
-        </div>
+    <section id="leads" className="relative bg-ocean-900 py-32">
+      <div className="mesh-bg absolute inset-0" />
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {departments.map((dept) => (
-            <div
-              key={dept.id}
-              className="group overflow-hidden rounded-2xl border border-white/10 bg-ocean-800/40 p-6 backdrop-blur-md transition-all hover:border-orange-500/50 hover:shadow-xl"
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="mb-20 text-center"
+        >
+          <span className="mb-4 inline-block rounded-full bg-orange-500/10 px-4 py-1.5 text-sm font-semibold text-orange-400">
+            Leadership
+          </span>
+          <h2 className="mb-6 text-4xl font-bold text-white md:text-6xl">
+            Team Leads
+          </h2>
+          <p className="mx-auto max-w-2xl text-lg text-slate-400">
+            Meet the people steering ROXX toward innovation and excellence.
+          </p>
+        </motion.div>
+
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {teamLeads.map((lead, index) => (
+            <motion.div
+              key={lead.name}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -8 }}
+              className="group glass overflow-hidden rounded-3xl transition-all hover:border-orange-500/30"
             >
-              <div className="mb-4 flex items-center gap-4">
-                <div className="h-16 w-16 overflow-hidden rounded-xl">
-                  <img src={dept.image} alt={dept.lead} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-white">{dept.lead}</h3>
-                  <p className="text-xs font-medium text-orange-400">{dept.role}</p>
-                  <p className="text-xs text-slate-400">{dept.name} Domain</p>
+              <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-blue-600/20 via-orange-500/10 to-purple-600/20">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white/10 text-3xl font-black text-white ring-2 ring-white/20 md:h-28 md:w-28 md:text-4xl">
+                  {lead.name.charAt(0)}
                 </div>
               </div>
-              <p className="text-xs leading-relaxed text-slate-300">{dept.description}</p>
-            </div>
+              <div className="p-6">
+                <p className="mb-1 text-sm font-semibold text-orange-400">
+                  {lead.department}
+                </p>
+                <h3 className="mb-1 text-xl font-bold text-white">
+                  {lead.name}
+                </h3>
+                <p className="mb-3 text-sm text-slate-400">{lead.role}</p>
+                <p className="text-sm leading-relaxed text-slate-300">
+                  {lead.bio}
+                </p>
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -477,29 +606,192 @@ function TeamLeads() {
 }
 
 function Departments() {
-  return (
-    <section id="departments" className="bg-ocean-900 py-24">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-16 text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Engineering Specializations</span>
-          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Our 6 Core Departments</h2>
-        </div>
+  const [activeIndex, setActiveIndex] = useState(0);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const pinnedRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const triggersRef = useRef<ScrollTrigger[]>([]);
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            { title: "Avionics & Flight Systems", icon: Plane, desc: "Autopilot configuration, aerial telemetry, sensor fusion, and high-altitude flight stability." },
-            { title: "Electronics & Embedded PCB", icon: Zap, desc: "Custom PCB design, power distribution boards, ESC controllers, and embedded microcontroller firmware." },
-            { title: "Software & Edge AI", icon: Cpu, desc: "ROS 2 trajectory planning, Jetson Orin deep learning vision models, and cloud data dashboards." },
-            { title: "Airframe & CAD Mechanics", icon: Settings, desc: "Carbon-fiber manufacturing, structural FEA analysis, aerodynamic wing modeling, and CFD testing." },
-            { title: "AgriTech & Hydroponics", icon: Droplets, desc: "Automated nutrient dosing pumps, pH/EC closed-loop regulation, and indoor crop pods." },
-            { title: "Field Operations & Testing", icon: Wind, desc: "Flight safety protocols, mission field trials, battery log tracking, and competition logistics." },
-          ].map((d) => (
-            <div key={d.title} className="rounded-2xl border border-white/10 bg-ocean-800/40 p-6 backdrop-blur-md">
-              <d.icon className="mb-3 h-8 w-8 text-orange-400" />
-              <h3 className="font-bold text-white">{d.title}</h3>
-              <p className="mt-2 text-xs leading-relaxed text-slate-300">{d.desc}</p>
+  useEffect(() => {
+    if (!sectionRef.current || !pinnedRef.current) return;
+
+    triggersRef.current.forEach((t) => t.kill());
+    triggersRef.current = [];
+
+    const st = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top top",
+      end: () => `+=${window.innerHeight * departments.length * 0.5}`,
+      pin: pinnedRef.current,
+      pinSpacing: true,
+      scrub: 0.5,
+      onUpdate: (self) => {
+        const progress = self.progress;
+        const index = Math.min(
+          Math.floor(progress * departments.length),
+          departments.length - 1
+        );
+        setActiveIndex(index);
+        if (progressRef.current) {
+          progressRef.current.style.width = `${progress * 100}%`;
+        }
+      },
+    });
+
+    triggersRef.current.push(st);
+
+    return () => {
+      triggersRef.current.forEach((t) => t.kill());
+      triggersRef.current = [];
+    };
+  }, []);
+
+  const activeDept = departments[activeIndex];
+
+  return (
+    <section
+      id="departments"
+      ref={sectionRef}
+      className="relative bg-ocean-900"
+      style={{ height: `${(departments.length * 0.5 + 1) * 100}vh` }}
+    >
+      <div ref={pinnedRef} className="relative z-10 flex min-h-screen items-center justify-center overflow-hidden py-20">
+        <div className="mesh-bg absolute inset-0" />
+
+        <div className="relative z-10 mx-auto w-full max-w-6xl px-6">
+          <div className="mb-12 text-center md:mb-16">
+            <span className="mb-4 inline-block rounded-full bg-blue-500/10 px-4 py-1.5 text-sm font-semibold text-blue-400">
+              Our Team
+            </span>
+            <h2 className="mb-4 text-4xl font-bold text-white md:text-6xl">
+              Departments
+            </h2>
+            <p className="mx-auto max-w-2xl text-lg text-slate-400">
+              Keep scrolling to explore every specialized unit that powers ROXX.
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-12 lg:flex-row lg:justify-center">
+            {/* Circular Department Orbit Display */}
+            <div className="relative h-[300px] w-[300px] md:h-[420px] md:w-[420px]">
+              <div className="absolute inset-0 rounded-full border border-white/10 animate-spin-slow" />
+              <div className="absolute inset-4 rounded-full border border-dashed border-blue-500/30 animate-spin-reverse" />
+              <div className="absolute inset-[-1.5rem] rounded-full border border-white/5" />
+
+              {/* Center Icon */}
+              <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeDept.id}
+                    initial={{ scale: 0.5, opacity: 0, rotate: -20 }}
+                    animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                    exit={{ scale: 0.5, opacity: 0, rotate: 20 }}
+                    transition={{ duration: 0.4 }}
+                    className={`flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br ${activeDept.color} shadow-2xl md:h-28 md:w-28`}
+                  >
+                    <activeDept.icon className="h-8 w-8 text-white md:h-12 md:w-12" />
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Orbiting Department Node Buttons */}
+              {departments.map((dept, index) => {
+                const angle = (index / departments.length) * Math.PI * 2 - Math.PI / 2;
+                const radius = 130;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                const isActive = index === activeIndex;
+
+                return (
+                  <button
+                    key={dept.id}
+                    onClick={() => setActiveIndex(index)}
+                    style={{
+                      transform: `translate(${x}px, ${y}px)`,
+                    }}
+                    className={`absolute left-1/2 top-1/2 z-30 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center transition-all duration-300 ${
+                      isActive ? "scale-125" : "opacity-60 hover:opacity-100"
+                    }`}
+                  >
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all md:h-12 md:w-12 ${
+                        isActive
+                          ? `bg-gradient-to-br ${dept.color} shadow-lg shadow-blue-500/30`
+                          : "glass-dark text-slate-300"
+                      }`}
+                    >
+                      <dept.icon className="h-5 w-5 text-white" />
+                    </div>
+                    <span
+                      className={`mt-1.5 text-[10px] font-semibold md:text-xs ${
+                        isActive ? "text-white" : "text-slate-400"
+                      }`}
+                    >
+                      {dept.name}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-          ))}
+
+            {/* Department Active Card Details */}
+            <div className="w-full max-w-lg">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeDept.id}
+                  initial={{ opacity: 0, x: 40 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -40 }}
+                  transition={{ duration: 0.4 }}
+                  className="glass rounded-3xl p-8 md:p-10 border border-white/10"
+                >
+                  <div className="mb-6 flex items-center gap-4">
+                    <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${activeDept.color} shadow-lg`}>
+                      <activeDept.icon className="h-7 w-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-white md:text-3xl">
+                        {activeDept.name}
+                      </h3>
+                      <p className="text-sm font-semibold text-blue-400">
+                        {activeDept.lead}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="mb-8 text-base leading-relaxed text-slate-300 md:text-lg">
+                    {activeDept.description}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
+                    {["Leadership", "Innovation", "Execution", "Excellence"].map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-xl bg-white/5 px-3 py-1.5 text-xs text-slate-300 border border-white/5"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mx-auto mt-12 max-w-md">
+            <div className="flex items-center justify-between text-xs text-slate-400">
+              <span>{activeIndex + 1} / {departments.length}</span>
+              <span>Keep scrolling</span>
+            </div>
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+              <div
+                ref={progressRef}
+                className="h-full rounded-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-100"
+                style={{ width: `${((activeIndex + 1) / departments.length) * 100}%` }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -507,55 +799,67 @@ function Departments() {
 }
 
 function Projects() {
-  const [filter, setFilter] = useState("All");
-  const filtered = filter === "All" ? projects : projects.filter((p) => p.category === filter);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeProject = projects[activeIndex];
 
   return (
-    <section id="projects" className="bg-ocean-900/90 py-24">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-12 text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Research & Development</span>
-          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Innovations & Projects</h2>
-        </div>
+    <section id="projects" className="relative bg-ocean-900 py-32">
+      <div className="mesh-bg absolute inset-0" />
 
-        <div className="mb-10 flex justify-center gap-3">
-          {["All", "Aerial", "Ground", "AgriTech"].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              className={`rounded-full px-5 py-2 text-xs font-semibold transition-all ${
-                filter === cat
-                  ? "bg-orange-500 text-white shadow-lg"
-                  : "border border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="mb-20 text-center"
+        >
+          <span className="mb-4 inline-block rounded-full bg-orange-500/10 px-4 py-1.5 text-sm font-semibold text-orange-400">
+            Projects
+          </span>
+          <h2 className="mb-6 text-4xl font-bold text-white md:text-6xl">
+            R&D Projects
+          </h2>
+        </motion.div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {filtered.map((p) => (
-            <div key={p.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-ocean-800/50 shadow-xl backdrop-blur-md">
-              <div className="relative h-48 overflow-hidden">
-                <img src={p.image} alt={p.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                <span className="absolute left-3 top-3 rounded-full bg-orange-500 px-2.5 py-0.5 text-[10px] font-bold text-white uppercase">
-                  {p.category}
-                </span>
+        <div className="mx-auto max-w-5xl">
+          <div className="relative overflow-hidden rounded-3xl glass border border-white/10 p-8 md:p-12">
+            <div className="grid gap-8 lg:grid-cols-12 items-center">
+              <div className="relative h-64 overflow-hidden rounded-2xl lg:col-span-6 md:h-80">
+                <img
+                  src={activeProject.image}
+                  alt={activeProject.title}
+                  className="h-full w-full object-cover"
+                />
               </div>
-              <div className="p-5">
-                <h3 className="font-bold text-white">{p.title}</h3>
-                <p className="mt-2 text-xs leading-relaxed text-slate-300">{p.description}</p>
-                <div className="mt-4 flex flex-wrap gap-1">
-                  {p.specs.map((spec, i) => (
-                    <span key={i} className="rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-medium text-orange-300 border border-white/10">
-                      {spec}
-                    </span>
+
+              <div className="lg:col-span-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-500">
+                  <activeProject.icon className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="mb-2 text-2xl font-bold text-white md:text-4xl">
+                  {activeProject.title}
+                </h3>
+                <p className="mb-6 text-base text-slate-200 md:text-lg">
+                  {activeProject.description}
+                </p>
+
+                <div className="flex gap-3">
+                  {projects.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setActiveIndex(index)}
+                      className={`h-2.5 rounded-full transition-all ${
+                        index === activeIndex
+                          ? "w-8 bg-orange-500"
+                          : "w-2.5 bg-white/30 hover:bg-white/50"
+                      }`}
+                    />
                   ))}
                 </div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </section>
@@ -564,21 +868,47 @@ function Projects() {
 
 function Achievements() {
   return (
-    <section id="achievements" className="bg-ocean-900 py-24">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-16 text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Excellence & Recognition</span>
-          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Achievements & Milestones</h2>
-        </div>
+    <section id="achievements" className="relative overflow-hidden bg-ocean-900 py-32">
+      <div className="mesh-bg absolute inset-0" />
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {achievements.map((item, idx) => (
-            <div key={idx} className="relative rounded-2xl border border-white/10 bg-ocean-800/40 p-6 backdrop-blur-md">
-              <item.icon className="mb-3 h-8 w-8 text-orange-400" />
-              <span className="text-xs font-bold uppercase tracking-wider text-orange-400">{item.year}</span>
-              <h3 className="mt-1 font-bold text-white">{item.title}</h3>
-              <p className="mt-2 text-xs leading-relaxed text-slate-300">{item.description}</p>
-            </div>
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="mb-20 text-center"
+        >
+          <span className="mb-4 inline-block rounded-full bg-yellow-500/10 px-4 py-1.5 text-sm font-semibold text-yellow-400">
+            Milestones
+          </span>
+          <h2 className="mb-6 text-4xl font-bold text-white md:text-6xl">
+            Achievements
+          </h2>
+          <p className="mx-auto max-w-2xl text-lg text-slate-400">
+            Recognitions that reflect our relentless pursuit of engineering excellence.
+          </p>
+        </motion.div>
+
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {achievements.map((achievement, index) => (
+            <motion.div
+              key={achievement.title}
+              initial={{ opacity: 0, y: 40, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -8, scale: 1.02 }}
+              className="glass group rounded-2xl p-8 transition-all hover:border-orange-500/30"
+            >
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-500 to-orange-500 shadow-lg shadow-orange-500/20 transition-transform group-hover:scale-110">
+                <achievement.icon className="h-7 w-7 text-white" />
+              </div>
+              <h3 className="mb-2 text-xl font-bold text-white">
+                {achievement.title}
+              </h3>
+              <p className="text-slate-400">{achievement.org}</p>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -588,42 +918,94 @@ function Achievements() {
 
 function TeamCards() {
   const [activeCard, setActiveCard] = useState(0);
+  const card = teamCards[activeCard];
 
   return (
-    <section className="bg-ocean-900/80 py-24">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="mb-16 text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-400">Team Vision</span>
-          <h2 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Messages from Core Members</h2>
-        </div>
+    <section id="team" className="relative overflow-hidden bg-ocean-900 py-32">
+      <div className="mesh-bg absolute inset-0" />
 
-        <div className="mx-auto max-w-xl">
-          <div className="relative rounded-3xl border border-white/10 bg-ocean-800/60 p-8 shadow-2xl backdrop-blur-xl">
-            <div className="mb-6 flex items-center gap-4">
-              <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-orange-500">
-                <img src={teamCards[activeCard].image} alt={teamCards[activeCard].name} className="h-full w-full object-cover" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">{teamCards[activeCard].name}</h3>
-                <p className="text-xs font-semibold text-orange-400">{teamCards[activeCard].role}</p>
+      <div className="relative z-10 mx-auto max-w-5xl px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="mb-20 text-center"
+        >
+          <span className="mb-4 inline-block rounded-full bg-purple-500/10 px-4 py-1.5 text-sm font-semibold text-purple-400">
+            Team Voices
+          </span>
+          <h2 className="mb-6 text-4xl font-bold text-white md:text-6xl">
+            Words From ROXX
+          </h2>
+        </motion.div>
+
+        <div className="flex flex-col items-center">
+          <div className="relative w-full max-w-2xl">
+            <div className="relative mx-auto aspect-[16/10] w-full overflow-hidden rounded-t-3xl bg-gradient-to-b from-slate-100 to-slate-200 shadow-2xl">
+              <motion.div
+                initial={{ rotateX: 0 }}
+                whileInView={{ rotateX: 180 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                style={{ transformOrigin: "top" }}
+                className="absolute inset-x-0 top-0 z-20 h-1/2 bg-gradient-to-b from-slate-200 to-slate-300"
+              >
+                <div className="absolute bottom-0 left-0 right-0 h-full bg-gradient-to-b from-slate-100 to-slate-300" 
+                     style={{ clipPath: "polygon(0 0, 50% 100%, 100% 0)" }} />
+              </motion.div>
+
+              <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-slate-300 to-slate-200" />
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeCard}
+                  initial={{ y: 80, opacity: 0 }}
+                  whileInView={{ y: -60, opacity: 1 }}
+                  viewport={{ once: false }}
+                  transition={{ duration: 0.8, delay: 1, type: "spring" }}
+                  className="absolute left-1/2 top-1/2 z-30 w-[85%] -translate-x-1/2 rounded-2xl bg-white p-6 shadow-xl md:p-8"
+                >
+                  <div className="flex flex-col items-center text-center">
+                    <img
+                      src={card.image}
+                      alt={card.name}
+                      className="mb-4 h-20 w-20 rounded-2xl object-cover md:h-24 md:w-24"
+                    />
+                    <h3 className="text-xl font-bold text-slate-900 md:text-2xl">
+                      {card.name}
+                    </h3>
+                    <p className="mb-4 text-sm font-semibold text-orange-500 md:text-base">
+                      {card.role}
+                    </p>
+                    <p className="text-slate-600 italic">&ldquo;{card.quote}&rdquo;</p>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              <div className="absolute bottom-0 left-0 right-0 z-10 flex h-full">
+                <div className="h-full w-1/2 bg-gradient-to-tr from-slate-300 to-slate-200" style={{ clipPath: "polygon(0 100%, 0 40%, 100% 100%)" }} />
+                <div className="h-full w-1/2 bg-gradient-to-tl from-slate-300 to-slate-200" style={{ clipPath: "polygon(100% 100%, 100% 40%, 0 100%)" }} />
               </div>
             </div>
 
-            <p className="text-sm italic leading-relaxed text-slate-200">
-              &ldquo;{teamCards[activeCard].quote}&rdquo;
-            </p>
-
-            <div className="mt-8 flex justify-center gap-2">
-              {teamCards.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveCard(idx)}
-                  className={`h-2 rounded-full transition-all ${
-                    idx === activeCard ? "w-8 bg-orange-500" : "w-2 bg-white/20"
-                  }`}
-                />
-              ))}
+            <div className="absolute -right-4 -top-4 rounded-full bg-orange-500 p-3 shadow-lg">
+              <Mail className="h-6 w-6 text-white" />
             </div>
+          </div>
+
+          <div className="mt-24 flex items-center gap-3">
+            {teamCards.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveCard(index)}
+                className={`h-3 rounded-full transition-all ${
+                  index === activeCard
+                    ? "w-8 bg-orange-500"
+                    : "w-3 bg-white/20 hover:bg-white/40"
+                }`}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -633,33 +1015,102 @@ function TeamCards() {
 
 function Footer() {
   return (
-    <footer className="border-t border-white/10 bg-ocean-900 py-12">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white/10 shadow-md">
-              <img src="/images/roxx-logo.png" alt="ROXX Logo" className="h-full w-full object-cover" />
+    <footer className="relative overflow-hidden bg-ocean-900 pb-8 pt-24">
+      <div className="mesh-bg absolute inset-0" />
+
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <div className="mb-16 grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <div className="mb-6 flex items-center gap-3">
+              <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white/10 shadow-lg shadow-orange-500/20 ring-1 ring-white/20 md:h-20 md:w-20">
+                <img
+                  src="/images/roxx-logo.png"
+                  alt="ROXX Logo"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <span className="text-xl font-bold text-white">
+                Team <span className="text-orange-400">ROXX</span>
+              </span>
             </div>
-            <span className="font-bold text-white">Team ROXX Autonomous Systems</span>
+            <p className="mb-6 text-slate-400">
+              Innovating at the edge of robotics, aviation, and sustainable automation.
+            </p>
+            <div className="flex gap-4">
+              {[
+                { name: "Instagram", path: "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" },
+                { name: "Twitter", path: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" },
+                { name: "LinkedIn", path: "M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" },
+                { name: "GitHub", path: "M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" },
+              ].map((social, index) => (
+                <a
+                  key={index}
+                  href="#"
+                  aria-label={social.name}
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-slate-400 transition-all hover:bg-orange-500 hover:text-white"
+                >
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d={social.path} />
+                  </svg>
+                </a>
+              ))}
+            </div>
           </div>
 
-          <p className="text-xs text-slate-400">
+          <div>
+            <h4 className="mb-6 text-lg font-bold text-white">Quick Links</h4>
+            <ul className="space-y-3 text-slate-400">
+              {["Home", "Founder", "Leads", "Departments", "Projects", "Achievements", "Team"].map((link) => (
+                <li key={link}>
+                  <a
+                    href={`#${link.toLowerCase()}`}
+                    className="transition-colors hover:text-orange-400"
+                  >
+                    {link}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="mb-6 text-lg font-bold text-white">Contact</h4>
+            <ul className="space-y-3 text-slate-400">
+              <li>teamroxx@university.edu</li>
+              <li>+91 98765 43210</li>
+              <li>Innovation Lab, Block C</li>
+              <li>University Campus, India</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="mb-6 text-lg font-bold text-white">Team Portal</h4>
+            <p className="mb-4 text-slate-400">
+              Members can access resources, schedules, and project dashboards.
+            </p>
+            <Link
+              href="/dashboard"
+              className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-6 py-3 font-semibold text-white transition-all hover:shadow-lg hover:shadow-orange-500/30"
+            >
+              Enter Portal <ExternalLink className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
+          <p className="text-sm text-slate-500">
             © {new Date().getFullYear()} Team ROXX. All rights reserved.
           </p>
-
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-2 text-xs font-semibold text-orange-400 hover:underline"
-          >
-            Access Member Workspace →
-          </Link>
+          <p className="text-sm text-slate-500">
+            Designed with passion by Team ROXX
+          </p>
         </div>
       </div>
     </footer>
   );
 }
 
-export default function HomePage() {
+export default function App() {
   return (
     <main className="bg-ocean-900 font-sans antialiased text-white selection:bg-orange-500 selection:text-white">
       <Nav />
