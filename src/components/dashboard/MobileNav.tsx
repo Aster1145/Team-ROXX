@@ -48,12 +48,16 @@ export function MobileNav() {
         <div className="fixed inset-0 z-50 bg-white dark:bg-slate-900 p-4 sm:p-6 flex flex-col justify-between overflow-y-auto">
           <div>
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-              <div className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold text-xs">
-                  RX
-                </span>
-                <span className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-slate-900 dark:text-white">
-                  Team ROXX
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-900/10 dark:bg-white/10 ring-1 ring-slate-900/10 dark:ring-white/20 shadow-xs">
+                  <img
+                    src="/images/roxx-logo.png"
+                    alt="ROXX Logo"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <span className="font-[family-name:var(--font-playfair)] text-lg font-bold text-slate-900 dark:text-white">
+                  Team <span className="text-orange-500 dark:text-orange-400">ROXX</span>
                 </span>
               </div>
               <button

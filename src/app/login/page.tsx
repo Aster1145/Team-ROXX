@@ -41,12 +41,16 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-cream px-6 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center justify-center gap-2">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-forest text-white font-bold">
-              RX
-            </span>
-            <span className="font-[family-name:var(--font-playfair)] text-2xl font-semibold text-forest">
-              ROXX
+          <Link href="/" className="inline-flex items-center justify-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-slate-900/10 dark:bg-white/10 ring-1 ring-slate-900/10 dark:ring-white/20 shadow-md">
+              <img
+                src="/images/roxx-logo.png"
+                alt="Team ROXX Logo"
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <span className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-slate-900 dark:text-white">
+              Team <span className="text-orange-500">ROXX</span>
             </span>
           </Link>
         </div>

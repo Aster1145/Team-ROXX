@@ -60,11 +60,15 @@ export function Sidebar() {
         // EXPANDED HEADER
         <div className="flex h-16 items-center justify-between border-b border-slate-100 dark:border-slate-800 px-4">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold text-sm shadow-xs">
-              RX
-            </span>
-            <span className="font-[family-name:var(--font-playfair)] text-xl font-semibold text-slate-900 dark:text-white truncate">
-              Team ROXX
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-900/10 dark:bg-white/10 ring-1 ring-slate-900/10 dark:ring-white/20 shadow-xs">
+              <img
+                src="/images/roxx-logo.png"
+                alt="ROXX Logo"
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <span className="font-[family-name:var(--font-playfair)] text-xl font-bold text-slate-900 dark:text-white truncate">
+              Team <span className="text-orange-500 dark:text-orange-400">ROXX</span>
             </span>
           </div>
 
@@ -81,10 +85,14 @@ export function Sidebar() {
         <div className="flex h-16 items-center justify-center border-b border-slate-100 dark:border-slate-800 px-2">
           <button
             onClick={toggleSidebar}
-            className="group relative flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold text-xs shadow-xs hover:scale-110 transition-all"
+            className="group relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-slate-900/10 dark:bg-white/10 ring-1 ring-slate-900/10 dark:ring-white/20 shadow-xs hover:scale-110 transition-all"
             title="Expand Sidebar"
           >
-            <span>RX</span>
+            <img
+              src="/images/roxx-logo.png"
+              alt="ROXX Logo"
+              className="h-full w-full object-cover"
+            />
             <span className="absolute -right-1 -bottom-1 flex h-4 w-4 items-center justify-center rounded-full bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700 shadow-2xs">
               <PanelLeftOpen className="h-2.5 w-2.5" />
             </span>
