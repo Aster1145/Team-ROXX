@@ -317,7 +317,7 @@ function Hero() {
     <section
       id="home"
       ref={containerRef}
-      className="relative flex min-h-screen items-center justify-center overflow-hidden py-24 sm:py-0"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden pt-28 pb-16 sm:pt-36 sm:pb-24"
     >
       {/* Ocean Background */}
       <motion.div style={{ y, scale }} className="absolute inset-0 z-0">
@@ -347,7 +347,7 @@ function Hero() {
       {/* Content */}
       <motion.div
         style={{ opacity }}
-        className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-4 sm:px-6 text-center"
+        className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-4 sm:px-6 text-center pt-4 sm:pt-8"
       >
         {/* Drone Fly-in */}
         <motion.div
