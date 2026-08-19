@@ -76,11 +76,11 @@ const teamLeads = [
     image: "/images/dhruva.png",
   },
   {
-    name: "Structures Lead",
+    name: "Umar Shariff",
     role: "Vice Captain",
     department: "CAD/CAM",
     bio: "Designing carbon-fiber frames, stress simulation, and precision 3D prototyping.",
-    image: "/images/team-2.jpg",
+    image: "/images/umar.png",
   },
   {
     name: "Flight Ops Lead",
@@ -163,9 +163,9 @@ const departments = [
   {
     id: "cad-cam",
     name: "CAD/CAM",
-    lead: "Structures Lead",
+    lead: "Umar Shariff",
     role: "Structures Lead",
-    image: "/images/team-2.jpg",
+    image: "/images/umar.png",
     icon: Box,
     color: "from-amber-500 to-orange-500",
     description: "Mechanical chassis design, carbon-fiber manufacturing, stress simulation, and 3D printing.",
