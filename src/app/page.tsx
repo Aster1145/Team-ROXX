@@ -69,11 +69,11 @@ const teamLeads = [
     image: "/images/shreyas.png",
   },
   {
-    name: "Autonomy Lead",
+    name: "Dhruva Kumar T R",
     role: "Vice Captain",
     department: "Autonomy Stack",
     bio: "Developing real-time SLAM, GPS-denied navigation, and AI path-planning algorithms.",
-    image: "/images/team-1.jpg",
+    image: "/images/dhruva.png",
   },
   {
     name: "Structures Lead",
@@ -153,9 +153,9 @@ const departments = [
   {
     id: "autonomy-stack",
     name: "Autonomy Stack",
-    lead: "Autonomy Lead",
+    lead: "Dhruva Kumar T R",
     role: "Autonomy Lead",
-    image: "/images/team-1.jpg",
+    image: "/images/dhruva.png",
     icon: Cpu,
     color: "from-emerald-500 to-teal-400",
     description: "Real-time SLAM, GPS-denied navigation, AI vision, and path-planning algorithms.",
