@@ -563,7 +563,7 @@ function Founder() {
             Visionary Leadership
           </span>
           <h2 className="text-3xl font-bold text-white sm:text-4xl md:text-6xl">
-            Meet the Founder
+            Founder
           </h2>
         </motion.div>
 
