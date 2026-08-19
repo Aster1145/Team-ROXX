@@ -226,22 +226,22 @@ function Nav() {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className={`fixed left-0 right-0 z-50 px-4 transition-all duration-300 ${
-        scrolled ? "top-4" : "top-5"
+      className={`fixed left-0 right-0 z-50 px-3 sm:px-4 transition-all duration-300 ${
+        scrolled ? "top-3 sm:top-4" : "top-3 sm:top-5"
       }`}
     >
       <div className={`mx-auto flex max-w-4xl items-center justify-between rounded-full border border-white/10 px-3 py-2 shadow-2xl transition-all duration-300 md:px-5 md:py-3 ${
         scrolled ? "glass-dark shadow-orange-500/10" : "glass"
       }`}>
-        <a href="#home" className="flex items-center gap-2 md:gap-3">
-          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/20 md:h-12 md:w-12">
+        <a href="#home" className="flex items-center gap-2 sm:gap-3">
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/20 sm:h-10 sm:w-10 md:h-12 md:w-12">
             <img
               src="/images/roxx-logo.png"
               alt="ROXX Logo"
               className="h-full w-full object-cover"
             />
           </div>
-          <span className="text-lg font-bold tracking-tight text-white md:text-xl">
+          <span className="text-base font-bold tracking-tight text-white sm:text-lg md:text-xl">
             Team <span className="text-orange-400">ROXX</span>
           </span>
         </a>
@@ -258,19 +258,22 @@ function Nav() {
           ))}
         </div>
 
-        <Link
-          href="/dashboard"
-          className="hidden items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-orange-500/30 md:flex"
-        >
-          Portal <ExternalLink className="h-4 w-4" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-3 py-1.5 text-xs font-semibold text-white shadow-md transition-all hover:shadow-lg hover:shadow-orange-500/30 sm:px-4 sm:py-2 sm:text-sm"
+          >
+            Portal <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
 
-        <button
-          className="rounded-full bg-white/10 p-2 text-white lg:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+          <button
+            className="rounded-full bg-white/10 p-2 text-white lg:hidden"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
       </div>
 
       <AnimatePresence>
@@ -279,26 +282,19 @@ function Nav() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="mx-auto mt-3 max-w-md rounded-3xl glass-dark border border-white/10 p-5 lg:hidden"
+            className="mx-auto mt-3 max-w-md rounded-3xl glass-dark border border-white/10 p-5 lg:hidden shadow-2xl"
           >
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               {links.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="rounded-xl px-4 py-2 text-base font-medium text-slate-200 transition-colors hover:bg-white/10"
+                  className="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-200 transition-colors hover:bg-white/10"
                 >
                   {link.name}
                 </a>
               ))}
-              <Link
-                href="/dashboard"
-                onClick={() => setMobileOpen(false)}
-                className="mt-2 flex items-center justify-center gap-2 rounded-full bg-orange-500 px-5 py-3 font-semibold text-white"
-              >
-                Team Portal <ExternalLink className="h-4 w-4" />
-              </Link>
             </div>
           </motion.div>
         )}
@@ -321,7 +317,7 @@ function Hero() {
     <section
       id="home"
       ref={containerRef}
-      className="relative flex min-h-screen items-center justify-center overflow-hidden"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden py-24 sm:py-0"
     >
       {/* Ocean Background */}
       <motion.div style={{ y, scale }} className="absolute inset-0 z-0">
@@ -351,40 +347,40 @@ function Hero() {
       {/* Content */}
       <motion.div
         style={{ opacity }}
-        className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-6 text-center"
+        className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-4 sm:px-6 text-center"
       >
         {/* Drone Fly-in */}
         <motion.div
           initial={{ x: -300, y: 150, scale: 0.1, opacity: 0, rotate: -15 }}
           animate={{ x: 0, y: 0, scale: 1, opacity: 1, rotate: 0 }}
           transition={{ duration: 2.4, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.2 }}
-          className="mb-8"
+          className="mb-4 sm:mb-8"
         >
           <div className="relative">
-            <div className="absolute -inset-8 rounded-full bg-orange-500/20 blur-2xl animate-pulse-glow" />
-            <Plane className="relative h-20 w-20 text-orange-400 drop-shadow-[0_0_30px_rgba(249,115,22,0.6)] md:h-28 md:w-28" />
+            <div className="absolute -inset-6 rounded-full bg-orange-500/20 blur-xl animate-pulse-glow" />
+            <Plane className="relative h-16 w-16 text-orange-400 drop-shadow-[0_0_30px_rgba(249,115,22,0.6)] sm:h-20 sm:w-20 md:h-28 md:w-28" />
           </div>
         </motion.div>
 
         {/* ROXX Animated Logo */}
-        <div className="relative mb-8 flex items-center justify-center">
+        <div className="relative mb-6 sm:mb-8 flex items-center justify-center w-full overflow-hidden py-4">
           {/* Spinning Rings */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1, delay: 1.5 }}
-            className="absolute inset-0 flex items-center justify-center"
+            className="absolute inset-0 flex items-center justify-center pointer-events-none"
           >
-            <div className="absolute h-64 w-64 rounded-full border-2 border-dashed border-orange-400/40 animate-spin-slow md:h-96 md:w-96" />
-            <div className="absolute h-52 w-52 rounded-full border border-blue-400/30 animate-spin-reverse md:h-80 md:w-80" />
-            <div className="absolute h-72 w-72 rounded-full border border-white/10 md:h-[28rem] md:w-[28rem]" />
+            <div className="absolute h-44 w-44 sm:h-64 sm:w-64 md:h-96 md:w-96 rounded-full border-2 border-dashed border-orange-400/40 animate-spin-slow" />
+            <div className="absolute h-36 w-36 sm:h-52 sm:w-52 md:h-80 md:w-80 rounded-full border border-blue-400/30 animate-spin-reverse" />
+            <div className="absolute h-52 w-52 sm:h-72 sm:w-72 md:h-[28rem] md:w-[28rem] rounded-full border border-white/10" />
           </motion.div>
 
-          <div className="relative flex items-center text-[6rem] font-black leading-none tracking-tighter text-white md:text-[10rem] lg:text-[14rem]">
+          <div className="relative flex items-center text-[3.8rem] sm:text-[6.5rem] md:text-[10rem] lg:text-[14rem] font-black leading-none tracking-tighter text-white">
             {/* R moves left */}
             <motion.span
               initial={{ x: 0, opacity: 0 }}
-              animate={{ x: -30, opacity: 1 }}
+              animate={{ x: -12, opacity: 1 }}
               transition={{ duration: 1, delay: 2, ease: "easeOut" }}
               className="text-gradient"
             >
@@ -404,7 +400,7 @@ function Hero() {
             {/* XX moves right */}
             <motion.span
               initial={{ x: 0, opacity: 0 }}
-              animate={{ x: 30, opacity: 1 }}
+              animate={{ x: 12, opacity: 1 }}
               transition={{ duration: 1, delay: 2, ease: "easeOut" }}
               className="text-gradient"
             >
@@ -417,7 +413,7 @@ function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 3.2 }}
-          className="mb-6 max-w-2xl text-lg text-slate-300 md:text-2xl"
+          className="mb-6 max-w-2xl text-sm sm:text-lg md:text-2xl text-slate-300 px-2 leading-relaxed"
         >
           Student Innovation Group building autonomous systems for drones, rovers,
           aerial vehicles, and hydroponics.
@@ -427,17 +423,17 @@ function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 3.4 }}
-          className="flex flex-wrap items-center justify-center gap-4"
+          className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto px-4"
         >
           <a
             href="#departments"
-            className="group flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 font-semibold text-white shadow-lg shadow-orange-500/30 transition-all hover:scale-105 hover:shadow-orange-500/50"
+            className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-white shadow-lg shadow-orange-500/30 transition-all hover:scale-105 hover:shadow-orange-500/50"
           >
             Explore Team <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
           </a>
           <a
             href="#projects"
-            className="rounded-full border border-white/20 glass px-8 py-4 font-semibold text-white transition-all hover:bg-white/10"
+            className="flex w-full sm:w-auto items-center justify-center rounded-full border border-white/20 glass px-6 py-3.5 text-sm sm:text-base font-semibold text-white transition-all hover:bg-white/10"
           >
             Our Projects
           </a>
@@ -448,12 +444,18 @@ function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 4 }}
-          className="mt-16 flex flex-col items-center gap-2 text-slate-400"
+          className="mt-12 sm:mt-16 flex flex-col items-center gap-2"
         >
-          <span className="text-xs font-semibold uppercase tracking-widest">
-            SCROLL
+          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+            Scroll
           </span>
-          <ChevronDown className="h-4 w-4 animate-bounce text-orange-400" />
+          <div className="flex h-8 w-5 items-start justify-center rounded-full border-2 border-white/20 p-1">
+            <motion.div
+              animate={{ y: [0, 12, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="h-1.5 w-1.5 rounded-full bg-orange-400"
+            />
+          </div>
         </motion.div>
       </motion.div>
     </section>
@@ -462,39 +464,39 @@ function Hero() {
 
 function Founder() {
   return (
-    <section id="founder" className="relative overflow-hidden bg-ocean-900 py-32">
+    <section id="founder" className="relative overflow-hidden bg-ocean-900 py-20 sm:py-32">
       <div className="mesh-bg absolute inset-0" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="mb-20 text-center"
+          className="mb-12 sm:mb-20 text-center"
         >
-          <span className="mb-4 inline-block rounded-full bg-orange-500/10 px-4 py-1.5 text-sm font-semibold text-orange-400">
-            Vision
+          <span className="mb-3 inline-block rounded-full bg-orange-500/10 px-4 py-1.5 text-xs sm:text-sm font-semibold text-orange-400">
+            Visionary Leadership
           </span>
-          <h2 className="mb-6 text-4xl font-bold text-white md:text-6xl">
-            Founder
+          <h2 className="text-3xl font-bold text-white sm:text-4xl md:text-6xl">
+            Meet the Founder
           </h2>
         </motion.div>
 
-        <div className="grid items-center gap-12 lg:grid-cols-2">
-          {/* Founder Image */}
+        <div className="grid gap-10 lg:grid-cols-12 items-center">
+          {/* Founder Picture */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
-            className="flex justify-center"
+            className="flex justify-center lg:col-span-5"
           >
             <div className="relative">
               {/* Spinning Ring behind picture */}
-              <div className="absolute inset-[-1.5rem] rounded-full border border-dashed border-orange-500/40 animate-spin-slow" />
+              <div className="absolute inset-[-1.25rem] sm:inset-[-1.5rem] rounded-full border border-dashed border-orange-500/40 animate-spin-slow" />
 
-              <div className="relative h-64 w-64 overflow-hidden rounded-full border-4 border-white/10 md:h-80 md:w-80">
+              <div className="relative h-56 w-56 overflow-hidden rounded-full border-4 border-white/10 sm:h-64 sm:w-64 md:h-80 md:w-80 shadow-2xl">
                 <img
                   src="/images/founder.jpg"
                   alt="Founder"
@@ -510,33 +512,34 @@ function Founder() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
+            className="lg:col-span-7"
           >
-            <h3 className="mb-2 text-3xl font-bold text-white md:text-5xl">
+            <h3 className="mb-2 text-2xl font-bold text-white sm:text-3xl md:text-5xl">
               Shashi Kumar C
             </h3>
-            <p className="mb-6 text-lg font-semibold text-orange-400 md:text-xl">
+            <p className="mb-4 sm:mb-6 text-base font-semibold text-orange-400 sm:text-lg md:text-xl">
               Founder, Team ROXX
             </p>
-            <p className="mb-6 text-lg leading-relaxed text-slate-300">
+            <p className="mb-6 text-sm sm:text-base md:text-lg leading-relaxed text-slate-300">
               A passionate innovator in autonomous systems and aerial robotics,
               driven to build technology that pushes the boundaries of what student
               teams can achieve.
             </p>
 
-            <div className="mb-8 rounded-2xl bg-gradient-to-r from-blue-600/20 to-orange-500/20 p-6 border border-white/10">
-              <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-slate-400">
+            <div className="mb-6 sm:mb-8 rounded-2xl bg-gradient-to-r from-blue-600/20 to-orange-500/20 p-4 sm:p-6 border border-white/10">
+              <p className="mb-1 sm:mb-2 text-xs sm:text-sm font-semibold uppercase tracking-wider text-slate-400">
                 Current Role
               </p>
-              <p className="text-xl font-bold text-white md:text-2xl">
+              <p className="text-lg font-bold text-white sm:text-xl md:text-2xl">
                 Research Intern at TiHAN, IIT Hyderabad
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               {["Leadership", "Research", "Robotics", "Innovation"].map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-white/5 px-4 py-2 text-sm text-slate-300 border border-white/10"
+                  className="rounded-full bg-white/5 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm text-slate-300 border border-white/10"
                 >
                   {tag}
                 </span>
@@ -551,29 +554,29 @@ function Founder() {
 
 function TeamLeads() {
   return (
-    <section id="leads" className="relative bg-ocean-900 py-32">
+    <section id="leads" className="relative bg-ocean-900 py-20 sm:py-32">
       <div className="mesh-bg absolute inset-0" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="mb-20 text-center"
+          className="mb-12 sm:mb-20 text-center"
         >
-          <span className="mb-4 inline-block rounded-full bg-orange-500/10 px-4 py-1.5 text-sm font-semibold text-orange-400">
+          <span className="mb-3 inline-block rounded-full bg-orange-500/10 px-4 py-1.5 text-xs sm:text-sm font-semibold text-orange-400">
             Leadership
           </span>
-          <h2 className="mb-6 text-4xl font-bold text-white md:text-6xl">
+          <h2 className="mb-4 sm:mb-6 text-3xl font-bold text-white sm:text-4xl md:text-6xl">
             Team Leads
           </h2>
-          <p className="mx-auto max-w-2xl text-lg text-slate-400">
+          <p className="mx-auto max-w-2xl text-sm sm:text-lg text-slate-400 px-2">
             Meet the people steering ROXX toward innovation and excellence.
           </p>
         </motion.div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {teamLeads.map((lead, index) => (
             <motion.div
               key={lead.name}
@@ -592,20 +595,20 @@ function TeamLeads() {
                     className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white/10 text-3xl font-black text-white ring-2 ring-white/20 md:h-28 md:w-28 md:text-4xl">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/10 text-2xl font-black text-white ring-2 ring-white/20 sm:h-24 sm:w-24 md:h-28 md:w-28 md:text-4xl">
                     {lead.name.charAt(0)}
                   </div>
                 )}
               </div>
-              <div className="p-6">
-                <p className="mb-1 text-sm font-semibold text-orange-400">
+              <div className="p-5 sm:p-6">
+                <p className="mb-1 text-xs sm:text-sm font-semibold text-orange-400">
                   {lead.department}
                 </p>
-                <h3 className="mb-1 text-xl font-bold text-white">
+                <h3 className="mb-1 text-lg sm:text-xl font-bold text-white">
                   {lead.name}
                 </h3>
-                <p className="mb-3 text-sm text-slate-400">{lead.role}</p>
-                <p className="text-sm leading-relaxed text-slate-300">
+                <p className="mb-2 sm:mb-3 text-xs sm:text-sm text-slate-400">{lead.role}</p>
+                <p className="text-xs sm:text-sm leading-relaxed text-slate-300">
                   {lead.bio}
                 </p>
               </div>
@@ -623,6 +626,14 @@ function Departments() {
   const pinnedRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const triggersRef = useRef<ScrollTrigger[]>([]);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => setIsSmallScreen(window.innerWidth < 640);
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
 
   useEffect(() => {
     if (!sectionRef.current || !pinnedRef.current) return;
@@ -659,6 +670,7 @@ function Departments() {
   }, []);
 
   const activeDept = departments[activeIndex];
+  const radius = isSmallScreen ? 100 : 130;
 
   return (
     <section
@@ -667,28 +679,28 @@ function Departments() {
       className="relative bg-ocean-900"
       style={{ height: `${(departments.length * 0.5 + 1) * 100}vh` }}
     >
-      <div ref={pinnedRef} className="relative z-10 flex min-h-screen items-center justify-center overflow-hidden py-20">
+      <div ref={pinnedRef} className="relative z-10 flex min-h-screen items-center justify-center overflow-hidden py-16 sm:py-20">
         <div className="mesh-bg absolute inset-0" />
 
-        <div className="relative z-10 mx-auto w-full max-w-6xl px-6">
-          <div className="mb-12 text-center md:mb-16">
-            <span className="mb-4 inline-block rounded-full bg-blue-500/10 px-4 py-1.5 text-sm font-semibold text-blue-400">
+        <div className="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6">
+          <div className="mb-8 text-center sm:mb-12 md:mb-16">
+            <span className="mb-3 inline-block rounded-full bg-blue-500/10 px-4 py-1.5 text-xs sm:text-sm font-semibold text-blue-400">
               Our Team
             </span>
-            <h2 className="mb-4 text-4xl font-bold text-white md:text-6xl">
+            <h2 className="mb-3 text-3xl font-bold text-white sm:text-4xl md:text-6xl">
               Departments
             </h2>
-            <p className="mx-auto max-w-2xl text-lg text-slate-400">
+            <p className="mx-auto max-w-2xl text-sm sm:text-lg text-slate-400 px-2">
               Keep scrolling to explore every specialized unit that powers ROXX.
             </p>
           </div>
 
-          <div className="flex flex-col items-center gap-12 lg:flex-row lg:justify-center">
+          <div className="flex flex-col items-center gap-8 sm:gap-12 lg:flex-row lg:justify-center">
             {/* Circular Department Orbit Display */}
-            <div className="relative h-[300px] w-[300px] md:h-[420px] md:w-[420px]">
+            <div className="relative h-[250px] w-[250px] sm:h-[320px] sm:w-[320px] md:h-[420px] md:w-[420px] shrink-0">
               <div className="absolute inset-0 rounded-full border border-white/10 animate-spin-slow" />
-              <div className="absolute inset-4 rounded-full border border-dashed border-blue-500/30 animate-spin-reverse" />
-              <div className="absolute inset-[-1.5rem] rounded-full border border-white/5" />
+              <div className="absolute inset-3 sm:inset-4 rounded-full border border-dashed border-blue-500/30 animate-spin-reverse" />
+              <div className="absolute inset-[-1rem] sm:inset-[-1.5rem] rounded-full border border-white/5" />
 
               {/* Center Icon */}
               <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
@@ -699,9 +711,9 @@ function Departments() {
                     animate={{ scale: 1, opacity: 1, rotate: 0 }}
                     exit={{ scale: 0.5, opacity: 0, rotate: 20 }}
                     transition={{ duration: 0.4 }}
-                    className={`flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br ${activeDept.color} shadow-2xl md:h-28 md:w-28`}
+                    className={`flex h-16 w-16 sm:h-22 sm:w-22 md:h-28 md:w-28 items-center justify-center rounded-2xl sm:rounded-3xl bg-gradient-to-br ${activeDept.color} shadow-2xl`}
                   >
-                    <activeDept.icon className="h-8 w-8 text-white md:h-12 md:w-12" />
+                    <activeDept.icon className="h-6 w-6 sm:h-8 sm:w-8 md:h-12 md:w-12 text-white" />
                   </motion.div>
                 </AnimatePresence>
               </div>
@@ -709,7 +721,6 @@ function Departments() {
               {/* Orbiting Department Node Buttons */}
               {departments.map((dept, index) => {
                 const angle = (index / departments.length) * Math.PI * 2 - Math.PI / 2;
-                const radius = 130;
                 const x = Math.cos(angle) * radius;
                 const y = Math.sin(angle) * radius;
                 const isActive = index === activeIndex;
@@ -722,21 +733,21 @@ function Departments() {
                       transform: `translate(${x}px, ${y}px)`,
                     }}
                     className={`absolute left-1/2 top-1/2 z-30 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center transition-all duration-300 ${
-                      isActive ? "scale-125" : "opacity-60 hover:opacity-100"
+                      isActive ? "scale-110 sm:scale-125" : "opacity-60 hover:opacity-100"
                     }`}
                   >
                     <div
-                      className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all md:h-12 md:w-12 ${
+                      className={`flex h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 items-center justify-center rounded-xl sm:rounded-2xl transition-all ${
                         isActive
                           ? `bg-gradient-to-br ${dept.color} shadow-lg shadow-blue-500/30`
                           : "glass-dark text-slate-300"
                       }`}
                     >
-                      <dept.icon className="h-5 w-5 text-white" />
+                      <dept.icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                     </div>
                     <span
-                      className={`mt-1.5 text-[10px] font-semibold md:text-xs ${
-                        isActive ? "text-white" : "text-slate-400"
+                      className={`mt-1 text-[9px] sm:text-[10px] font-semibold md:text-xs whitespace-nowrap ${
+                        isActive ? "text-white font-bold" : "text-slate-400"
                       }`}
                     >
                       {dept.name}
@@ -755,23 +766,23 @@ function Departments() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -40 }}
                   transition={{ duration: 0.4 }}
-                  className="glass rounded-3xl p-8 md:p-10 border border-white/10"
+                  className="glass rounded-3xl p-5 sm:p-8 md:p-10 border border-white/10"
                 >
-                  <div className="mb-6 flex items-center gap-4">
-                    <div className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${activeDept.color} shadow-lg`}>
-                      <activeDept.icon className="h-7 w-7 text-white" />
+                  <div className="mb-4 sm:mb-6 flex items-center gap-3 sm:gap-4">
+                    <div className={`flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${activeDept.color} shadow-lg`}>
+                      <activeDept.icon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-white md:text-3xl">
+                      <h3 className="text-xl font-bold text-white sm:text-2xl md:text-3xl">
                         {activeDept.name}
                       </h3>
-                      <p className="text-sm font-semibold text-blue-400">
+                      <p className="text-xs sm:text-sm font-semibold text-blue-400">
                         {activeDept.lead}
                       </p>
                     </div>
                   </div>
 
-                  <p className="mb-8 text-base leading-relaxed text-slate-300 md:text-lg">
+                  <p className="mb-6 sm:mb-8 text-sm sm:text-base leading-relaxed text-slate-300 md:text-lg">
                     {activeDept.description}
                   </p>
 
@@ -779,7 +790,7 @@ function Departments() {
                     {["Leadership", "Innovation", "Execution", "Excellence"].map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-xl bg-white/5 px-3 py-1.5 text-xs text-slate-300 border border-white/5"
+                        className="rounded-xl bg-white/5 px-2.5 py-1 text-[11px] sm:text-xs text-slate-300 border border-white/5"
                       >
                         {tag}
                       </span>
@@ -791,7 +802,7 @@ function Departments() {
           </div>
 
           {/* Progress Bar */}
-          <div className="mx-auto mt-12 max-w-md">
+          <div className="mx-auto mt-8 sm:mt-12 max-w-md">
             <div className="flex items-center justify-between text-xs text-slate-400">
               <span>{activeIndex + 1} / {departments.length}</span>
               <span>Keep scrolling</span>
@@ -815,29 +826,29 @@ function Projects() {
   const activeProject = projects[activeIndex];
 
   return (
-    <section id="projects" className="relative bg-ocean-900 py-32">
+    <section id="projects" className="relative bg-ocean-900 py-20 sm:py-32">
       <div className="mesh-bg absolute inset-0" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="mb-20 text-center"
+          className="mb-12 sm:mb-20 text-center"
         >
-          <span className="mb-4 inline-block rounded-full bg-orange-500/10 px-4 py-1.5 text-sm font-semibold text-orange-400">
+          <span className="mb-3 inline-block rounded-full bg-orange-500/10 px-4 py-1.5 text-xs sm:text-sm font-semibold text-orange-400">
             Projects
           </span>
-          <h2 className="mb-6 text-4xl font-bold text-white md:text-6xl">
+          <h2 className="mb-4 sm:mb-6 text-3xl font-bold text-white sm:text-4xl md:text-6xl">
             R&D Projects
           </h2>
         </motion.div>
 
         <div className="mx-auto max-w-5xl">
-          <div className="relative overflow-hidden rounded-3xl glass border border-white/10 p-8 md:p-12">
-            <div className="grid gap-8 lg:grid-cols-12 items-center">
-              <div className="relative h-64 overflow-hidden rounded-2xl lg:col-span-6 md:h-80">
+          <div className="relative overflow-hidden rounded-3xl glass border border-white/10 p-5 sm:p-8 md:p-12">
+            <div className="grid gap-6 sm:gap-8 lg:grid-cols-12 items-center">
+              <div className="relative h-48 sm:h-64 overflow-hidden rounded-2xl lg:col-span-6 md:h-80">
                 <img
                   src={activeProject.image}
                   alt={activeProject.title}
@@ -846,17 +857,17 @@ function Projects() {
               </div>
 
               <div className="lg:col-span-6">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-500">
-                  <activeProject.icon className="h-6 w-6 text-white" />
+                <div className="mb-3 sm:mb-4 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-500">
+                  <activeProject.icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 </div>
-                <h3 className="mb-2 text-2xl font-bold text-white md:text-4xl">
+                <h3 className="mb-2 text-xl font-bold text-white sm:text-2xl md:text-4xl">
                   {activeProject.title}
                 </h3>
-                <p className="mb-6 text-base text-slate-200 md:text-lg">
+                <p className="mb-6 text-sm text-slate-200 sm:text-base md:text-lg">
                   {activeProject.description}
                 </p>
 
-                <div className="flex gap-3">
+                <div className="flex gap-2.5">
                   {projects.map((_, index) => (
                     <button
                       key={index}
@@ -866,6 +877,7 @@ function Projects() {
                           ? "w-8 bg-orange-500"
                           : "w-2.5 bg-white/30 hover:bg-white/50"
                       }`}
+                      aria-label={`Select project ${index + 1}`}
                     />
                   ))}
                 </div>
@@ -880,29 +892,29 @@ function Projects() {
 
 function Achievements() {
   return (
-    <section id="achievements" className="relative overflow-hidden bg-ocean-900 py-32">
+    <section id="achievements" className="relative overflow-hidden bg-ocean-900 py-20 sm:py-32">
       <div className="mesh-bg absolute inset-0" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="mb-20 text-center"
+          className="mb-12 sm:mb-20 text-center"
         >
-          <span className="mb-4 inline-block rounded-full bg-yellow-500/10 px-4 py-1.5 text-sm font-semibold text-yellow-400">
+          <span className="mb-3 inline-block rounded-full bg-yellow-500/10 px-4 py-1.5 text-xs sm:text-sm font-semibold text-yellow-400">
             Milestones
           </span>
-          <h2 className="mb-6 text-4xl font-bold text-white md:text-6xl">
+          <h2 className="mb-4 sm:mb-6 text-3xl font-bold text-white sm:text-4xl md:text-6xl">
             Achievements
           </h2>
-          <p className="mx-auto max-w-2xl text-lg text-slate-400">
+          <p className="mx-auto max-w-2xl text-sm sm:text-lg text-slate-400 px-2">
             Recognitions that reflect our relentless pursuit of engineering excellence.
           </p>
         </motion.div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {achievements.map((achievement, index) => (
             <motion.div
               key={achievement.title}
@@ -911,15 +923,15 @@ function Achievements() {
               viewport={{ once: true, margin: "-50px" }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               whileHover={{ y: -8, scale: 1.02 }}
-              className="glass group rounded-2xl p-8 transition-all hover:border-orange-500/30"
+              className="glass group rounded-2xl p-5 sm:p-8 transition-all hover:border-orange-500/30"
             >
-              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-500 to-orange-500 shadow-lg shadow-orange-500/20 transition-transform group-hover:scale-110">
-                <achievement.icon className="h-7 w-7 text-white" />
+              <div className="mb-4 sm:mb-6 flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-500 to-orange-500 shadow-lg shadow-orange-500/20 transition-transform group-hover:scale-110">
+                <achievement.icon className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
               </div>
-              <h3 className="mb-2 text-xl font-bold text-white">
+              <h3 className="mb-1.5 text-lg sm:text-xl font-bold text-white">
                 {achievement.title}
               </h3>
-              <p className="text-slate-400">{achievement.org}</p>
+              <p className="text-xs sm:text-sm text-slate-400">{achievement.org}</p>
             </motion.div>
           ))}
         </div>
@@ -933,28 +945,28 @@ function TeamCards() {
   const card = teamCards[activeCard];
 
   return (
-    <section id="team" className="relative overflow-hidden bg-ocean-900 py-32">
+    <section id="team" className="relative overflow-hidden bg-ocean-900 py-20 sm:py-32">
       <div className="mesh-bg absolute inset-0" />
 
-      <div className="relative z-10 mx-auto max-w-5xl px-6">
+      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8 }}
-          className="mb-20 text-center"
+          className="mb-12 sm:mb-20 text-center"
         >
-          <span className="mb-4 inline-block rounded-full bg-purple-500/10 px-4 py-1.5 text-sm font-semibold text-purple-400">
+          <span className="mb-3 inline-block rounded-full bg-purple-500/10 px-4 py-1.5 text-xs sm:text-sm font-semibold text-purple-400">
             Team Voices
           </span>
-          <h2 className="mb-6 text-4xl font-bold text-white md:text-6xl">
+          <h2 className="mb-4 sm:mb-6 text-3xl font-bold text-white sm:text-4xl md:text-6xl">
             Words From ROXX
           </h2>
         </motion.div>
 
         <div className="flex flex-col items-center">
           <div className="relative w-full max-w-2xl">
-            <div className="relative mx-auto aspect-[16/10] w-full overflow-hidden rounded-t-3xl bg-gradient-to-b from-slate-100 to-slate-200 shadow-2xl">
+            <div className="relative mx-auto aspect-[1.1/1] sm:aspect-[16/10] w-full overflow-hidden rounded-t-3xl bg-gradient-to-b from-slate-100 to-slate-200 shadow-2xl">
               <motion.div
                 initial={{ rotateX: 0 }}
                 whileInView={{ rotateX: 180 }}
@@ -973,24 +985,24 @@ function TeamCards() {
                 <motion.div
                   key={activeCard}
                   initial={{ y: 80, opacity: 0 }}
-                  whileInView={{ y: -60, opacity: 1 }}
+                  whileInView={{ y: -50, opacity: 1 }}
                   viewport={{ once: false }}
                   transition={{ duration: 0.8, delay: 1, type: "spring" }}
-                  className="absolute left-1/2 top-1/2 z-30 w-[85%] -translate-x-1/2 rounded-2xl bg-white p-6 shadow-xl md:p-8"
+                  className="absolute left-1/2 top-1/2 z-30 w-[92%] sm:w-[85%] -translate-x-1/2 rounded-2xl bg-white p-4 sm:p-6 md:p-8 shadow-xl"
                 >
                   <div className="flex flex-col items-center text-center">
                     <img
                       src={card.image}
                       alt={card.name}
-                      className="mb-4 h-20 w-20 rounded-2xl object-cover object-top md:h-24 md:w-24"
+                      className="mb-3 sm:mb-4 h-16 w-16 sm:h-20 sm:w-20 rounded-2xl object-cover object-top md:h-24 md:w-24"
                     />
-                    <h3 className="text-xl font-bold text-slate-900 md:text-2xl">
+                    <h3 className="text-lg font-bold text-slate-900 sm:text-xl md:text-2xl">
                       {card.name}
                     </h3>
-                    <p className="mb-4 text-sm font-semibold text-orange-500 md:text-base">
+                    <p className="mb-2 sm:mb-4 text-xs font-semibold text-orange-500 sm:text-sm md:text-base">
                       {card.role}
                     </p>
-                    <p className="text-slate-600 italic">&ldquo;{card.quote}&rdquo;</p>
+                    <p className="text-xs sm:text-sm text-slate-600 italic">&ldquo;{card.quote}&rdquo;</p>
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -1001,12 +1013,12 @@ function TeamCards() {
               </div>
             </div>
 
-            <div className="absolute -right-4 -top-4 rounded-full bg-orange-500 p-3 shadow-lg">
-              <Mail className="h-6 w-6 text-white" />
+            <div className="absolute -right-2 -top-2 sm:-right-4 sm:-top-4 rounded-full bg-orange-500 p-2 sm:p-3 shadow-lg">
+              <Mail className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
             </div>
           </div>
 
-          <div className="mt-24 flex items-center gap-3">
+          <div className="mt-16 sm:mt-24 flex items-center gap-3">
             {teamCards.map((_, index) => (
               <button
                 key={index}
@@ -1016,6 +1028,7 @@ function TeamCards() {
                     ? "w-8 bg-orange-500"
                     : "w-3 bg-white/20 hover:bg-white/40"
                 }`}
+                aria-label={`Select card ${index + 1}`}
               />
             ))}
           </div>
@@ -1027,28 +1040,28 @@ function TeamCards() {
 
 function Footer() {
   return (
-    <footer className="relative overflow-hidden bg-ocean-900 pb-8 pt-24">
+    <footer className="relative overflow-hidden bg-ocean-900 pb-8 pt-16 sm:pt-24">
       <div className="mesh-bg absolute inset-0" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
-        <div className="mb-16 grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mb-12 sm:mb-16 grid gap-8 sm:gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white/10 shadow-lg shadow-orange-500/20 ring-1 ring-white/20 md:h-20 md:w-20">
+            <div className="mb-4 sm:mb-6 flex items-center gap-3">
+              <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center overflow-hidden rounded-2xl bg-white/10 shadow-lg shadow-orange-500/20 ring-1 ring-white/20 md:h-20 md:w-20">
                 <img
                   src="/images/roxx-logo.png"
                   alt="ROXX Logo"
                   className="h-full w-full object-cover"
                 />
               </div>
-              <span className="text-xl font-bold text-white">
+              <span className="text-lg sm:text-xl font-bold text-white">
                 Team <span className="text-orange-400">ROXX</span>
               </span>
             </div>
-            <p className="mb-6 text-slate-400">
+            <p className="mb-6 text-xs sm:text-sm text-slate-400 leading-relaxed">
               Innovating at the edge of robotics, aviation, and sustainable automation.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-3 sm:gap-4">
               {[
                 { name: "Instagram", path: "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" },
                 { name: "Twitter", path: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" },
@@ -1059,9 +1072,9 @@ function Footer() {
                   key={index}
                   href="#"
                   aria-label={social.name}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-slate-400 transition-all hover:bg-orange-500 hover:text-white"
+                  className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-white/5 text-slate-400 transition-all hover:bg-orange-500 hover:text-white"
                 >
-                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d={social.path} />
                   </svg>
                 </a>
@@ -1070,8 +1083,8 @@ function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-6 text-lg font-bold text-white">Quick Links</h4>
-            <ul className="space-y-3 text-slate-400">
+            <h4 className="mb-4 sm:mb-6 text-base sm:text-lg font-bold text-white">Quick Links</h4>
+            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-400">
               {["Home", "Founder", "Leads", "Departments", "Projects", "Achievements", "Team"].map((link) => (
                 <li key={link}>
                   <a
@@ -1086,8 +1099,8 @@ function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-6 text-lg font-bold text-white">Contact</h4>
-            <ul className="space-y-3 text-slate-400">
+            <h4 className="mb-4 sm:mb-6 text-base sm:text-lg font-bold text-white">Contact</h4>
+            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-400">
               <li>teamroxx@university.edu</li>
               <li>+91 98765 43210</li>
               <li>Innovation Lab, Block C</li>
@@ -1096,24 +1109,24 @@ function Footer() {
           </div>
 
           <div>
-            <h4 className="mb-6 text-lg font-bold text-white">Team Portal</h4>
-            <p className="mb-4 text-slate-400">
+            <h4 className="mb-4 sm:mb-6 text-base sm:text-lg font-bold text-white">Team Portal</h4>
+            <p className="mb-4 text-xs sm:text-sm text-slate-400 leading-relaxed">
               Members can access resources, schedules, and project dashboards.
             </p>
             <Link
               href="/dashboard"
-              className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-6 py-3 font-semibold text-white transition-all hover:shadow-lg hover:shadow-orange-500/30"
+              className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-orange-500/30"
             >
               Enter Portal <ExternalLink className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
-          <p className="text-sm text-slate-500">
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-6 sm:pt-8 md:flex-row text-center md:text-left">
+          <p className="text-xs sm:text-sm text-slate-500">
             © {new Date().getFullYear()} Team ROXX. All rights reserved.
           </p>
-          <p className="text-sm text-slate-500">
+          <p className="text-xs sm:text-sm text-slate-500">
             Designed with passion by Team ROXX
           </p>
         </div>
