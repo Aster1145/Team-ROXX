@@ -83,11 +83,11 @@ const teamLeads = [
     image: "/images/umar.png",
   },
   {
-    name: "Flight Ops Lead",
+    name: "Sai Tanveesh",
     role: "Vice Captain",
     department: "Flight Operations",
     bio: "Managing telemetry ground stations, safety compliance, and field flight tests.",
-    image: "/images/team-3.jpg",
+    image: "/images/tanveesh.jpg",
   },
   {
     name: "Software Lead",
@@ -183,9 +183,9 @@ const departments = [
   {
     id: "flight-operations",
     name: "Flight Operations",
-    lead: "Operations Lead",
+    lead: "Sai Tanveesh",
     role: "Operations Lead",
-    image: "/images/team-4.jpg",
+    image: "/images/tanveesh.jpg",
     icon: Compass,
     color: "from-sky-500 to-blue-600",
     description: "Flight testing protocols, safety compliance, telemetry ground stations, and field operations.",
