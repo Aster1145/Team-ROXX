@@ -1185,8 +1185,16 @@ function Footer() {
           <div>
             <h4 className="mb-4 sm:mb-6 text-base sm:text-lg font-bold text-white">Contact</h4>
             <ul className="space-y-2.5 text-xs sm:text-sm text-slate-400">
-              <li>teamroxx@university.edu</li>
-              <li>+91 98765 43210</li>
+              <li>
+                <a href="mailto:team.roxx.innovation@gmail.com" className="transition-colors hover:text-orange-400">
+                  team.roxx.innovation@gmail.com
+                </a>
+              </li>
+              <li>
+                <a href="tel:+919113985429" className="transition-colors hover:text-orange-400">
+                  +91 91139 85429
+                </a>
+              </li>
               <li>Innovation Lab, Block C</li>
               <li>University Campus, India</li>
             </ul>
