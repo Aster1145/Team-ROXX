@@ -104,11 +104,11 @@ const teamLeads = [
     image: "/images/team-1.jpg",
   },
   {
-    name: "Social Media Lead",
+    name: "Arighna Chowdhury",
     role: "Vice Captain",
     department: "Social Media & Branding",
     bio: "Building ROXX brand identity, content creation, digital media, and community storytelling.",
-    image: "/images/team-2.jpg",
+    image: "/images/arighna.png",
   },
   {
     name: "Khushi Kumari",
@@ -203,9 +203,9 @@ const departments = [
   {
     id: "social-media",
     name: "Social Media",
-    lead: "Media Lead",
+    lead: "Arighna Chowdhury",
     role: "Media Lead",
-    image: "/images/team-2.jpg",
+    image: "/images/arighna.png",
     icon: Share2,
     color: "from-rose-500 to-red-400",
     description: "Content creation, community engagement, digital media, and brand storytelling.",
