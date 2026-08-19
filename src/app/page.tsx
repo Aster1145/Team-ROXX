@@ -498,7 +498,7 @@ function Founder() {
                 <img
                   src="/images/founder.jpg"
                   alt="Founder"
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover object-top"
                 />
               </div>
             </div>
@@ -589,7 +589,7 @@ function TeamLeads() {
                   <img
                     src={lead.image}
                     alt={lead.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="h-full w-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
                   <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white/10 text-3xl font-black text-white ring-2 ring-white/20 md:h-28 md:w-28 md:text-4xl">
@@ -982,7 +982,7 @@ function TeamCards() {
                     <img
                       src={card.image}
                       alt={card.name}
-                      className="mb-4 h-20 w-20 rounded-2xl object-cover md:h-24 md:w-24"
+                      className="mb-4 h-20 w-20 rounded-2xl object-cover object-top md:h-24 md:w-24"
                     />
                     <h3 className="text-xl font-bold text-slate-900 md:text-2xl">
                       {card.name}
