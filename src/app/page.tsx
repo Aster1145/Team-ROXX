@@ -1195,8 +1195,8 @@ function Footer() {
                   +91 91139 85429
                 </a>
               </li>
-              <li>Innovation Lab, Block C</li>
-              <li>University Campus, India</li>
+              <li>Center of Excellence-426, Block-B</li>
+              <li>Dayananda Sagar University, India</li>
             </ul>
           </div>
 
