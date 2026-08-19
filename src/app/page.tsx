@@ -61,7 +61,7 @@ const teamLeads = [
     role: "Vice Captain",
     department: "Integration",
     bio: "Architecting systems that bring hardware, software, and mission goals together.",
-    image: "/images/team-3.jpg",
+    image: "/images/shreyas.png",
   },
 ];
 
@@ -191,7 +191,7 @@ const teamCards = [
     name: "Shreyas R",
     role: "Vice Captain & Integration Lead",
     quote: "Integration is where individual brilliance becomes a symphony of systems.",
-    image: "/images/team-3.jpg",
+    image: "/images/shreyas.png",
   },
   {
     name: "Emily Chen",
