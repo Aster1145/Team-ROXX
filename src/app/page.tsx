@@ -43,7 +43,7 @@ const teamLeads = [
   {
     name: "Hansika M",
     role: "Team Lead",
-    department: "Avionics",
+    department: "Autonomy Stack",
     bio: "Guiding ROXX with passion for autonomous systems and aerial innovation.",
     image: "/images/team-hansika.jpg",
   },
@@ -123,9 +123,9 @@ const departments = [
   {
     id: "avionics",
     name: "Avionics",
-    lead: "Avionics Lead",
+    lead: "Shashi Kumar C",
     role: "Avionics Lead",
-    image: "/images/team-hansika.jpg",
+    image: "/images/founder.jpg",
     icon: Plane,
     color: "from-blue-500 to-cyan-400",
     description: "Flight control systems, autopilot integration, and aerial navigation.",
@@ -143,7 +143,7 @@ const departments = [
   {
     id: "technical-integration",
     name: "Technical Integration",
-    lead: "Integration Lead",
+    lead: "Shreyas R",
     role: "Integration Lead",
     image: "/images/shreyas.png",
     icon: Settings,
@@ -153,9 +153,9 @@ const departments = [
   {
     id: "autonomy-stack",
     name: "Autonomy Stack",
-    lead: "Dhruva Kumar T R",
+    lead: "Hansika M",
     role: "Autonomy Lead",
-    image: "/images/dhruva.png",
+    image: "/images/team-hansika.jpg",
     icon: Cpu,
     color: "from-emerald-500 to-teal-400",
     description: "Real-time SLAM, GPS-denied navigation, AI vision, and path-planning algorithms.",
