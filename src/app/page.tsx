@@ -97,11 +97,11 @@ const teamLeads = [
     image: "",
   },
   {
-    name: "Business Lead",
+    name: "Lekh Rathod",
     role: "Vice Captain",
     department: "Business & Sponsorships",
     bio: "Acquiring corporate sponsorships, grant funding, budget management, and partner relations.",
-    image: "",
+    image: "/images/lekh.jpg",
   },
   {
     name: "Arighna Chowdhury",
@@ -193,9 +193,9 @@ const departments = [
   {
     id: "business-sponsorships",
     name: "Business & Sponsor",
-    lead: "Business Lead",
+    lead: "Lekh Rathod",
     role: "Business Lead",
-    image: "",
+    image: "/images/lekh.jpg",
     icon: DollarSign,
     color: "from-green-500 to-emerald-600",
     description: "Corporate sponsorship acquisition, grant funding, budget management, and partner relations.",
