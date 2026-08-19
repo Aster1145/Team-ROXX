@@ -250,7 +250,7 @@ const projects = [
 ];
 
 const achievements = [
-  { title: "National Drone Champions", org: "AVIATHON 2024", icon: Trophy },
+  { title: "1st Prize - AI Robosoccer Winner", org: "DSU Celesti 2026 (₹50,000 Cash Prize)", icon: Trophy },
   { title: "Best Innovation Award", org: "TechFest IIT Bombay", icon: Award },
   { title: "Top 5 Global Finalist", org: "IARC Challenge", icon: Target },
   { title: "Research Grant Winner", org: "DST India", icon: Rocket },
