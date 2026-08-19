@@ -254,8 +254,8 @@ const achievements = [
   { title: "Best Innovation Award", org: "TechFest IIT Bombay", icon: Award },
   { title: "Top 5 Global Finalist", org: "IARC Challenge", icon: Target },
   { title: "Research Grant Winner", org: "DST India", icon: Rocket },
-  { title: "500+ Community Members", org: "Student Network", icon: Users },
-  { title: "Published 3 Papers", org: "IEEE Xplore", icon: Cpu },
+  { title: "50+ Community Members", org: "Student Network", icon: Users },
+  { title: "1 Published Paper", org: "IEEE Xplore", icon: Cpu },
 ];
 
 const teamCards = [
