@@ -111,11 +111,11 @@ const teamLeads = [
     image: "/images/team-2.jpg",
   },
   {
-    name: "Documentation Lead",
+    name: "Khushi Kumari",
     role: "Vice Captain",
     department: "Documentation & Reports",
     bio: "Authoring technical whitepapers, competition logs, research papers, and compliance docs.",
-    image: "/images/team-3.jpg",
+    image: "/images/khushi.png",
   },
 ];
 
@@ -213,9 +213,9 @@ const departments = [
   {
     id: "documentation",
     name: "Documentation",
-    lead: "Docs Lead",
+    lead: "Khushi Kumari",
     role: "Docs Lead",
-    image: "/images/team-3.jpg",
+    image: "/images/khushi.png",
     icon: FileText,
     color: "from-fuchsia-500 to-pink-500",
     description: "Technical documentation, whitepapers, competition logs, research papers, and compliance.",
