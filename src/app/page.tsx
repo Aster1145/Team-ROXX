@@ -55,11 +55,11 @@ const teamLeads = [
     image: "/images/founder.jpg",
   },
   {
-    name: "Akshay M",
+    name: "Ronak Soni",
     role: "Vice Captain",
     department: "Electronics",
-    bio: "Driving electronics innovation and cross-team technical strategy.",
-    image: "/images/akshay.png",
+    bio: "Driving electronics innovation, circuit design, and hardware strategy.",
+    image: "/images/ronak.jpg",
   },
   {
     name: "Shreyas R",
@@ -90,11 +90,11 @@ const teamLeads = [
     image: "/images/tanveesh.jpg",
   },
   {
-    name: "Software Lead",
+    name: "Akshay M",
     role: "Vice Captain",
     department: "Software Dev",
     bio: "Architecting web portals, real-time telemetry APIs, and developer tooling.",
-    image: "",
+    image: "/images/akshay.png",
   },
   {
     name: "Lekh Rathod",
@@ -133,9 +133,9 @@ const departments = [
   {
     id: "electronics",
     name: "Electronics",
-    lead: "Electronics Lead",
+    lead: "Ronak Soni",
     role: "Electronics Lead",
-    image: "/images/akshay.png",
+    image: "/images/ronak.jpg",
     icon: Zap,
     color: "from-yellow-500 to-orange-400",
     description: "PCB design, power distribution, sensor interfacing, and embedded hardware.",
@@ -173,9 +173,9 @@ const departments = [
   {
     id: "software-dev",
     name: "Software Dev",
-    lead: "Software Lead",
+    lead: "Akshay M",
     role: "Software Lead",
-    image: "",
+    image: "/images/akshay.png",
     icon: Code,
     color: "from-indigo-500 to-cyan-500",
     description: "Cloud dashboard architecture, telemetry APIs, web portal, and developer tooling.",
