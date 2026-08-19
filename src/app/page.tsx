@@ -251,7 +251,7 @@ const projects = [
 
 const achievements = [
   { title: "1st Prize - AI Robosoccer Winner", org: "DSU Celesti 2026 (₹50,000 Cash Prize)", icon: Trophy },
-  { title: "Best Innovation Award", org: "TechFest IIT Bombay", icon: Award },
+  { title: "NIDAR 2025-2026 Participants", org: "Hosted in Delhi, Noida", icon: Award },
   { title: "Top 5 Global Finalist", org: "IARC Challenge", icon: Target },
   { title: "Research Grant Winner", org: "DST India", icon: Rocket },
   { title: "50+ Community Members", org: "Student Network", icon: Users },
