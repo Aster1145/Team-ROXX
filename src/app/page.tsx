@@ -401,7 +401,7 @@ function Hero() {
     <section
       id="home"
       ref={containerRef}
-      className="relative flex min-h-screen items-center justify-center overflow-hidden pt-28 pb-16 sm:pt-36 sm:pb-24"
+      className="relative flex h-screen min-h-[620px] max-h-[1000px] flex-col items-center justify-between overflow-hidden pt-20 pb-4 sm:pt-24 sm:pb-6"
     >
       {/* Ocean Background */}
       <motion.div style={{ y, scale }} className="absolute inset-0 z-0">
@@ -413,41 +413,41 @@ function Hero() {
         <div className="mesh-bg absolute inset-0" />
       </motion.div>
 
-      {/* Animated Waves */}
-      <div className="absolute bottom-0 left-0 right-0 z-0 opacity-40">
+      {/* Animated Waves (Anchored at bottom-0, fully visible on load) */}
+      <div className="absolute bottom-0 left-0 right-0 z-0 opacity-50 pointer-events-none">
         <svg
-          viewBox="0 0 1440 320"
-          className="w-full animate-wave"
+          viewBox="0 0 1440 280"
+          className="w-full h-32 sm:h-44 md:h-56 animate-wave object-cover"
           preserveAspectRatio="none"
         >
           <path
-            fill="#2563eb"
-            fillOpacity="0.3"
+            fill="#1e3a8a"
+            fillOpacity="0.5"
             d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
           />
         </svg>
       </div>
 
-      {/* Content */}
+      {/* Content Container */}
       <motion.div
         style={{ opacity }}
-        className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center px-4 sm:px-6 text-center pt-4 sm:pt-8"
+        className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col items-center justify-center px-4 sm:px-6 text-center"
       >
-        {/* Drone Fly-in */}
+        {/* Drone Fly-in (Positioned safely below header) */}
         <motion.div
           initial={{ x: -300, y: 150, scale: 0.1, opacity: 0, rotate: -15 }}
           animate={{ x: 0, y: 0, scale: 1, opacity: 1, rotate: 0 }}
           transition={{ duration: 2.4, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.2 }}
-          className="mb-4 sm:mb-8"
+          className="mb-2 sm:mb-4"
         >
           <div className="relative">
-            <div className="absolute -inset-6 rounded-full bg-orange-500/20 blur-xl animate-pulse-glow" />
-            <Plane className="relative h-16 w-16 text-orange-400 drop-shadow-[0_0_30px_rgba(249,115,22,0.6)] sm:h-20 sm:w-20 md:h-28 md:w-28" />
+            <div className="absolute -inset-4 rounded-full bg-orange-500/20 blur-xl animate-pulse-glow" />
+            <Plane className="relative h-12 w-12 text-orange-400 drop-shadow-[0_0_30px_rgba(249,115,22,0.6)] sm:h-16 sm:w-16 md:h-22 md:w-22" />
           </div>
         </motion.div>
 
         {/* ROXX Animated Logo */}
-        <div className="relative mb-6 sm:mb-8 flex items-center justify-center w-full overflow-hidden py-4">
+        <div className="relative mb-3 sm:mb-6 flex items-center justify-center w-full overflow-hidden py-1 sm:py-2">
           {/* Spinning Rings */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
@@ -455,12 +455,12 @@ function Hero() {
             transition={{ duration: 1, delay: 1.5 }}
             className="absolute inset-0 flex items-center justify-center pointer-events-none"
           >
-            <div className="absolute h-44 w-44 sm:h-64 sm:w-64 md:h-96 md:w-96 rounded-full border-2 border-dashed border-orange-400/40 animate-spin-slow" />
-            <div className="absolute h-36 w-36 sm:h-52 sm:w-52 md:h-80 md:w-80 rounded-full border border-blue-400/30 animate-spin-reverse" />
-            <div className="absolute h-52 w-52 sm:h-72 sm:w-72 md:h-[28rem] md:w-[28rem] rounded-full border border-white/10" />
+            <div className="absolute h-40 w-40 sm:h-56 sm:w-56 md:h-80 md:w-80 rounded-full border-2 border-dashed border-orange-400/40 animate-spin-slow" />
+            <div className="absolute h-32 w-32 sm:h-44 sm:w-44 md:h-64 md:w-64 rounded-full border border-blue-400/30 animate-spin-reverse" />
+            <div className="absolute h-[11rem] w-[11rem] sm:h-64 sm:w-64 md:h-[22rem] md:w-[22rem] rounded-full border border-white/10" />
           </motion.div>
 
-          <div className="relative flex items-center text-[3.8rem] sm:text-[6.5rem] md:text-[10rem] lg:text-[14rem] font-black leading-none tracking-tighter text-white">
+          <div className="relative flex items-center text-[3.5rem] sm:text-[6rem] md:text-[9rem] lg:text-[11rem] font-black leading-none tracking-tighter text-white">
             {/* R moves left */}
             <motion.span
               initial={{ x: 0, opacity: 0 }}
@@ -497,7 +497,7 @@ function Hero() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 3.2 }}
-          className="mb-6 max-w-2xl text-sm sm:text-lg md:text-2xl text-slate-300 px-2 leading-relaxed"
+          className="mb-4 max-w-2xl text-xs sm:text-base md:text-xl text-slate-300 px-2 leading-relaxed"
         >
           Student Innovation Group building autonomous systems for drones, rovers,
           aerial vehicles, and hydroponics.
@@ -511,36 +511,36 @@ function Hero() {
         >
           <a
             href="#departments"
-            className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-6 py-3.5 text-sm sm:text-base font-semibold text-white shadow-lg shadow-orange-500/30 transition-all hover:scale-105 hover:shadow-orange-500/50"
+            className="group flex w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-red-500 px-6 py-3 text-xs sm:text-base font-semibold text-white shadow-lg shadow-orange-500/30 transition-all hover:scale-105 hover:shadow-orange-500/50"
           >
-            Explore Team <ChevronRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            Explore Team <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-x-1" />
           </a>
           <a
             href="#projects"
-            className="flex w-full sm:w-auto items-center justify-center rounded-full border border-white/20 glass px-6 py-3.5 text-sm sm:text-base font-semibold text-white transition-all hover:bg-white/10"
+            className="flex w-full sm:w-auto items-center justify-center rounded-full border border-white/20 glass px-6 py-3 text-xs sm:text-base font-semibold text-white transition-all hover:bg-white/10"
           >
             Our Projects
           </a>
         </motion.div>
+      </motion.div>
 
-        {/* Scroll Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 4 }}
-          className="mt-12 sm:mt-16 flex flex-col items-center gap-2"
-        >
-          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-            Scroll
-          </span>
-          <div className="flex h-8 w-5 items-start justify-center rounded-full border-2 border-white/20 p-1">
-            <motion.div
-              animate={{ y: [0, 12, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              className="h-1.5 w-1.5 rounded-full bg-orange-400"
-            />
-          </div>
-        </motion.div>
+      {/* Scroll Indicator (Always visible on initial page load at bottom) */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 4 }}
+        className="relative z-10 flex flex-col items-center gap-1.5 pb-2"
+      >
+        <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-slate-300">
+          Scroll
+        </span>
+        <div className="flex h-7 w-4 sm:h-8 sm:w-5 items-start justify-center rounded-full border-2 border-white/30 p-1 bg-ocean-900/40 backdrop-blur-sm">
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            className="h-1.5 w-1.5 rounded-full bg-orange-400"
+          />
+        </div>
       </motion.div>
     </section>
   );
