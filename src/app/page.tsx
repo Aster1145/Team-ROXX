@@ -40,24 +40,28 @@ const teamLeads = [
     role: "Team Lead",
     department: "Avionics",
     bio: "Guiding ROXX with passion for autonomous systems and aerial innovation.",
+    image: "/images/team-1.jpg",
   },
   {
     name: "Shashi Kumar C",
     role: "Team Captain",
     department: "Avionics",
     bio: "Leading ROXX with vision and precision in autonomous aerial systems.",
+    image: "/images/founder.jpg",
   },
   {
     name: "Akshay M",
     role: "Vice Captain",
     department: "Electronics",
     bio: "Driving electronics innovation and cross-team technical strategy.",
+    image: "/images/akshay.png",
   },
   {
     name: "Shreyas R",
     role: "Vice Captain",
     department: "Integration",
     bio: "Architecting systems that bring hardware, software, and mission goals together.",
+    image: "/images/team-3.jpg",
   },
 ];
 
@@ -181,7 +185,7 @@ const teamCards = [
     name: "Akshay M",
     role: "Vice Captain & Electronics Lead",
     quote: "Every circuit we solder carries the spark of our collective ambition.",
-    image: "/images/team-2.jpg",
+    image: "/images/akshay.png",
   },
   {
     name: "Shreyas R",
@@ -580,10 +584,18 @@ function TeamLeads() {
               whileHover={{ y: -8 }}
               className="group glass overflow-hidden rounded-3xl transition-all hover:border-orange-500/30"
             >
-              <div className="flex aspect-square items-center justify-center bg-gradient-to-br from-blue-600/20 via-orange-500/10 to-purple-600/20">
-                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white/10 text-3xl font-black text-white ring-2 ring-white/20 md:h-28 md:w-28 md:text-4xl">
-                  {lead.name.charAt(0)}
-                </div>
+              <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-gradient-to-br from-blue-600/20 via-orange-500/10 to-purple-600/20">
+                {lead.image ? (
+                  <img
+                    src={lead.image}
+                    alt={lead.name}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white/10 text-3xl font-black text-white ring-2 ring-white/20 md:h-28 md:w-28 md:text-4xl">
+                    {lead.name.charAt(0)}
+                  </div>
+                )}
               </div>
               <div className="p-6">
                 <p className="mb-1 text-sm font-semibold text-orange-400">
