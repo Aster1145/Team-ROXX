@@ -153,9 +153,9 @@ const departments = [
   {
     id: "autonomy-stack",
     name: "Autonomy Stack",
-    lead: "Hansika M",
+    lead: "Dhruva Kumar T R",
     role: "Autonomy Lead",
-    image: "/images/team-hansika.jpg",
+    image: "/images/dhruva.png",
     icon: Cpu,
     color: "from-emerald-500 to-teal-400",
     description: "Real-time SLAM, GPS-denied navigation, AI vision, and path-planning algorithms.",
