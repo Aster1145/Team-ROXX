@@ -335,3 +335,42 @@ DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- 14. Trainee Assignments Table (Work Done + Paper Link Attachment + Captain & VC Rating)
+CREATE TABLE IF NOT EXISTS public.trainee_assignments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  learnings TEXT,
+  blockers TEXT,
+  drive_url TEXT,
+  rating_stars INTEGER CHECK (rating_stars BETWEEN 1 AND 5),
+  points INTEGER CHECK (points BETWEEN 2 AND 10),
+  rated_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  rating_feedback TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS drive_url TEXT;
+ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS rating_stars INTEGER CHECK (rating_stars BETWEEN 1 AND 5);
+ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS points INTEGER CHECK (points BETWEEN 2 AND 10);
+ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS rated_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
+ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS rating_feedback TEXT;
+
+ALTER TABLE public.trainee_assignments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Trainee assignments are viewable by authenticated users" ON public.trainee_assignments;
+CREATE POLICY "Trainee assignments are viewable by authenticated users"
+  ON public.trainee_assignments FOR SELECT TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "Authenticated users can submit assignments" ON public.trainee_assignments;
+CREATE POLICY "Authenticated users can submit assignments"
+  ON public.trainee_assignments FOR INSERT TO authenticated
+  WITH CHECK (auth.uid() = profile_id);
+
+DROP POLICY IF EXISTS "Captains and vice captains can rate trainee assignments" ON public.trainee_assignments;
+CREATE POLICY "Captains and vice captains can rate trainee assignments"
+  ON public.trainee_assignments FOR UPDATE TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
+

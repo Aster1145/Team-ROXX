@@ -183,3 +183,21 @@ export interface ScheduledMeeting {
   created_at: string;
   organizer?: { full_name: string; role: Role; department?: Department };
 }
+
+export interface TraineeAssignment {
+  id: string;
+  profile_id: string;
+  title: string;
+  summary: string;
+  learnings?: string | null;
+  blockers?: string | null;
+  drive_url?: string | null;
+  rating_stars?: number | null;
+  points?: number | null;
+  rated_by?: string | null;
+  rating_feedback?: string | null;
+  created_at: string;
+  profile?: { full_name: string; department: Department; role?: string };
+  rater?: { full_name: string; role: Role };
+}
+

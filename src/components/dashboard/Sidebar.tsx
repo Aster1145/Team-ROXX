@@ -14,6 +14,7 @@ import {
   Wallet,
   BookOpen,
   Video,
+  GraduationCap,
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
@@ -25,6 +26,7 @@ import { useSidebar } from "@/context/SidebarContext";
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
+  { href: "/dashboard/assignments", label: "Assignments", icon: GraduationCap },
   { href: "/dashboard/learning", label: "Learning Hub", icon: BookOpen },
   { href: "/dashboard/meetings", label: "Meetings", icon: Video },
   { href: "/dashboard/events", label: "Events", icon: CalendarDays },
@@ -34,6 +36,7 @@ const NAV = [
   { href: "/dashboard/budget", label: "Budget", icon: Wallet },
   { href: "/dashboard/members", label: "Members", icon: Users },
 ];
+
 
 export function Sidebar() {
   const pathname = usePathname();

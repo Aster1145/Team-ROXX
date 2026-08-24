@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Header } from "@/components/dashboard/Header";
@@ -11,7 +12,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input, Textarea } from "@/components/ui/Input";
 import { WeeklyReport, Profile } from "@/types";
 import { isCaptain, isViceCaptain, isTrainee, roleLabel } from "@/lib/roles";
-import { Plus, Download, FileText, Star, Trophy, Award, MessageSquare, CheckCircle2, AlertTriangle, FileDown } from "lucide-react";
+import { Plus, Download, FileText, Star, Trophy, Award, MessageSquare, CheckCircle2, AlertTriangle, FileDown, GraduationCap } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import * as XLSX from "xlsx";
 
@@ -293,6 +294,11 @@ export default function ReportsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+          <Link href="/dashboard/assignments">
+            <Button variant="outline" className="text-xs font-semibold gap-1.5 bg-orange-50 dark:bg-orange-950/40 text-orange-900 dark:text-orange-200 border-orange-200 dark:border-orange-800 hover:bg-orange-600 hover:text-white transition-colors">
+              <GraduationCap className="h-4 w-4 shrink-0" /> Trainee Leaderboard
+            </Button>
+          </Link>
           {canDownload && (
             <Button variant="outline" onClick={exportExcel} className="text-xs font-semibold gap-1.5">
               <Download className="h-4 w-4 shrink-0" /> Export Excel

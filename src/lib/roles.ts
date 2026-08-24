@@ -59,6 +59,11 @@ export function canCreateOrEdit(profile?: Profile | null) {
   return !isTrainee(profile);
 }
 
+export function canRateTrainees(profile?: Profile | null) {
+  return profile?.role === "captain" || profile?.role === "vice_captain";
+}
+
+
 export function roleLabel(role?: Role, department?: Department) {
   if (role === "trainee" || department === "Trainee") {
     return "Trainee (1st Year)";
