@@ -187,17 +187,23 @@ export interface ScheduledMeeting {
 export interface TraineeAssignment {
   id: string;
   profile_id: string;
+  assigned_by?: string | null;
   title: string;
-  summary: string;
+  description?: string | null;
+  due_date?: string | null;
+  summary?: string | null;
   learnings?: string | null;
   blockers?: string | null;
   drive_url?: string | null;
+  status?: "pending" | "submitted" | "graded" | string;
   rating_stars?: number | null;
   points?: number | null;
   rated_by?: string | null;
   rating_feedback?: string | null;
   created_at: string;
   profile?: { full_name: string; department: Department; role?: string };
+  assigner?: { full_name: string; role: Role };
   rater?: { full_name: string; role: Role };
 }
+
 

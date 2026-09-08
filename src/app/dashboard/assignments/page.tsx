@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Input, Textarea } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { TraineeAssignment, Profile } from "@/types";
-import { canRateTrainees, roleLabel, isTrainee } from "@/lib/roles";
+import { canRateTrainees, roleLabel, isTrainee, canEditProject } from "@/lib/roles";
 import {
   Plus,
   Download,
@@ -24,6 +25,14 @@ import {
   FileDown,
   Link2,
   BookOpen,
+  Send,
+  Calendar,
+  UserCheck,
+  Clock,
+  AlertCircle,
+  UserPlus,
+  FileText,
+  Check,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import * as XLSX from "xlsx";
@@ -33,8 +42,14 @@ export default function AssignmentsPage() {
   const supabase = createClient();
 
   const [assignments, setAssignments] = useState<TraineeAssignment[]>([]);
+  const [teamMembers, setTeamMembers] = useState<Profile[]>([]);
   const [trainees, setTrainees] = useState<Profile[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [filterTab, setFilterTab] = useState<"all" | "my_assigned" | "pending" | "submitted" | "graded">("all");
+
+  // Modals state
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [submittingAssignmentTarget, setSubmittingAssignmentTarget] = useState<TraineeAssignment | null>(null);
 
   // Rating Modal state (Captains & Vice Captains)
   const [ratingModalOpen, setRatingModalOpen] = useState(false);
@@ -43,31 +58,54 @@ export default function AssignmentsPage() {
   const [feedback, setFeedback] = useState<string>("");
   const [submittingRating, setSubmittingRating] = useState(false);
 
-  const [form, setForm] = useState({
+  // Form states
+  const [submittingCreate, setSubmittingCreate] = useState(false);
+  const [submittingWork, setSubmittingWork] = useState(false);
+
+  const [createForm, setCreateForm] = useState({
     title: "",
+    description: "",
+    target_profile_id: "",
+    due_date: "",
+  });
+
+  const [submitForm, setSubmitForm] = useState({
     summary: "",
     learnings: "",
     blockers: "",
     drive_url: "",
   });
 
+  const userCanManage = canEditProject(profile);
+  const userCanRate = canRateTrainees(profile);
+
   const fetchData = async () => {
     try {
-      const [assignmentsRes, profilesRes] = await Promise.all([
-        supabase
+      let assignmentsData: TraineeAssignment[] = [];
+      
+      // Try full query with assigner relationship
+      const { data, error } = await supabase
+        .from("trainee_assignments")
+        .select("*, profile:profiles!profile_id(full_name, department, role), assigner:profiles!assigned_by(full_name, role), rater:profiles!rated_by(full_name, role)")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        // Fallback if assigned_by column doesn't exist on older database schemas
+        const fallback = await supabase
           .from("trainee_assignments")
           .select("*, profile:profiles!profile_id(full_name, department, role), rater:profiles!rated_by(full_name, role)")
-          .order("created_at", { ascending: false }),
-        supabase.from("profiles").select("*"),
-      ]);
-
-      if (assignmentsRes.error) {
-        console.warn("Trainee assignments query notice:", assignmentsRes.error.message);
+          .order("created_at", { ascending: false });
+        assignmentsData = (fallback.data as TraineeAssignment[]) || [];
+      } else {
+        assignmentsData = (data as TraineeAssignment[]) || [];
       }
 
-      setAssignments((assignmentsRes.data as TraineeAssignment[]) || []);
+      setAssignments(assignmentsData);
 
+      const profilesRes = await supabase.from("profiles").select("*").order("full_name", { ascending: true });
       const allProfiles = (profilesRes.data as Profile[]) || [];
+      setTeamMembers(allProfiles);
+
       const traineeProfiles = allProfiles.filter(
         (m) => m.role === "trainee" || m.department === "Trainee"
       );
@@ -81,35 +119,118 @@ export default function AssignmentsPage() {
     fetchData();
   }, [supabase]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Create Assignment (Team Leads assign task to member/trainee)
+  const handleCreateAssignment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile?.id) return;
+    if (!createForm.target_profile_id) {
+      alert("Please select a target member or trainee.");
+      return;
+    }
+
+    setSubmittingCreate(true);
 
     try {
-      let formattedDriveUrl = form.drive_url.trim();
-      if (formattedDriveUrl && !formattedDriveUrl.startsWith("http://") && !formattedDriveUrl.startsWith("https://")) {
-        formattedDriveUrl = `https://${formattedDriveUrl}`;
-      }
+      const targetIds =
+        createForm.target_profile_id === "all_trainees"
+          ? trainees.map((t) => t.id)
+          : createForm.target_profile_id === "all_members"
+          ? teamMembers.map((m) => m.id)
+          : [createForm.target_profile_id];
 
-      const { error } = await supabase.from("trainee_assignments").insert({
-        profile_id: profile.id,
-        title: form.title,
-        summary: form.summary,
-        learnings: form.learnings || null,
-        blockers: form.blockers || null,
-        drive_url: formattedDriveUrl || null,
-      });
+      const records = targetIds.map((targetId) => ({
+        profile_id: targetId,
+        assigned_by: profile.id,
+        title: createForm.title,
+        description: createForm.description || null,
+        due_date: createForm.due_date || null,
+        summary: "", // Pending submission
+      }));
+
+      const { error } = await supabase.from("trainee_assignments").insert(records);
 
       if (error) {
-        alert("Error submitting assignment: " + error.message);
+        alert("Error creating assignment: " + error.message);
         return;
       }
 
-      setModalOpen(false);
-      setForm({ title: "", summary: "", learnings: "", blockers: "", drive_url: "" });
+      setCreateModalOpen(false);
+      setCreateForm({ title: "", description: "", target_profile_id: "", due_date: "" });
+      await fetchData();
+    } catch (err: any) {
+      alert("Failed to create assignment: " + err.message);
+    } finally {
+      setSubmittingCreate(false);
+    }
+  };
+
+  // Submit Solution for Assignment
+  const handleOpenSubmitModal = (assignment?: TraineeAssignment) => {
+    if (assignment) {
+      setSubmittingAssignmentTarget(assignment);
+      setSubmitForm({
+        summary: assignment.summary || "",
+        learnings: assignment.learnings || "",
+        blockers: assignment.blockers || "",
+        drive_url: assignment.drive_url || "",
+      });
+    } else {
+      setSubmittingAssignmentTarget(null);
+      setSubmitForm({ summary: "", learnings: "", blockers: "", drive_url: "" });
+    }
+    setSubmitModalOpen(true);
+  };
+
+  const handleSubmitAssignmentSolution = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!profile?.id) return;
+    setSubmittingWork(true);
+
+    try {
+      let formattedDriveUrl = submitForm.drive_url.trim();
+      if (
+        formattedDriveUrl &&
+        !formattedDriveUrl.startsWith("http://") &&
+        !formattedDriveUrl.startsWith("https://")
+      ) {
+        formattedDriveUrl = `https://${formattedDriveUrl}`;
+      }
+
+      if (submittingAssignmentTarget) {
+        // Updating existing assigned task
+        const { error } = await supabase
+          .from("trainee_assignments")
+          .update({
+            summary: submitForm.summary,
+            learnings: submitForm.learnings || null,
+            blockers: submitForm.blockers || null,
+            drive_url: formattedDriveUrl || null,
+          })
+          .eq("id", submittingAssignmentTarget.id);
+
+        if (error) throw error;
+      } else {
+        // Submitting self-initiated work
+        const { error } = await supabase.from("trainee_assignments").insert({
+          profile_id: profile.id,
+          title: submitForm.summary.slice(0, 50) || "Trainee Work Submission",
+          summary: submitForm.summary,
+          learnings: submitForm.learnings || null,
+          blockers: submitForm.blockers || null,
+          drive_url: formattedDriveUrl || null,
+        });
+
+        if (error) throw error;
+      }
+
+      setSubmitModalOpen(false);
+      setSubmittingAssignmentTarget(null);
+      setSubmitForm({ summary: "", learnings: "", blockers: "", drive_url: "" });
       await fetchData();
     } catch (err: any) {
       alert("Failed to submit assignment: " + err.message);
+    } finally {
+      setSubmittingWork(false);
     }
   };
 
@@ -155,9 +276,11 @@ export default function AssignmentsPage() {
   const exportExcel = () => {
     const rows = assignments.map((a) => ({
       Title: a.title,
-      "Trainee Name": a.profile?.full_name,
+      "Assigned To": a.profile?.full_name || "Unassigned",
       Department: a.profile?.department,
-      Summary: a.summary,
+      "Assigned By": a.assigner?.full_name || "Self Initiated",
+      Status: a.rating_stars != null ? "Graded" : a.summary && a.summary.trim() !== "" ? "Submitted" : "Pending",
+      Summary: a.summary || "Not Submitted",
       Learnings: a.learnings || "None",
       Blockers: a.blockers || "None",
       "Google Link": a.drive_url || "No Attachment",
@@ -165,25 +288,26 @@ export default function AssignmentsPage() {
       "Points Awarded": a.points ? `${a.points} Pts` : "0 Pts",
       "Evaluated By": a.rater?.full_name ? `${a.rater.full_name} (${roleLabel(a.rater.role)})` : "Pending",
       "Evaluator Feedback": a.rating_feedback || "None",
-      Submitted: formatDate(a.created_at),
+      "Due Date": a.due_date ? formatDate(a.due_date) : "No Due Date",
+      "Date Created": formatDate(a.created_at),
     }));
 
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Trainee Assignments");
-    XLSX.writeFile(wb, `trainee-assignments-${new Date().toISOString().split("T")[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, "Assignments");
+    XLSX.writeFile(wb, `assignments-${new Date().toISOString().split("T")[0]}.xlsx`);
   };
 
   const downloadAssignmentDoc = (a: TraineeAssignment) => {
-    const traineeName = a.profile?.full_name || "Trainee Member";
-    const dept = a.profile?.department || "Trainee";
+    const traineeName = a.profile?.full_name || "Team Member";
+    const dept = a.profile?.department || "General";
     const submittedOn = formatDate(a.created_at);
 
     const docContent = `
       <html xmlns:o='urn:schemas-microsoft-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
       <head>
         <meta charset='utf-8'>
-        <title>Trainee Work Assignment - ${traineeName}</title>
+        <title>Technical Assignment Submission - ${traineeName}</title>
         <style>
           body { font-family: Calibri, Arial, sans-serif; margin: 30px; color: #1e293b; line-height: 1.6; }
           .header { border-bottom: 3px solid #ea580c; padding-bottom: 10px; margin-bottom: 20px; }
@@ -201,14 +325,14 @@ export default function AssignmentsPage() {
       </head>
       <body>
         <div class="header">
-          <h1>Trainee Technical Assignment Submission</h1>
+          <h1>Technical Assignment Submission</h1>
           <p>Team ROXX Autonomous Systems Portal</p>
         </div>
 
         <table class="meta-table">
           <tr>
             <td class="meta-label">Submitted By:</td>
-            <td><strong>${traineeName}</strong> (Trainee)</td>
+            <td><strong>${traineeName}</strong></td>
           </tr>
           <tr>
             <td class="meta-label">Department / Domain:</td>
@@ -217,6 +341,10 @@ export default function AssignmentsPage() {
           <tr>
             <td class="meta-label">Assignment Title:</td>
             <td><strong>${a.title}</strong></td>
+          </tr>
+          <tr>
+            <td class="meta-label">Assigned By:</td>
+            <td>${a.assigner?.full_name || "Self Initiated / Team Lead"}</td>
           </tr>
           <tr>
             <td class="meta-label">Submission Date:</td>
@@ -229,6 +357,11 @@ export default function AssignmentsPage() {
           </tr>
           ` : ""}
         </table>
+
+        ${a.description ? `
+        <div class="section-title">Assignment Instructions & Guidelines</div>
+        <div class="content-box">${a.description}</div>
+        ` : ""}
 
         <div class="section-title">1. Summary of Work Done</div>
         <div class="content-box">${a.summary || "No summary provided."}</div>
@@ -243,7 +376,7 @@ export default function AssignmentsPage() {
         <div class="rating-card">
           <h3>Evaluator Rating (${a.rater?.full_name || "Team Lead"})</h3>
           <p><strong>Stars Awarded:</strong> ${a.rating_stars} / 5 Stars</p>
-          <p><strong>Trainee Points:</strong> +${a.points || 0} Pts</p>
+          <p><strong>Points Awarded:</strong> +${a.points || 0} Pts</p>
           ${a.rating_feedback ? `<p><strong>Feedback Note:</strong> ${a.rating_feedback}</p>` : ""}
         </div>
         ` : ""}
@@ -256,16 +389,14 @@ export default function AssignmentsPage() {
     const link = document.createElement("a");
     link.href = url;
     const safeName = traineeName.replace(/[^a-zA-Z0-9_-]/g, "_");
-    link.download = `Trainee-Assignment-${safeName}-${a.created_at.split("T")[0]}.doc`;
+    link.download = `Assignment-${safeName}-${a.created_at.split("T")[0]}.doc`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
-  const userCanRate = canRateTrainees(profile);
-
-  // Trainee Leaderboard Calculation (Ranks Trainees by assignment performance)
+  // Leaderboard Calculation
   const traineeLeaderboard = trainees
     .map((t) => {
       const tAssignments = assignments.filter((a) => a.profile_id === t.id && a.points != null);
@@ -280,6 +411,19 @@ export default function AssignmentsPage() {
       };
     })
     .sort((a, b) => b.totalPoints - a.totalPoints);
+
+  // Filtered Assignments List
+  const filteredAssignments = assignments.filter((a) => {
+    const isSubmitted = a.summary && a.summary.trim().length > 0;
+    const isGraded = a.rating_stars != null;
+    const isMyAssigned = a.profile_id === profile?.id;
+
+    if (filterTab === "my_assigned") return isMyAssigned;
+    if (filterTab === "pending") return !isSubmitted && !isGraded;
+    if (filterTab === "submitted") return isSubmitted && !isGraded;
+    if (filterTab === "graded") return isGraded;
+    return true;
+  });
 
   const renderStars = (numStars: number) => {
     return (
@@ -298,34 +442,54 @@ export default function AssignmentsPage() {
 
   return (
     <>
-      <Header title="Trainee Assignments & Work Ranking" />
+      <Header title="Assignments & Technical Task Portal" />
 
       {/* Top Banner & Action Controls */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Trainees submit work done with optional paper/Google Drive link attachments. Vice Captains & Captains review and rank their work.
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <GraduationCap className="h-5 w-5 text-orange-600 dark:text-orange-400 shrink-0" />
+            Assignments & Tasks
+          </h2>
+          <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+            Team leads assign tasks; members & trainees submit solutions with Google Drive links for review and points ranking.
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+
+        <div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-auto">
           {assignments.length > 0 && (
             <Button variant="outline" onClick={exportExcel} className="text-xs font-semibold gap-1.5">
               <Download className="h-4 w-4 shrink-0" /> Export Excel
             </Button>
           )}
-          <Button onClick={() => setModalOpen(true)} className="text-xs font-semibold gap-1.5 bg-orange-600 hover:bg-orange-700 text-white">
-            <Plus className="h-4 w-4 shrink-0" /> Submit Assignment
+
+          {/* Captain & Vice Captain Create/Assign Assignment Button */}
+          {userCanManage && (
+            <Button
+              onClick={() => setCreateModalOpen(true)}
+              className="text-xs font-bold gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs"
+            >
+              <UserPlus className="h-4 w-4 shrink-0" /> Assign New Task
+            </Button>
+          )}
+
+          {/* Member/Trainee Submit Work Button */}
+          <Button
+            onClick={() => handleOpenSubmitModal()}
+            className="text-xs font-bold gap-1.5 bg-orange-600 hover:bg-orange-700 text-white shadow-2xs"
+          >
+            <Send className="h-4 w-4 shrink-0" /> Submit Solution / Work
           </Button>
         </div>
       </div>
 
-      {/* Trainee Performance Ranking Leaderboard */}
+      {/* Performance Ranking Leaderboard */}
       <Card className="mb-8 border-orange-200 dark:border-orange-950/60 bg-gradient-to-br from-orange-50/50 via-white to-amber-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-orange-950/20 shadow-xs">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-orange-100 dark:border-slate-800 p-3.5 sm:p-5">
           <div className="flex items-center gap-2 flex-wrap min-w-0">
             <Trophy className="h-5 w-5 text-orange-500 shrink-0" />
             <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 leading-snug">
-              Trainee Performance Ranking Leaderboard
+              Member & Trainee Performance Leaderboard
             </CardTitle>
             <Badge variant="sage" className="text-[10px] bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-300 border-orange-200 shrink-0">
               {traineeLeaderboard.length} Trainees Ranked
@@ -379,7 +543,7 @@ export default function AssignmentsPage() {
 
               {traineeLeaderboard.length === 0 && (
                 <p className="text-xs text-slate-500 dark:text-slate-400 col-span-3 py-3 text-center">
-                  No trainee evaluation ratings yet.
+                  No evaluation ratings recorded yet.
                 </p>
               )}
             </div>
@@ -387,57 +551,155 @@ export default function AssignmentsPage() {
         </CardContent>
       </Card>
 
-      {/* Trainee Assignments Feed */}
-      <div className="space-y-4">
-        <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-          Trainee Work Submissions
-        </h3>
+      {/* Filter Tabs Bar */}
+      <div className="mb-4 flex flex-wrap gap-2 items-center">
+        <button
+          onClick={() => setFilterTab("all")}
+          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+            filterTab === "all"
+              ? "bg-slate-900 dark:bg-emerald-500 text-white dark:text-slate-950 shadow-2xs"
+              : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
+          }`}
+        >
+          All Assignments ({assignments.length})
+        </button>
 
-        {assignments.map((a) => {
+        <button
+          onClick={() => setFilterTab("my_assigned")}
+          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+            filterTab === "my_assigned"
+              ? "bg-orange-600 text-white shadow-2xs"
+              : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
+          }`}
+        >
+          Assigned to Me ({assignments.filter((a) => a.profile_id === profile?.id).length})
+        </button>
+
+        <button
+          onClick={() => setFilterTab("pending")}
+          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+            filterTab === "pending"
+              ? "bg-amber-600 text-white shadow-2xs"
+              : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
+          }`}
+        >
+          Pending Submission ({assignments.filter((a) => (!a.summary || a.summary.trim() === "") && a.rating_stars == null).length})
+        </button>
+
+        <button
+          onClick={() => setFilterTab("submitted")}
+          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+            filterTab === "submitted"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
+          }`}
+        >
+          Submitted / Under Review ({assignments.filter((a) => a.summary && a.summary.trim() !== "" && a.rating_stars == null).length})
+        </button>
+
+        <button
+          onClick={() => setFilterTab("graded")}
+          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+            filterTab === "graded"
+              ? "bg-emerald-600 text-white shadow-2xs"
+              : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
+          }`}
+        >
+          Graded & Completed ({assignments.filter((a) => a.rating_stars != null).length})
+        </button>
+      </div>
+
+      {/* Assignments Feed */}
+      <div className="space-y-4">
+        {filteredAssignments.map((a) => {
           const hasBeenRated = a.rating_stars != null;
+          const isSubmitted = a.summary && a.summary.trim().length > 0;
           const isOwnSubmission = a.profile_id === profile?.id;
 
           return (
-            <Card key={a.id} className="hover:shadow-md transition-shadow border-slate-200 dark:border-slate-800">
+            <Card
+              key={a.id}
+              className={`hover:shadow-md transition-shadow border-slate-200 dark:border-slate-800 ${
+                !isSubmitted
+                  ? "border-l-4 border-l-amber-500"
+                  : hasBeenRated
+                  ? "border-l-4 border-l-emerald-500"
+                  : "border-l-4 border-l-blue-500"
+              }`}
+            >
               <CardHeader className="p-3.5 sm:p-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400">
-                      <GraduationCap className="h-5 w-5" />
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-bold ${
+                      hasBeenRated
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
+                        : isSubmitted
+                        ? "bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
+                        : "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
+                    }`}>
+                      {hasBeenRated ? <CheckCircle2 className="h-5 w-5" /> : isSubmitted ? <FileText className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
                     </div>
                     <div className="min-w-0">
-                      <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 truncate flex items-center gap-2">
-                        <span>{a.title}</span>
-                        {isOwnSubmission && (
-                          <Badge variant="sage" className="text-[10px] bg-emerald-100 text-emerald-900 border-emerald-300 shrink-0">My Work</Badge>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 truncate">
+                          {a.title}
+                        </CardTitle>
+
+                        {/* Status Badges */}
+                        {hasBeenRated ? (
+                          <Badge variant="forest" className="text-[10px]">Graded & Rated ✓</Badge>
+                        ) : isSubmitted ? (
+                          <Badge variant="info" className="text-[10px]">Submitted — Under Review</Badge>
+                        ) : (
+                          <Badge variant="warning" className="text-[10px]">Pending Submission</Badge>
                         )}
-                      </CardTitle>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                        By <strong className="text-slate-700 dark:text-slate-300">{a.profile?.full_name}</strong> · {a.profile?.department} · Submitted {formatDate(a.created_at)}
+
+                        {isOwnSubmission && (
+                          <Badge variant="sage" className="text-[10px] bg-emerald-100 text-emerald-900 border-emerald-300 shrink-0">Assigned to You</Badge>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                        Assigned To: <strong className="text-slate-700 dark:text-slate-300">{a.profile?.full_name}</strong> ({a.profile?.department})
+                        {a.assigner?.full_name && (
+                          <span> · Assigned by: <strong className="text-slate-700 dark:text-slate-300">{a.assigner.full_name}</strong></span>
+                        )}
+                        {a.due_date && (
+                          <span className="text-orange-600 dark:text-orange-400 font-semibold"> · Due: {formatDate(a.due_date)}</span>
+                        )}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    {/* Display Rating & Points */}
-                    <div className="flex items-center gap-2 bg-stone-50 dark:bg-slate-800 px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-slate-700">
-                      {hasBeenRated ? (
-                        <>
-                          {renderStars(a.rating_stars!)}
-                          <span className="text-xs font-bold text-amber-700 dark:text-amber-400 ml-1">
-                            +{a.points} Pts
-                          </span>
-                        </>
-                      ) : (
-                        <span className="text-xs text-slate-500 dark:text-slate-400 italic flex items-center gap-1">
-                          <Star className="h-3.5 w-3.5 text-stone-400" /> Awaiting VC/Captain Rating
+                  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+                    {/* Action: Submit Work (If Assigned user and not yet submitted or updating) */}
+                    {isOwnSubmission && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleOpenSubmitModal(a)}
+                        className={`text-xs font-bold gap-1 ${
+                          isSubmitted
+                            ? "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200"
+                            : "bg-orange-600 hover:bg-orange-700 text-white"
+                        }`}
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                        {isSubmitted ? "Update Solution" : "Submit Solution"}
+                      </Button>
+                    )}
+
+                    {/* Rating Badge / Points */}
+                    {hasBeenRated && (
+                      <div className="flex items-center gap-2 bg-stone-50 dark:bg-slate-800 px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-slate-700">
+                        {renderStars(a.rating_stars!)}
+                        <span className="text-xs font-bold text-amber-700 dark:text-amber-400 ml-1">
+                          +{a.points} Pts
                         </span>
-                      )}
-                    </div>
+                      </div>
+                    )}
 
                     {/* Both Vice Captains & Captains can Rate Trainee Work */}
-                    {userCanRate && (
+                    {userCanRate && isSubmitted && (
                       <Button
                         size="sm"
                         variant="outline"
@@ -445,63 +707,95 @@ export default function AssignmentsPage() {
                         className="text-xs bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 hover:bg-amber-600 hover:text-white transition-all font-medium gap-1"
                       >
                         <Award className="h-3.5 w-3.5" />
-                        {hasBeenRated ? "Edit Rating" : "Rate Trainee"}
+                        {hasBeenRated ? "Edit Rating" : "Rate Submission"}
                       </Button>
                     )}
 
                     {/* Download Assignment as Word Document */}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => downloadAssignmentDoc(a)}
-                      className="text-xs bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-700 hover:text-white transition-all font-medium gap-1"
-                      title="Download assignment as Word doc (.doc)"
-                    >
-                      <FileDown className="h-3.5 w-3.5" />
-                      Doc
-                    </Button>
-
-                    <Badge variant="sage" className="shrink-0 text-[10px]">{formatDate(a.created_at)}</Badge>
+                    {isSubmitted && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => downloadAssignmentDoc(a)}
+                        className="text-xs bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-700 hover:text-white transition-all font-medium gap-1"
+                        title="Download assignment as Word doc (.doc)"
+                      >
+                        <FileDown className="h-3.5 w-3.5" />
+                        Doc
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardHeader>
 
               <CardContent className="space-y-4 p-3.5 sm:p-5 pt-0 sm:pt-0">
-                {/* Google Link Paper Attachment Button */}
-                {a.drive_url && (
-                  <div className="rounded-xl bg-orange-50/80 dark:bg-orange-950/30 p-3 border border-orange-200 dark:border-orange-900 flex items-center justify-between gap-3 min-w-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Link2 className="h-4 w-4 text-orange-600 dark:text-orange-400 shrink-0" />
-                      <span className="text-xs font-bold text-orange-950 dark:text-orange-200 truncate">
-                        Google Paper / Work Attachment:
-                      </span>
-                    </div>
-                    <a
-                      href={a.drive_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-orange-600 hover:bg-orange-700 px-3 py-1.5 rounded-lg shadow-2xs transition-colors shrink-0"
-                    >
-                      Open Google Drive Link <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
+                {/* Assignment Instructions / Guidelines (If set by Lead) */}
+                {a.description && (
+                  <div className="rounded-xl bg-slate-50 dark:bg-slate-800/60 p-3 border border-slate-200/80 dark:border-slate-700">
+                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                      <BookOpen className="h-3.5 w-3.5 text-orange-500" /> Instructions & Guidelines:
+                    </p>
+                    <p className="text-xs text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{a.description}</p>
                   </div>
                 )}
 
-                <div className="min-w-0 break-words">
-                  <p className="text-xs font-semibold uppercase text-slate-400 mb-1">Work Done Summary</p>
-                  <p className="text-sm text-slate-800 dark:text-slate-200 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{a.summary}</p>
-                </div>
+                {/* Submission Details */}
+                {isSubmitted ? (
+                  <>
+                    {/* Google Link Paper Attachment Button */}
+                    {a.drive_url && (
+                      <div className="rounded-xl bg-orange-50/80 dark:bg-orange-950/30 p-3 border border-orange-200 dark:border-orange-900 flex items-center justify-between gap-3 min-w-0">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Link2 className="h-4 w-4 text-orange-600 dark:text-orange-400 shrink-0" />
+                          <span className="text-xs font-bold text-orange-950 dark:text-orange-200 truncate">
+                            Google Paper / Solution Attachment:
+                          </span>
+                        </div>
+                        <a
+                          href={a.drive_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-orange-600 hover:bg-orange-700 px-3 py-1.5 rounded-lg shadow-2xs transition-colors shrink-0"
+                        >
+                          Open Attachment Link <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      </div>
+                    )}
 
-                <div className="grid gap-4 md:grid-cols-2 min-w-0">
-                  <div className="min-w-0 break-words">
-                    <p className="text-xs font-semibold uppercase text-slate-400 mb-1">Key Technical Learnings & Output</p>
-                    <p className="text-sm text-slate-700 dark:text-slate-300 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{a.learnings || "—"}</p>
+                    <div className="min-w-0 break-words">
+                      <p className="text-xs font-semibold uppercase text-slate-400 mb-1">Submitted Solution & Summary</p>
+                      <p className="text-sm text-slate-800 dark:text-slate-200 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{a.summary}</p>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2 min-w-0">
+                      <div className="min-w-0 break-words">
+                        <p className="text-xs font-semibold uppercase text-slate-400 mb-1">Key Technical Learnings & Output</p>
+                        <p className="text-sm text-slate-700 dark:text-slate-300 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{a.learnings || "—"}</p>
+                      </div>
+                      <div className="min-w-0 break-words">
+                        <p className="text-xs font-semibold uppercase text-slate-400 mb-1">Doubts & Blockers</p>
+                        <p className="text-sm text-slate-700 dark:text-slate-300 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{a.blockers || "—"}</p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="py-3 px-4 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-xs text-amber-900 dark:text-amber-200">
+                      <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
+                      <span>This assignment is waiting for solution submission from <strong>{a.profile?.full_name}</strong>.</span>
+                    </div>
+
+                    {isOwnSubmission && (
+                      <Button
+                        size="sm"
+                        onClick={() => handleOpenSubmitModal(a)}
+                        className="text-xs bg-orange-600 hover:bg-orange-700 text-white font-bold shrink-0"
+                      >
+                        Submit Work Now
+                      </Button>
+                    )}
                   </div>
-                  <div className="min-w-0 break-words">
-                    <p className="text-xs font-semibold uppercase text-slate-400 mb-1">Doubts & Blockers</p>
-                    <p className="text-sm text-slate-700 dark:text-slate-300 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{a.blockers || "—"}</p>
-                  </div>
-                </div>
+                )}
 
                 {/* Evaluator Feedback Note */}
                 {a.rating_feedback && (
@@ -520,74 +814,184 @@ export default function AssignmentsPage() {
           );
         })}
 
-        {assignments.length === 0 && (
+        {filteredAssignments.length === 0 && (
           <div className="py-12 text-center text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
             <GraduationCap className="h-10 w-10 mx-auto text-orange-500/40 mb-2" />
-            <p className="font-bold text-base text-slate-800 dark:text-slate-200">No trainee assignments submitted yet.</p>
-            <p className="text-xs mt-1">Trainees can submit work done and paper links here for evaluation and ranking.</p>
+            <p className="font-bold text-base text-slate-800 dark:text-slate-200">No assignments found for this filter.</p>
+            <p className="text-xs mt-1">Team leads can assign new tasks and members can submit completed work here.</p>
           </div>
         )}
       </div>
 
-      {/* Submit Assignment Modal */}
-      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Submit Trainee Work Assignment">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Assignment Title / Topic *</label>
-            <Input
-              placeholder="e.g. Flight Controller Wiring & Drone Firmware Setup"
-              required
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-            />
-          </div>
+      {/* CREATE & ASSIGN TASK MODAL (Captain & Vice Captain Only) */}
+      {userCanManage && (
+        <Modal
+          isOpen={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+          title="Create & Assign New Task / Assignment"
+        >
+          <form onSubmit={handleCreateAssignment} className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                Assignment Title / Topic *
+              </label>
+              <Input
+                placeholder="e.g. Avionics Wiring Diagram & Motor Calibration Log"
+                required
+                value={createForm.title}
+                onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                Assign To Member / Trainee *
+              </label>
+              <Select
+                required
+                value={createForm.target_profile_id}
+                onChange={(e) => setCreateForm({ ...createForm, target_profile_id: e.target.value })}
+              >
+                <option value="">Select a member or target group...</option>
+                <option value="all_trainees">★ Assign to ALL 1st-Year Trainees</option>
+                <option value="all_members">★ Assign to ALL Team Members</option>
+                <optgroup label="Specific Team Members">
+                  {teamMembers.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.full_name} ({roleLabel(m.role)} — {m.department})
+                    </option>
+                  ))}
+                </optgroup>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                Submission Due Date (Optional)
+              </label>
+              <Input
+                type="date"
+                value={createForm.due_date}
+                onChange={(e) => setCreateForm({ ...createForm, due_date: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                Instructions, Resources & Guidelines (Optional)
+              </label>
+              <Textarea
+                rows={3}
+                placeholder="Detail the instructions, expected outputs, reference links, and guidelines for completing this task..."
+                value={createForm.description}
+                onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              isLoading={submittingCreate}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+            >
+              Assign Task & Notify Trainee
+            </Button>
+          </form>
+        </Modal>
+      )}
+
+      {/* SUBMIT SOLUTION MODAL (For Assigned Member/Trainee or Self-Initiated Work) */}
+      <Modal
+        isOpen={submitModalOpen}
+        onClose={() => {
+          setSubmitModalOpen(false);
+          setSubmittingAssignmentTarget(null);
+        }}
+        title={
+          submittingAssignmentTarget
+            ? `Submit Solution for: ${submittingAssignmentTarget.title}`
+            : "Submit Trainee / Member Work Assignment"
+        }
+      >
+        <form onSubmit={handleSubmitAssignmentSolution} className="space-y-4">
+          {submittingAssignmentTarget?.description && (
+            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+              <span className="text-[11px] font-bold text-slate-500 uppercase block mb-1">Assignment Guidelines:</span>
+              <p className="text-xs text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{submittingAssignmentTarget.description}</p>
+            </div>
+          )}
+
+          {!submittingAssignmentTarget && (
+            <div>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                Assignment Title / Topic *
+              </label>
+              <Input
+                placeholder="e.g. Flight Controller Wiring & Drone Firmware Setup"
+                required
+                value={submitForm.summary.slice(0, 40)}
+                onChange={(e) => setSubmitForm({ ...submitForm, summary: e.target.value })}
+              />
+            </div>
+          )}
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Google Drive / Paper Attachment Link *</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              Google Drive / Paper Attachment Link *
+            </label>
             <Input
               type="url"
               placeholder="https://drive.google.com/file/d/... or Google Doc URL"
-              value={form.drive_url}
-              onChange={(e) => setForm({ ...form, drive_url: e.target.value })}
+              value={submitForm.drive_url}
+              onChange={(e) => setSubmitForm({ ...submitForm, drive_url: e.target.value })}
             />
             <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
-              Attach Google Drive link for handwritten paper work, diagram scans, or Google Docs.
+              Attach Google Drive link for handwritten paper work, diagram scans, code repositories, or Google Docs.
             </span>
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Summary of Work Done *</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              Summary of Work Done & Solution Details *
+            </label>
             <Textarea
-              placeholder="Describe the tasks completed and experiments conducted..."
+              placeholder="Describe the tasks completed, steps taken, and results achieved..."
               required
               rows={3}
-              value={form.summary}
-              onChange={(e) => setForm({ ...form, summary: e.target.value })}
+              value={submitForm.summary}
+              onChange={(e) => setSubmitForm({ ...submitForm, summary: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Key Technical Learnings & Output</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              Key Technical Learnings & Output
+            </label>
             <Textarea
-              placeholder="What new skills or knowledge did you acquire?"
+              placeholder="What new skills, domain concepts, or technical knowledge did you acquire?"
               rows={2}
-              value={form.learnings}
-              onChange={(e) => setForm({ ...form, learnings: e.target.value })}
+              value={submitForm.learnings}
+              onChange={(e) => setSubmitForm({ ...submitForm, learnings: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Doubts & Challenges Faced</label>
+            <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+              Doubts & Challenges Faced
+            </label>
             <Textarea
               placeholder="Any questions or technical blockers for Vice Captains / Captain..."
               rows={2}
-              value={form.blockers}
-              onChange={(e) => setForm({ ...form, blockers: e.target.value })}
+              value={submitForm.blockers}
+              onChange={(e) => setSubmitForm({ ...submitForm, blockers: e.target.value })}
             />
           </div>
 
-          <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold">
-            Submit Assignment & Request Ranking
+          <Button
+            type="submit"
+            isLoading={submittingWork}
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold"
+          >
+            Submit Assignment Solution & Request Rating
           </Button>
         </form>
       </Modal>
@@ -624,7 +1028,7 @@ export default function AssignmentsPage() {
 
               <div className="inline-flex items-center gap-1.5 bg-amber-100 dark:bg-amber-900 text-amber-900 dark:text-amber-100 px-3 py-1 rounded-full text-sm font-bold border border-amber-300 dark:border-amber-700">
                 <Award className="h-4 w-4 text-amber-600" />
-                {stars} Stars = {stars * 2} Trainee Points Awarded
+                {stars} Stars = {stars * 2} Points Awarded
               </div>
             </div>
 
@@ -649,7 +1053,7 @@ export default function AssignmentsPage() {
                 isLoading={submittingRating}
                 className="bg-amber-600 hover:bg-amber-700 text-white font-semibold flex items-center gap-1.5"
               >
-                <CheckCircle2 className="h-4 w-4" /> Save Trainee Rating
+                <CheckCircle2 className="h-4 w-4" /> Save Rating & Award Points
               </Button>
             </div>
           </form>
