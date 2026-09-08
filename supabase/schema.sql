@@ -311,6 +311,29 @@ CREATE POLICY "Captains and vice captains can manage learning resources"
   ON public.learning_resources FOR ALL TO authenticated
   USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
 
+-- 12b. User Learning Completions Table (Progress persistence across devices)
+CREATE TABLE IF NOT EXISTS public.user_learning_completions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  resource_id UUID REFERENCES public.learning_resources(id) ON DELETE CASCADE,
+  completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (profile_id, resource_id)
+);
+
+ALTER TABLE public.user_learning_completions ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Learning completions are viewable by authenticated users" ON public.user_learning_completions;
+CREATE POLICY "Learning completions are viewable by authenticated users"
+  ON public.user_learning_completions FOR SELECT TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "Users and Team Leads can manage learning completions" ON public.user_learning_completions;
+CREATE POLICY "Users and Team Leads can manage learning completions"
+  ON public.user_learning_completions FOR ALL TO authenticated
+  USING (
+    profile_id = auth.uid() OR
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain'))
+  );
+
 -- 13. Auto Profile Signup Trigger
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
