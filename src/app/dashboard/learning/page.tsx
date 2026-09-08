@@ -11,8 +11,8 @@ import { Modal } from "@/components/ui/Modal";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DEPARTMENTS } from "@/lib/constants";
-import { canEditProject, isCaptain } from "@/lib/roles";
-import { LearningResource, ResourceType } from "@/types";
+import { canEditProject, isCaptain, isTrainee, roleLabel } from "@/lib/roles";
+import { LearningResource, Profile, ResourceType } from "@/types";
 import {
   BookOpen,
   Plus,
@@ -26,9 +26,13 @@ import {
   GraduationCap,
   PlayCircle,
   CheckCircle,
+  Users,
+  Eye,
+  UserCheck,
+  TrendingUp,
   X,
+  Filter,
 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
 
 // Helper to extract embed URL for YouTube videos
 function getYouTubeEmbedUrl(url: string) {
@@ -55,13 +59,20 @@ export default function LearningPage() {
   const supabase = createClient();
 
   const [resources, setResources] = useState<LearningResource[]>([]);
+  const [teamProfiles, setTeamProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
 
-  // Learning Progress state
-  const [completedResourceIds, setCompletedResourceIds] = useState<string[]>([]);
+  // Learning Progress state mapping: memberId -> list of completed resource IDs
+  const [memberCompletions, setMemberCompletions] = useState<Record<string, string[]>>({});
+  
+  // Monitoring state for Captains / Vice Captains
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [searchMemberQuery, setSearchMemberQuery] = useState("");
+  const [memberRoleFilter, setMemberRoleFilter] = useState<string>("all");
+  const [showMonitorPanel, setShowMonitorPanel] = useState(true);
 
   // Modals state
   const [modalOpen, setModalOpen] = useState(false);
@@ -78,6 +89,9 @@ export default function LearningPage() {
     url: "",
     category: "Trainee",
   });
+
+  const userCanManage = canEditProject(profile);
+  const isUserTrainee = isTrainee(profile);
 
   const fetchResources = async () => {
     try {
@@ -96,27 +110,66 @@ export default function LearningPage() {
     }
   };
 
+  const fetchProfilesAndCompletions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("full_name", { ascending: true });
+
+      if (!error && data) {
+        setTeamProfiles(data as Profile[]);
+
+        // Load completions for each profile from localStorage
+        const completionsMap: Record<string, string[]> = {};
+        data.forEach((p: Profile) => {
+          const saved = localStorage.getItem(`roxx_completed_learning_${p.id}`);
+          if (saved) {
+            try {
+              completionsMap[p.id] = JSON.parse(saved);
+            } catch (e) {
+              completionsMap[p.id] = [];
+            }
+          } else {
+            completionsMap[p.id] = [];
+          }
+        });
+
+        // Ensure current user completion is synced
+        if (profile?.id && !completionsMap[profile.id]) {
+          const savedCurrent = localStorage.getItem(`roxx_completed_learning_${profile.id}`);
+          completionsMap[profile.id] = savedCurrent ? JSON.parse(savedCurrent) : [];
+        }
+
+        setMemberCompletions(completionsMap);
+      }
+    } catch (err) {
+      console.error("Error fetching team profiles:", err);
+    }
+  };
+
   useEffect(() => {
     fetchResources();
-    if (profile?.id) {
-      const saved = localStorage.getItem(`roxx_completed_learning_${profile.id}`);
-      if (saved) {
-        try {
-          setCompletedResourceIds(JSON.parse(saved));
-        } catch (e) {
-          console.error("Failed to parse completed materials:", e);
-        }
-      }
-    }
+    fetchProfilesAndCompletions();
   }, [profile?.id, supabase]);
 
-  const toggleCompleteResource = (id: string) => {
-    setCompletedResourceIds((prev) => {
-      const updated = prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id];
-      if (profile?.id) {
-        localStorage.setItem(`roxx_completed_learning_${profile.id}`, JSON.stringify(updated));
+  // Toggle completion for a specific member ID
+  const toggleMemberResourceCompletion = (memberId: string, resourceId: string) => {
+    setMemberCompletions((prev) => {
+      const currentList = prev[memberId] || [];
+      const updatedList = currentList.includes(resourceId)
+        ? currentList.filter((id) => id !== resourceId)
+        : [...currentList, resourceId];
+
+      const newMap = { ...prev, [memberId]: updatedList };
+
+      try {
+        localStorage.setItem(`roxx_completed_learning_${memberId}`, JSON.stringify(updatedList));
+      } catch (e) {
+        console.error("Failed to save learning completion:", e);
       }
-      return updated;
+
+      return newMap;
     });
   };
 
@@ -196,8 +249,6 @@ export default function LearningPage() {
     }
   };
 
-  const isUserTrainee = profile?.role === "trainee";
-
   // Trainees can ONLY see Trainee materials. Members/Captains can see ALL materials.
   const visibleResources = resources.filter((r) => {
     if (isUserTrainee) {
@@ -215,11 +266,55 @@ export default function LearningPage() {
     return matchesSearch && matchesCategory && matchesType;
   });
 
-  // Calculate Learning Progress
-  const totalTraineeMaterials = visibleResources.length;
-  const completedCount = visibleResources.filter((r) => completedResourceIds.includes(r.id)).length;
-  const progressPercentage =
-    totalTraineeMaterials > 0 ? Math.round((completedCount / totalTraineeMaterials) * 100) : 0;
+  // Calculate Progress for the active target user (Selected member or current user)
+  const activeTargetId = selectedMemberId || profile?.id || "";
+  const selectedMemberProfile = teamProfiles.find((p) => p.id === activeTargetId) || profile;
+  
+  const targetUserCompletedIds = memberCompletions[activeTargetId] || [];
+  
+  // Calculate Target User Progress
+  const isTargetTrainee = selectedMemberProfile ? isTrainee(selectedMemberProfile) : isUserTrainee;
+  const targetApplicableResources = visibleResources.filter((r) => {
+    if (isTargetTrainee) return r.category === "Trainee";
+    return true;
+  });
+
+  const totalTargetMaterials = targetApplicableResources.length;
+  const targetCompletedCount = targetApplicableResources.filter((r) =>
+    targetUserCompletedIds.includes(r.id)
+  ).length;
+  const targetProgressPercentage =
+    totalTargetMaterials > 0 ? Math.round((targetCompletedCount / totalTargetMaterials) * 100) : 0;
+
+  // Calculate Team Overview Progress for Captain & Vice Captain
+  const filteredTeamMembers = teamProfiles.filter((p) => {
+    const matchesSearch = p.full_name.toLowerCase().includes(searchMemberQuery.toLowerCase()) ||
+      p.department.toLowerCase().includes(searchMemberQuery.toLowerCase());
+    const matchesRole =
+      memberRoleFilter === "all" ||
+      (memberRoleFilter === "trainee" && isTrainee(p)) ||
+      (memberRoleFilter === "member" && p.role === "member") ||
+      (memberRoleFilter === "vice_captain" && p.role === "vice_captain") ||
+      (memberRoleFilter === "captain" && p.role === "captain");
+    return matchesSearch && matchesRole;
+  });
+
+  const getMemberProgress = (member: Profile) => {
+    const memberIsTrainee = isTrainee(member);
+    const applicableRes = visibleResources.filter((r) => (memberIsTrainee ? r.category === "Trainee" : true));
+    const completedIds = memberCompletions[member.id] || [];
+    const completedCnt = applicableRes.filter((r) => completedIds.includes(r.id)).length;
+    const totalCnt = applicableRes.length;
+    const pct = totalCnt > 0 ? Math.round((completedCnt / totalCnt) * 100) : 0;
+    return { completedCnt, totalCnt, pct };
+  };
+
+  const teamAveragePct =
+    teamProfiles.length > 0
+      ? Math.round(
+          teamProfiles.reduce((acc, m) => acc + getMemberProgress(m).pct, 0) / teamProfiles.length
+        )
+      : 0;
 
   const renderTypeIcon = (type: ResourceType) => {
     switch (type) {
@@ -236,26 +331,24 @@ export default function LearningPage() {
     switch (type) {
       case "youtube":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 border border-rose-200">
-            <Video className="h-3 w-3 text-red-600" /> YouTube Video
+          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 dark:bg-rose-950/60 px-2.5 py-0.5 text-xs font-semibold text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+            <Video className="h-3 w-3 text-red-600 dark:text-red-400" /> YouTube Video
           </span>
         );
       case "drive":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200">
-            <Folder className="h-3 w-3 text-amber-600" /> Google Drive
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+            <Folder className="h-3 w-3 text-amber-600 dark:text-amber-400" /> Google Drive
           </span>
         );
       case "link":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-800 border border-blue-200">
-            <LinkIcon className="h-3 w-3 text-blue-600" /> Reference Link
+          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-950/60 px-2.5 py-0.5 text-xs font-semibold text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+            <LinkIcon className="h-3 w-3 text-blue-600 dark:text-blue-400" /> Reference Link
           </span>
         );
     }
   };
-
-  const userCanManage = canEditProject(profile);
 
   return (
     <>
@@ -271,7 +364,7 @@ export default function LearningPage() {
           <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
             {isUserTrainee
               ? "Study materials and tutorials curated for 1st-year trainees."
-              : "Tutorials, Google Drive documents, and YouTube videos for trainees and domain study."}
+              : "Tutorials, Google Drive documents, and YouTube videos. Monitor & update member learning progress."}
           </p>
         </div>
         {userCanManage && (
@@ -281,8 +374,217 @@ export default function LearningPage() {
         )}
       </div>
 
-      {/* TRAINEE LEARNING PROGRESS TRACKER CARD (TRAINEES ONLY) */}
-      {isUserTrainee && (
+      {/* CAPTAIN & VICE CAPTAIN: TEAM LEARNING PROGRESS MONITOR & UPDATE DASHBOARD */}
+      {userCanManage && (
+        <Card className="mb-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+          <CardHeader className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-600 dark:bg-emerald-500 text-white dark:text-slate-950 font-bold shadow-xs">
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">
+                      Team Learning Progress Monitor
+                    </h3>
+                    <Badge variant="forest" className="text-[10px]">
+                      {isCaptain(profile) ? "Captain Control" : "Vice Captain View"}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">
+                    Track member study status, inspect individual progress bars, and update completion state.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant={showMonitorPanel ? "secondary" : "outline"}
+                  onClick={() => setShowMonitorPanel(!showMonitorPanel)}
+                  className="text-xs gap-1.5"
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  {showMonitorPanel ? "Hide Team Roster" : "Show Team Roster"}
+                </Button>
+                {selectedMemberId && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setSelectedMemberId(null)}
+                    className="text-xs gap-1 text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                  >
+                    <X className="h-3.5 w-3.5" /> Clear Selection
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Team Overview Stats Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800">
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Total Members</span>
+                <span className="text-lg font-black text-slate-900 dark:text-slate-100">{teamProfiles.length}</span>
+              </div>
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Average Team Progress</span>
+                <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">{teamAveragePct}%</span>
+              </div>
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Total Materials</span>
+                <span className="text-lg font-black text-blue-600 dark:text-blue-400">{visibleResources.length}</span>
+              </div>
+              <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/80 dark:border-slate-800">
+                <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Monitoring Target</span>
+                <span className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate block mt-0.5">
+                  {selectedMemberProfile ? selectedMemberProfile.full_name : "All Team"}
+                </span>
+              </div>
+            </div>
+          </CardHeader>
+
+          {/* Member Roster & Individual Progress Bars Table */}
+          {showMonitorPanel && (
+            <CardContent className="p-4 sm:p-5">
+              <div className="flex flex-col sm:flex-row gap-3 mb-4 justify-between items-center">
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+                  <Input
+                    placeholder="Search member by name..."
+                    value={searchMemberQuery}
+                    onChange={(e) => setSearchMemberQuery(e.target.value)}
+                    className="pl-8 text-xs py-1.5"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Filter className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                  <Select
+                    value={memberRoleFilter}
+                    onChange={(e) => setMemberRoleFilter(e.target.value)}
+                    className="text-xs py-1.5"
+                  >
+                    <option value="all">All Roles</option>
+                    <option value="trainee">Trainees Only</option>
+                    <option value="member">Regular Members</option>
+                    <option value="vice_captain">Vice Captains</option>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-72 overflow-y-auto pr-1">
+                {filteredTeamMembers.map((m) => {
+                  const { completedCnt, totalCnt, pct } = getMemberProgress(m);
+                  const isSelected = selectedMemberId === m.id;
+
+                  return (
+                    <div
+                      key={m.id}
+                      onClick={() => setSelectedMemberId(isSelected ? null : m.id)}
+                      className={`p-3 rounded-xl border transition-all cursor-pointer flex flex-col justify-between ${
+                        isSelected
+                          ? "bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-400 dark:border-emerald-600 ring-2 ring-emerald-500/20"
+                          : "bg-slate-50/60 dark:bg-slate-800/40 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-start justify-between gap-1 mb-1.5">
+                          <div className="min-w-0">
+                            <h4 className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate">
+                              {m.full_name} {profile?.id === m.id && <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">(You)</span>}
+                            </h4>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                              {m.department} · {roleLabel(m.role)}
+                            </p>
+                          </div>
+                          <Badge variant={isTrainee(m) ? "warning" : "info"} className="text-[9px] shrink-0">
+                            {isTrainee(m) ? "Trainee" : m.role}
+                          </Badge>
+                        </div>
+
+                        {/* Progress Bar per Member */}
+                        <div className="mt-2 space-y-1">
+                          <div className="flex justify-between items-center text-[10px]">
+                            <span className="text-slate-500 dark:text-slate-400 font-medium">Learning Progress</span>
+                            <span className="font-bold text-slate-900 dark:text-slate-100">
+                              {completedCnt}/{totalCnt} ({pct}%)
+                            </span>
+                          </div>
+                          <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                            <div
+                              className="h-2 rounded-full bg-emerald-500 transition-all duration-300"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 pt-2 border-t border-slate-200/50 dark:border-slate-700/50 flex justify-between items-center">
+                        <span className="text-[10px] text-slate-400">
+                          {pct === 100 ? "✓ 100% Completed" : pct > 0 ? "In Progress" : "Not Started"}
+                        </span>
+                        <span className={`text-[10px] font-bold flex items-center gap-1 ${isSelected ? "text-emerald-700 dark:text-emerald-400" : "text-slate-600 dark:text-slate-300"}`}>
+                          <Eye className="h-3 w-3" />
+                          {isSelected ? "Currently Updating" : "Inspect & Update"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {filteredTeamMembers.length === 0 && (
+                  <div className="col-span-full py-6 text-center text-slate-400 text-xs">
+                    No team members match the filter criteria.
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          )}
+        </Card>
+      )}
+
+      {/* SELECTED MEMBER MONITORING & UPDATE ACTIVE BAR (When Captain/VC selects a member) */}
+      {userCanManage && selectedMemberId && selectedMemberProfile && (
+        <Card className="mb-6 border-emerald-300 dark:border-emerald-700 bg-emerald-50/40 dark:bg-emerald-950/30 shadow-xs">
+          <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold shrink-0">
+                <UserCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
+                  Updating Progress for: <span className="text-emerald-700 dark:text-emerald-400">{selectedMemberProfile.full_name}</span>
+                  <Badge variant="forest" className="text-[10px]">{selectedMemberProfile.department}</Badge>
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                  Use the material cards below to mark topics completed or incomplete on behalf of {selectedMemberProfile.full_name}.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+              <div className="text-right">
+                <span className="text-xl font-extrabold text-emerald-700 dark:text-emerald-400">{targetProgressPercentage}%</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                  {targetCompletedCount} of {totalTargetMaterials} Completed
+                </span>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setSelectedMemberId(null)}
+                className="text-xs gap-1 border-slate-300 dark:border-slate-700"
+              >
+                <X className="h-3 w-3" /> Done
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* LEARNING PROGRESS TRACKER CARD FOR REGULAR TRAINEES / MEMBERS (Or personal view when not monitoring) */}
+      {(!userCanManage || !selectedMemberId) && (
         <Card className="mb-6 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
           <CardContent className="p-5">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
@@ -291,16 +593,18 @@ export default function LearningPage() {
                   <GraduationCap className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">My Learning Progress</h3>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100 text-base">
+                    {isUserTrainee ? "My Learning Progress" : "Personal Learning Progress"}
+                  </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-400">
                     Track completed study materials and video tutorials.
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-2xl font-extrabold text-slate-900 dark:text-emerald-400">{progressPercentage}%</span>
+                <span className="text-2xl font-extrabold text-slate-900 dark:text-emerald-400">{targetProgressPercentage}%</span>
                 <span className="text-xs text-slate-500 dark:text-slate-400 block">
-                  {completedCount} of {totalTraineeMaterials} Materials Completed
+                  {targetCompletedCount} of {totalTargetMaterials} Materials Completed
                 </span>
               </div>
             </div>
@@ -308,7 +612,7 @@ export default function LearningPage() {
             <div className="h-3 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
               <div
                 className="h-3 rounded-full bg-slate-900 dark:bg-emerald-500 transition-all duration-500"
-                style={{ width: `${progressPercentage}%` }}
+                style={{ width: `${targetProgressPercentage}%` }}
               />
             </div>
           </CardContent>
@@ -362,7 +666,7 @@ export default function LearningPage() {
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {filteredResources.map((res) => {
           const embedUrl = res.resource_type === "youtube" ? getYouTubeEmbedUrl(res.url) : null;
-          const isCompleted = completedResourceIds.includes(res.id);
+          const isCompleted = targetUserCompletedIds.includes(res.id);
 
           return (
             <Card key={res.id} className={`hover:shadow-md transition-all border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col justify-between min-w-0 ${isCompleted ? "bg-emerald-50/20 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-700/60" : ""}`}>
@@ -430,20 +734,24 @@ export default function LearningPage() {
                     </a>
                   )}
 
-                  {/* Mark as Completed Toggle Button (Trainees Only) */}
-                  {isUserTrainee && (
-                    <button
-                      onClick={() => toggleCompleteResource(res.id)}
-                      className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                        isCompleted
-                          ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700"
-                      }`}
-                    >
-                      <CheckCircle className={`h-3.5 w-3.5 ${isCompleted ? "text-emerald-700 dark:text-emerald-400" : "text-slate-400"}`} />
-                      {isCompleted ? "Completed ✓" : "Mark as Completed"}
-                    </button>
-                  )}
+                  {/* Mark as Completed Toggle Button */}
+                  <button
+                    onClick={() => toggleMemberResourceCompletion(activeTargetId, res.id)}
+                    className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                      isCompleted
+                        ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 hover:bg-emerald-200"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    <CheckCircle className={`h-3.5 w-3.5 ${isCompleted ? "text-emerald-700 dark:text-emerald-400" : "text-slate-400"}`} />
+                    {userCanManage && selectedMemberId && selectedMemberProfile
+                      ? isCompleted
+                        ? `Completed for ${selectedMemberProfile.full_name.split(" ")[0]} ✓`
+                        : `Mark Completed for ${selectedMemberProfile.full_name.split(" ")[0]}`
+                      : isCompleted
+                      ? "Completed ✓"
+                      : "Mark as Completed"}
+                  </button>
                 </div>
 
                 {/* Footer Info & Admin Actions */}
@@ -477,10 +785,10 @@ export default function LearningPage() {
         })}
 
         {filteredResources.length === 0 && (
-          <div className="col-span-full py-16 text-center text-charcoal/60 bg-white rounded-2xl border border-stone">
-            <BookOpen className="h-10 w-10 mx-auto text-charcoal/30 mb-2" />
-            <p className="font-bold text-base">No learning materials found.</p>
-            <p className="text-xs mt-1">
+          <div className="col-span-full py-16 text-center text-charcoal/60 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <BookOpen className="h-10 w-10 mx-auto text-slate-400 mb-2" />
+            <p className="font-bold text-base text-slate-900 dark:text-slate-100">No learning materials found.</p>
+            <p className="text-xs mt-1 text-slate-500 dark:text-slate-400">
               {isUserTrainee
                 ? "No trainee materials have been uploaded yet."
                 : "Team leads can add Google Drive files and YouTube tutorials for trainee learning."}
@@ -525,7 +833,7 @@ export default function LearningPage() {
         >
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-xs font-semibold text-charcoal/70 block mb-1">Title *</label>
+              <label className="text-xs font-semibold text-charcoal/70 dark:text-slate-300 block mb-1">Title *</label>
               <Input
                 placeholder="e.g. Flight Controller Calibration & Tuning Tutorial"
                 required
@@ -536,7 +844,7 @@ export default function LearningPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-charcoal/70 block mb-1">Resource Type *</label>
+                <label className="text-xs font-semibold text-charcoal/70 dark:text-slate-300 block mb-1">Resource Type *</label>
                 <Select
                   value={form.resource_type}
                   onChange={(e) => setForm({ ...form, resource_type: e.target.value as ResourceType })}
@@ -548,7 +856,7 @@ export default function LearningPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-charcoal/70 block mb-1">Target Domain / Category *</label>
+                <label className="text-xs font-semibold text-charcoal/70 dark:text-slate-300 block mb-1">Target Domain / Category *</label>
                 <Select
                   value={form.category}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
@@ -561,7 +869,7 @@ export default function LearningPage() {
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-charcoal/70 block mb-1">
+              <label className="text-xs font-semibold text-charcoal/70 dark:text-slate-300 block mb-1">
                 {form.resource_type === "youtube"
                   ? "YouTube Video URL *"
                   : form.resource_type === "drive"
@@ -584,7 +892,7 @@ export default function LearningPage() {
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-charcoal/70 block mb-1">Description / Study Notes (Optional)</label>
+              <label className="text-xs font-semibold text-charcoal/70 dark:text-slate-300 block mb-1">Description / Study Notes (Optional)</label>
               <Textarea
                 rows={3}
                 placeholder="Key takeaways, instructions, or what to learn from this material..."
