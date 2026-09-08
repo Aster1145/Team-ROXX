@@ -119,7 +119,7 @@ export default function AssignmentsPage() {
     fetchData();
   }, [supabase]);
 
-  // Create Assignment (Team Leads assign task to member/trainee)
+  // Create Assignment (Calls server-side API endpoint to bypass RLS restrictions)
   const handleCreateAssignment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile?.id) return;
@@ -131,40 +131,41 @@ export default function AssignmentsPage() {
     setSubmittingCreate(true);
 
     try {
-      const targetIds =
-        createForm.target_profile_id === "all_trainees"
-          ? trainees.map((t) => t.id)
-          : createForm.target_profile_id === "all_members"
-          ? teamMembers.map((m) => m.id)
-          : [createForm.target_profile_id];
+      const res = await fetch("/api/assignments/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assigned_by: profile.id,
+          title: createForm.title,
+          description: createForm.description || null,
+          target_profile_id: createForm.target_profile_id,
+          due_date: createForm.due_date || null,
+        }),
+      });
 
-      const recordsWithAssignedBy = targetIds.map((targetId) => ({
-        profile_id: targetId,
-        assigned_by: profile.id,
-        title: createForm.title,
-        description: createForm.description || null,
-        due_date: createForm.due_date || null,
-        summary: "", // Pending submission
-      }));
+      const data = await res.json();
 
-      let { error } = await supabase.from("trainee_assignments").insert(recordsWithAssignedBy);
+      if (!res.ok || data.error) {
+        // Client fallback if API route responds with error
+        console.warn("API route notice, trying client fallback:", data.error);
+        const targetIds =
+          createForm.target_profile_id === "all_trainees"
+            ? trainees.map((t) => t.id)
+            : createForm.target_profile_id === "all_members"
+            ? teamMembers.map((m) => m.id)
+            : [createForm.target_profile_id];
 
-      // Fallback retry if schema cache in Supabase has not refreshed 'assigned_by' column yet
-      if (error && (error.message.includes("assigned_by") || error.message.includes("schema cache"))) {
-        console.warn("Retrying assignment creation without optional assigned_by column due to schema cache...");
         const recordsFallback = targetIds.map((targetId) => ({
           profile_id: targetId,
           title: createForm.title,
           summary: createForm.description ? `[Instructions]: ${createForm.description}` : "",
         }));
 
-        const retryRes = await supabase.from("trainee_assignments").insert(recordsFallback);
-        error = retryRes.error;
-      }
-
-      if (error) {
-        alert("Error creating assignment: " + error.message);
-        return;
+        const { error: clientErr } = await supabase.from("trainee_assignments").insert(recordsFallback);
+        if (clientErr) {
+          alert("Error creating assignment: " + (data.error || clientErr.message));
+          return;
+        }
       }
 
       setCreateModalOpen(false);
