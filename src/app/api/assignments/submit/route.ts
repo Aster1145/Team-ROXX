@@ -35,9 +35,26 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (assignment_id) {
+    let targetAssignmentId = assignment_id;
+
+    // If assignment_id is null, check if the user has a pending task assigned to them
+    if (!targetAssignmentId && profile_id) {
+      const { data: pendingTasks } = await adminSupabase
+        .from("trainee_assignments")
+        .select("id")
+        .eq("profile_id", profile_id)
+        .or("summary.is.null,summary.eq.")
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (pendingTasks && pendingTasks.length > 0) {
+        targetAssignmentId = pendingTasks[0].id;
+      }
+    }
+
+    if (targetAssignmentId) {
       // Updating existing assigned task solution
-      const { data, error } = await adminSupabase
+      let { data, error } = await adminSupabase
         .from("trainee_assignments")
         .update({
           summary: summary.trim(),
@@ -46,14 +63,32 @@ export async function POST(request: NextRequest) {
           drive_url: formattedDriveUrl || null,
           status: "submitted",
         })
-        .eq("id", assignment_id)
+        .eq("id", targetAssignmentId)
         .select();
+
+      // Retry without optional 'status' column if database schema cache hasn't synced
+      if (error && (error.message.includes("status") || error.message.includes("schema cache"))) {
+        console.warn("Retrying submit update without status column due to schema cache...");
+        const retryRes = await adminSupabase
+          .from("trainee_assignments")
+          .update({
+            summary: summary.trim(),
+            learnings: learnings ? learnings.trim() : null,
+            blockers: blockers ? blockers.trim() : null,
+            drive_url: formattedDriveUrl || null,
+          })
+          .eq("id", targetAssignmentId)
+          .select();
+
+        error = retryRes.error;
+        data = retryRes.data;
+      }
 
       if (error) throw error;
       return NextResponse.json({ success: true, data });
     } else {
       // Self-initiated work submission
-      const { data, error } = await adminSupabase
+      let { data, error } = await adminSupabase
         .from("trainee_assignments")
         .insert({
           profile_id,
@@ -65,6 +100,24 @@ export async function POST(request: NextRequest) {
           status: "submitted",
         })
         .select();
+
+      if (error && (error.message.includes("status") || error.message.includes("schema cache"))) {
+        console.warn("Retrying submit insert without status column due to schema cache...");
+        const retryRes = await adminSupabase
+          .from("trainee_assignments")
+          .insert({
+            profile_id,
+            title: title || summary.slice(0, 50) || "Trainee Work Submission",
+            summary: summary.trim(),
+            learnings: learnings ? learnings.trim() : null,
+            blockers: blockers ? blockers.trim() : null,
+            drive_url: formattedDriveUrl || null,
+          })
+          .select();
+
+        error = retryRes.error;
+        data = retryRes.data;
+      }
 
       if (error) throw error;
       return NextResponse.json({ success: true, data });

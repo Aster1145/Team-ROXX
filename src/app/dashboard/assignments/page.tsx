@@ -192,8 +192,18 @@ export default function AssignmentsPage() {
         drive_url: assignment.drive_url || "",
       });
     } else {
-      setSubmittingAssignmentTarget(null);
-      setSubmitForm({ title: "", summary: "", learnings: "", blockers: "", drive_url: "" });
+      const myPending = visibleAssignments.filter(
+        (a) => a.profile_id === profile?.id && (!a.summary || a.summary.trim() === "") && a.rating_stars == null
+      );
+      const target = myPending.length > 0 ? myPending[0] : null;
+      setSubmittingAssignmentTarget(target);
+      setSubmitForm({
+        title: target ? target.title : "",
+        summary: target?.summary || "",
+        learnings: target?.learnings || "",
+        blockers: target?.blockers || "",
+        drive_url: target?.drive_url || "",
+      });
     }
     setSubmitModalOpen(true);
   };
@@ -970,6 +980,46 @@ export default function AssignmentsPage() {
         }
       >
         <form onSubmit={handleSubmitAssignmentSolution} className="space-y-4">
+          {/* Task selector if current user has pending assigned tasks */}
+          {visibleAssignments.filter((a) => a.profile_id === profile?.id && (!a.summary || a.summary.trim() === "")).length > 0 && (
+            <div>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                Select Task Assignment to Submit *
+              </label>
+              <Select
+                value={submittingAssignmentTarget?.id || "new"}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "new") {
+                    setSubmittingAssignmentTarget(null);
+                    setSubmitForm({ title: "", summary: "", learnings: "", blockers: "", drive_url: "" });
+                  } else {
+                    const target = visibleAssignments.find((a) => a.id === val);
+                    if (target) {
+                      setSubmittingAssignmentTarget(target);
+                      setSubmitForm({
+                        title: target.title,
+                        summary: target.summary || "",
+                        learnings: target.learnings || "",
+                        blockers: target.blockers || "",
+                        drive_url: target.drive_url || "",
+                      });
+                    }
+                  }
+                }}
+              >
+                {visibleAssignments
+                  .filter((a) => a.profile_id === profile?.id && (!a.summary || a.summary.trim() === ""))
+                  .map((a) => (
+                    <option key={a.id} value={a.id}>
+                      📌 Pending Task: {a.title}
+                    </option>
+                  ))}
+                <option value="new">+ Create & Submit New Self-Initiated Work</option>
+              </Select>
+            </div>
+          )}
+
           {submittingAssignmentTarget?.description && (
             <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
               <span className="text-[11px] font-bold text-slate-500 uppercase block mb-1">Assignment Guidelines:</span>
