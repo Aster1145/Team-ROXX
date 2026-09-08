@@ -90,7 +90,7 @@ export default function AssignmentsPage() {
         .order("created_at", { ascending: false });
 
       if (error) {
-        // Fallback if assigned_by column doesn't exist on older database schemas
+        // Fallback if assigned_by relationship or schema cache is not updated
         const fallback = await supabase
           .from("trainee_assignments")
           .select("*, profile:profiles!profile_id(full_name, department, role), rater:profiles!rated_by(full_name, role)")
@@ -138,7 +138,7 @@ export default function AssignmentsPage() {
           ? teamMembers.map((m) => m.id)
           : [createForm.target_profile_id];
 
-      const records = targetIds.map((targetId) => ({
+      const recordsWithAssignedBy = targetIds.map((targetId) => ({
         profile_id: targetId,
         assigned_by: profile.id,
         title: createForm.title,
@@ -147,7 +147,20 @@ export default function AssignmentsPage() {
         summary: "", // Pending submission
       }));
 
-      const { error } = await supabase.from("trainee_assignments").insert(records);
+      let { error } = await supabase.from("trainee_assignments").insert(recordsWithAssignedBy);
+
+      // Fallback retry if schema cache in Supabase has not refreshed 'assigned_by' column yet
+      if (error && (error.message.includes("assigned_by") || error.message.includes("schema cache"))) {
+        console.warn("Retrying assignment creation without optional assigned_by column due to schema cache...");
+        const recordsFallback = targetIds.map((targetId) => ({
+          profile_id: targetId,
+          title: createForm.title,
+          summary: createForm.description ? `[Instructions]: ${createForm.description}` : "",
+        }));
+
+        const retryRes = await supabase.from("trainee_assignments").insert(recordsFallback);
+        error = retryRes.error;
+      }
 
       if (error) {
         alert("Error creating assignment: " + error.message);
