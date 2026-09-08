@@ -363,11 +363,15 @@ CREATE TRIGGER on_auth_user_created
 CREATE TABLE IF NOT EXISTS public.trainee_assignments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   profile_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  assigned_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
-  summary TEXT NOT NULL,
+  description TEXT,
+  due_date DATE,
+  summary TEXT DEFAULT '',
   learnings TEXT,
   blockers TEXT,
   drive_url TEXT,
+  status TEXT DEFAULT 'pending',
   rating_stars INTEGER CHECK (rating_stars BETWEEN 1 AND 5),
   points INTEGER CHECK (points BETWEEN 2 AND 10),
   rated_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
@@ -375,6 +379,10 @@ CREATE TABLE IF NOT EXISTS public.trainee_assignments (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS assigned_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL;
+ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS due_date DATE;
+ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
 ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS drive_url TEXT;
 ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS rating_stars INTEGER CHECK (rating_stars BETWEEN 1 AND 5);
 ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS points INTEGER CHECK (points BETWEEN 2 AND 10);
@@ -390,10 +398,14 @@ CREATE POLICY "Trainee assignments are viewable by authenticated users"
 DROP POLICY IF EXISTS "Authenticated users can submit assignments" ON public.trainee_assignments;
 CREATE POLICY "Authenticated users can submit assignments"
   ON public.trainee_assignments FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = profile_id);
+  WITH CHECK (auth.uid() = profile_id OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
 
 DROP POLICY IF EXISTS "Captains and vice captains can rate trainee assignments" ON public.trainee_assignments;
 CREATE POLICY "Captains and vice captains can rate trainee assignments"
-  ON public.trainee_assignments FOR UPDATE TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
+  ON public.trainee_assignments FOR ALL TO authenticated
+  USING (
+    auth.uid() = profile_id OR
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain'))
+  );
+
 
