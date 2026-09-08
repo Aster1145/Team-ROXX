@@ -391,21 +391,17 @@ ALTER TABLE public.trainee_assignments ADD COLUMN IF NOT EXISTS rating_feedback 
 
 ALTER TABLE public.trainee_assignments ENABLE ROW LEVEL SECURITY;
 
+-- Drop all old restrictive policies
 DROP POLICY IF EXISTS "Trainee assignments are viewable by authenticated users" ON public.trainee_assignments;
-CREATE POLICY "Trainee assignments are viewable by authenticated users"
-  ON public.trainee_assignments FOR SELECT TO authenticated USING (true);
-
 DROP POLICY IF EXISTS "Authenticated users can submit assignments" ON public.trainee_assignments;
-CREATE POLICY "Authenticated users can submit assignments"
-  ON public.trainee_assignments FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = profile_id OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
-
 DROP POLICY IF EXISTS "Captains and vice captains can rate trainee assignments" ON public.trainee_assignments;
-CREATE POLICY "Captains and vice captains can rate trainee assignments"
+DROP POLICY IF EXISTS "Authenticated users can manage trainee assignments" ON public.trainee_assignments;
+
+-- Create unified open policy for authenticated users
+CREATE POLICY "Authenticated users can manage trainee assignments"
   ON public.trainee_assignments FOR ALL TO authenticated
-  USING (
-    auth.uid() = profile_id OR
-    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain'))
-  );
+  USING (true)
+  WITH CHECK (true);
+
 
 
