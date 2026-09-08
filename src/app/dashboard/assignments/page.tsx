@@ -78,6 +78,7 @@ export default function AssignmentsPage() {
 
   const userCanManage = canEditProject(profile);
   const userCanRate = canRateTrainees(profile);
+  const isUserTrainee = isTrainee(profile);
 
   const fetchData = async () => {
     try {
@@ -288,7 +289,7 @@ export default function AssignmentsPage() {
   };
 
   const exportExcel = () => {
-    const rows = assignments.map((a) => ({
+    const rows = visibleAssignments.map((a) => ({
       Title: a.title,
       "Assigned To": a.profile?.full_name || "Unassigned",
       Department: a.profile?.department,
@@ -426,8 +427,16 @@ export default function AssignmentsPage() {
     })
     .sort((a, b) => b.totalPoints - a.totalPoints);
 
-  // Filtered Assignments List
-  const filteredAssignments = assignments.filter((a) => {
+  // VISIBILITY SCOPING: Trainees ONLY see their own assignments. Captains & Vice Captains see ALL team assignments.
+  const visibleAssignments = assignments.filter((a) => {
+    if (isUserTrainee) {
+      return a.profile_id === profile?.id;
+    }
+    return true;
+  });
+
+  // Filtered Assignments List (for active tab)
+  const filteredAssignments = visibleAssignments.filter((a) => {
     const isSubmitted = a.summary && a.summary.trim().length > 0;
     const isGraded = a.rating_stars != null;
     const isMyAssigned = a.profile_id === profile?.id;
@@ -466,12 +475,14 @@ export default function AssignmentsPage() {
             Assignments & Tasks
           </h2>
           <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-            Team leads assign tasks; members & trainees submit solutions with Google Drive links for review and points ranking.
+            {isUserTrainee
+              ? "View tasks assigned to you by team leads and submit your solutions."
+              : "Team leads assign tasks; members & trainees submit solutions with Google Drive links for review and points ranking."}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 shrink-0 self-start sm:self-auto">
-          {assignments.length > 0 && (
+          {visibleAssignments.length > 0 && (
             <Button variant="outline" onClick={exportExcel} className="text-xs font-semibold gap-1.5">
               <Download className="h-4 w-4 shrink-0" /> Export Excel
             </Button>
@@ -538,7 +549,7 @@ export default function AssignmentsPage() {
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate">
-                        {t.full_name}
+                        {t.full_name} {profile?.id === t.id && <span className="text-[10px] text-orange-600 dark:text-orange-400 font-semibold">(You)</span>}
                       </p>
                       <p className="text-[11px] font-medium text-orange-700 dark:text-orange-400 truncate">
                         {roleLabel(t.role, t.department)} • {t.department}
@@ -575,19 +586,21 @@ export default function AssignmentsPage() {
               : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
           }`}
         >
-          All Assignments ({assignments.length})
+          {isUserTrainee ? `My Assignments (${visibleAssignments.length})` : `All Team Assignments (${visibleAssignments.length})`}
         </button>
 
-        <button
-          onClick={() => setFilterTab("my_assigned")}
-          className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
-            filterTab === "my_assigned"
-              ? "bg-orange-600 text-white shadow-2xs"
-              : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
-          }`}
-        >
-          Assigned to Me ({assignments.filter((a) => a.profile_id === profile?.id).length})
-        </button>
+        {!isUserTrainee && (
+          <button
+            onClick={() => setFilterTab("my_assigned")}
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+              filterTab === "my_assigned"
+                ? "bg-orange-600 text-white shadow-2xs"
+                : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
+            }`}
+          >
+            Assigned to Me ({assignments.filter((a) => a.profile_id === profile?.id).length})
+          </button>
+        )}
 
         <button
           onClick={() => setFilterTab("pending")}
@@ -597,7 +610,7 @@ export default function AssignmentsPage() {
               : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
           }`}
         >
-          Pending Submission ({assignments.filter((a) => (!a.summary || a.summary.trim() === "") && a.rating_stars == null).length})
+          Pending Submission ({visibleAssignments.filter((a) => (!a.summary || a.summary.trim() === "") && a.rating_stars == null).length})
         </button>
 
         <button
@@ -608,7 +621,7 @@ export default function AssignmentsPage() {
               : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
           }`}
         >
-          Submitted / Under Review ({assignments.filter((a) => a.summary && a.summary.trim() !== "" && a.rating_stars == null).length})
+          Submitted / Under Review ({visibleAssignments.filter((a) => a.summary && a.summary.trim() !== "" && a.rating_stars == null).length})
         </button>
 
         <button
@@ -619,7 +632,7 @@ export default function AssignmentsPage() {
               : "bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-slate-100"
           }`}
         >
-          Graded & Completed ({assignments.filter((a) => a.rating_stars != null).length})
+          Graded & Completed ({visibleAssignments.filter((a) => a.rating_stars != null).length})
         </button>
       </div>
 
@@ -787,7 +800,7 @@ export default function AssignmentsPage() {
                         <p className="text-sm text-slate-700 dark:text-slate-300 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{a.learnings || "—"}</p>
                       </div>
                       <div className="min-w-0 break-words">
-                        <p className="text-xs font-semibold uppercase text-slate-400 mb-1">Doubts & Blockers</p>
+                        <p className="text-xs font-semibold uppercase text-slate-400 mb-1">Doubts & Challenges Faced</p>
                         <p className="text-sm text-slate-700 dark:text-slate-300 break-words [overflow-wrap:anywhere] whitespace-pre-wrap">{a.blockers || "—"}</p>
                       </div>
                     </div>
@@ -832,7 +845,11 @@ export default function AssignmentsPage() {
           <div className="py-12 text-center text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
             <GraduationCap className="h-10 w-10 mx-auto text-orange-500/40 mb-2" />
             <p className="font-bold text-base text-slate-800 dark:text-slate-200">No assignments found for this filter.</p>
-            <p className="text-xs mt-1">Team leads can assign new tasks and members can submit completed work here.</p>
+            <p className="text-xs mt-1">
+              {isUserTrainee
+                ? "You currently have no assignments under this filter."
+                : "Team leads can assign new tasks and members can submit completed work here."}
+            </p>
           </div>
         )}
       </div>
