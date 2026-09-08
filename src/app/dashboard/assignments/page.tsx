@@ -70,6 +70,7 @@ export default function AssignmentsPage() {
   });
 
   const [submitForm, setSubmitForm] = useState({
+    title: "",
     summary: "",
     learnings: "",
     blockers: "",
@@ -179,11 +180,12 @@ export default function AssignmentsPage() {
     }
   };
 
-  // Submit Solution for Assignment
+  // Submit Solution for Assignment (Calls server-side API route for guaranteed RLS-bypass execution)
   const handleOpenSubmitModal = (assignment?: TraineeAssignment) => {
     if (assignment) {
       setSubmittingAssignmentTarget(assignment);
       setSubmitForm({
+        title: assignment.title,
         summary: assignment.summary || "",
         learnings: assignment.learnings || "",
         blockers: assignment.blockers || "",
@@ -191,7 +193,7 @@ export default function AssignmentsPage() {
       });
     } else {
       setSubmittingAssignmentTarget(null);
-      setSubmitForm({ summary: "", learnings: "", blockers: "", drive_url: "" });
+      setSubmitForm({ title: "", summary: "", learnings: "", blockers: "", drive_url: "" });
     }
     setSubmitModalOpen(true);
   };
@@ -199,48 +201,72 @@ export default function AssignmentsPage() {
   const handleSubmitAssignmentSolution = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile?.id) return;
+
+    if (!submitForm.summary || !submitForm.summary.trim()) {
+      alert("Please provide a summary of work done & solution details.");
+      return;
+    }
+
     setSubmittingWork(true);
 
     try {
-      let formattedDriveUrl = submitForm.drive_url.trim();
-      if (
-        formattedDriveUrl &&
-        !formattedDriveUrl.startsWith("http://") &&
-        !formattedDriveUrl.startsWith("https://")
-      ) {
-        formattedDriveUrl = `https://${formattedDriveUrl}`;
-      }
+      const res = await fetch("/api/assignments/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assignment_id: submittingAssignmentTarget?.id || null,
+          profile_id: profile.id,
+          title: submittingAssignmentTarget?.title || submitForm.title || "Trainee Work Submission",
+          summary: submitForm.summary,
+          learnings: submitForm.learnings || null,
+          blockers: submitForm.blockers || null,
+          drive_url: submitForm.drive_url || null,
+        }),
+      });
 
-      if (submittingAssignmentTarget) {
-        // Updating existing assigned task
-        const { error } = await supabase
-          .from("trainee_assignments")
-          .update({
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        // Client-side fallback if server route responds with error
+        console.warn("Server API submission notice, trying client fallback:", data.error);
+        let formattedDriveUrl = submitForm.drive_url.trim();
+        if (
+          formattedDriveUrl &&
+          !formattedDriveUrl.startsWith("http://") &&
+          !formattedDriveUrl.startsWith("https://")
+        ) {
+          formattedDriveUrl = `https://${formattedDriveUrl}`;
+        }
+
+        if (submittingAssignmentTarget) {
+          const { error: updateErr } = await supabase
+            .from("trainee_assignments")
+            .update({
+              summary: submitForm.summary,
+              learnings: submitForm.learnings || null,
+              blockers: submitForm.blockers || null,
+              drive_url: formattedDriveUrl || null,
+            })
+            .eq("id", submittingAssignmentTarget.id);
+
+          if (updateErr) throw updateErr;
+        } else {
+          const { error: insertErr } = await supabase.from("trainee_assignments").insert({
+            profile_id: profile.id,
+            title: submitForm.title || submitForm.summary.slice(0, 50) || "Trainee Work Submission",
             summary: submitForm.summary,
             learnings: submitForm.learnings || null,
             blockers: submitForm.blockers || null,
             drive_url: formattedDriveUrl || null,
-          })
-          .eq("id", submittingAssignmentTarget.id);
+          });
 
-        if (error) throw error;
-      } else {
-        // Submitting self-initiated work
-        const { error } = await supabase.from("trainee_assignments").insert({
-          profile_id: profile.id,
-          title: submitForm.summary.slice(0, 50) || "Trainee Work Submission",
-          summary: submitForm.summary,
-          learnings: submitForm.learnings || null,
-          blockers: submitForm.blockers || null,
-          drive_url: formattedDriveUrl || null,
-        });
-
-        if (error) throw error;
+          if (insertErr) throw insertErr;
+        }
       }
 
       setSubmitModalOpen(false);
       setSubmittingAssignmentTarget(null);
-      setSubmitForm({ summary: "", learnings: "", blockers: "", drive_url: "" });
+      setSubmitForm({ title: "", summary: "", learnings: "", blockers: "", drive_url: "" });
       await fetchData();
     } catch (err: any) {
       alert("Failed to submit assignment: " + err.message);
@@ -959,18 +985,18 @@ export default function AssignmentsPage() {
               <Input
                 placeholder="e.g. Flight Controller Wiring & Drone Firmware Setup"
                 required
-                value={submitForm.summary.slice(0, 40)}
-                onChange={(e) => setSubmitForm({ ...submitForm, summary: e.target.value })}
+                value={submitForm.title}
+                onChange={(e) => setSubmitForm({ ...submitForm, title: e.target.value })}
               />
             </div>
           )}
 
           <div>
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
-              Google Drive / Paper Attachment Link *
+              Google Drive / Paper Attachment Link (Optional)
             </label>
             <Input
-              type="url"
+              type="text"
               placeholder="https://drive.google.com/file/d/... or Google Doc URL"
               value={submitForm.drive_url}
               onChange={(e) => setSubmitForm({ ...submitForm, drive_url: e.target.value })}
