@@ -33,6 +33,7 @@ import {
   UserPlus,
   FileText,
   Check,
+  Trash2,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import * as XLSX from "xlsx";
@@ -321,6 +322,24 @@ export default function AssignmentsPage() {
       alert("Failed to submit rating: " + err.message);
     } finally {
       setSubmittingRating(false);
+    }
+  };
+
+  const handleDeleteAssignment = async (assignmentId: string) => {
+    if (!confirm("Are you sure you want to delete this assignment?")) return;
+    try {
+      const { error } = await supabase
+        .from("trainee_assignments")
+        .delete()
+        .eq("id", assignmentId);
+
+      if (error) {
+        alert("Error deleting assignment: " + error.message);
+      } else {
+        await fetchData();
+      }
+    } catch (err: any) {
+      alert("Failed to delete assignment: " + err.message);
     }
   };
 
@@ -785,6 +804,20 @@ export default function AssignmentsPage() {
                       >
                         <FileDown className="h-3.5 w-3.5" />
                         Doc
+                      </Button>
+                    )}
+
+                    {/* Delete Assignment (Captain & Vice Captain) */}
+                    {userCanManage && (
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => handleDeleteAssignment(a.id)}
+                        className="text-xs font-medium gap-1 px-2.5"
+                        title="Delete Assignment"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete
                       </Button>
                     )}
                   </div>
