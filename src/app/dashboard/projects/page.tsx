@@ -242,28 +242,33 @@ function ProjectDetailModal({
   const assignedMember = (id: string | null) => members.find((m) => m.id === id);
 
   return (
-    <Modal isOpen onClose={onClose} title={project.name} className="max-w-2xl">
+    <Modal isOpen onClose={onClose} title={project.name} className="max-w-3xl">
       <div className="space-y-6">
         <div>
-          <p className="text-sm text-charcoal/70">{project.description}</p>
+          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{project.description}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Badge variant="forest">{project.department}</Badge>
             <Badge variant={project.status === "ongoing" ? "success" : "default"}>{project.status.replace("_", " ")}</Badge>
           </div>
         </div>
 
-        <div>
+        <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-semibold text-charcoal">Tasks</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-slate-900 dark:text-slate-100">Tasks</h3>
+              <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                {tasks.length}
+              </span>
+            </div>
             {canEditProject(profile) && (
-              <Button size="sm" onClick={() => setShowTaskForm(true)}>
+              <Button size="sm" onClick={() => setShowTaskForm(true)} className="gap-1">
                 <Plus className="h-4 w-4" /> Add Task
               </Button>
             )}
           </div>
 
           {showTaskForm && (
-            <form onSubmit={handleAddTask} className="mb-4 space-y-3 rounded-xl border border-stone bg-cream p-4">
+            <form onSubmit={handleAddTask} className="mb-4 space-y-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 p-4">
               <Input
                 placeholder="Task title"
                 required
@@ -275,7 +280,7 @@ function ProjectDetailModal({
                 value={taskForm.description}
                 onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
               />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Select
                   value={taskForm.assigned_to || ""}
                   onChange={(e) => setTaskForm({ ...taskForm, assigned_to: e.target.value || null })}
@@ -298,21 +303,28 @@ function ProjectDetailModal({
             </form>
           )}
 
-          <div className="space-y-3">
+          {/* Scrollable Tasks Container */}
+          <div className="max-h-[380px] overflow-y-auto pr-1 space-y-3 scroll-smooth">
             {tasks.map((t) => (
-              <div key={t.id} className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/60 p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-bold text-slate-900 dark:text-slate-100 text-sm">{t.title}</p>
-                    {t.description && <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">{t.description}</p>}
-                    <p className="mt-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-                      Assigned to: <strong className="text-slate-800 dark:text-slate-200">{assignedMember(t.assigned_to)?.full_name || "Unassigned"}</strong>
-                    </p>
+              <div
+                key={t.id}
+                className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/60 p-4 transition-all hover:border-slate-300 dark:hover:border-slate-700"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-slate-900 dark:text-slate-100 text-sm leading-snug break-words">{t.title}</p>
+                    {t.description && (
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 whitespace-pre-line leading-relaxed break-words">{t.description}</p>
+                    )}
+                    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-400">
+                      <span>Assigned to: <strong className="text-slate-800 dark:text-slate-200">{assignedMember(t.assigned_to)?.full_name || "Unassigned"}</strong></span>
+                      {t.due_date && <span>• Due: <strong className="text-slate-700 dark:text-slate-300">{t.due_date}</strong></span>}
+                    </div>
                   </div>
                   <Select
                     value={t.status}
                     onChange={(e) => updateTaskStatus(t.id, e.target.value as Task["status"])}
-                    className="w-36"
+                    className="w-full sm:w-36 shrink-0"
                   >
                     <option value="todo">To Do</option>
                     <option value="in_progress">In Progress</option>
@@ -322,7 +334,11 @@ function ProjectDetailModal({
                 </div>
               </div>
             ))}
-            {tasks.length === 0 && <p className="text-sm text-charcoal/60">No tasks yet.</p>}
+            {tasks.length === 0 && (
+              <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                No tasks created for this project yet.
+              </div>
+            )}
           </div>
         </div>
       </div>
