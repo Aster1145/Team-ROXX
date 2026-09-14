@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
+import { Modal } from "@/components/ui/Modal";
 import {
   FolderKanban,
   Users,
@@ -20,6 +21,7 @@ import {
   Bell,
   Clock,
   CheckCircle2,
+  Eye,
 } from "lucide-react";
 import { formatDate, formatDateTime } from "@/lib/utils";
 import { Project, Event, InventoryLog, WeeklyReport, Task, TaskStatus } from "@/types";
@@ -41,6 +43,7 @@ export default function DashboardPage() {
   const [inventory, setInventory] = useState<InventoryLog[]>([]);
   const [reports, setReports] = useState<WeeklyReport[]>([]);
   const [myTasks, setMyTasks] = useState<Task[]>([]);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboardData = async () => {
@@ -55,7 +58,7 @@ export default function DashboardPage() {
         supabase.from("weekly_reports").select("*, profile:profiles(full_name, department)").limit(3),
         supabase
           .from("tasks")
-          .select("*, project:projects(name)")
+          .select("*, project:projects(name, description, department)")
           .eq("assigned_to", profile.id)
           .order("created_at", { ascending: false }),
       ]);
@@ -204,11 +207,14 @@ export default function DashboardPage() {
             {myTasks.map((t) => (
               <div
                 key={t.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/60 shadow-2xs hover:border-slate-400 dark:hover:border-slate-600 transition-all min-w-0"
+                onClick={() => setSelectedTask(t)}
+                className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/60 shadow-2xs hover:border-emerald-500/50 dark:hover:border-emerald-500/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-all cursor-pointer min-w-0"
               >
-                <div className="space-y-1 min-w-0">
+                <div className="space-y-1.5 min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap min-w-0">
-                    <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm break-words [overflow-wrap:anywhere]">{t.title}</h4>
+                    <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm break-words [overflow-wrap:anywhere] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                      {t.title}
+                    </h4>
                     {t.project?.name && (
                       <Badge variant="forest" className="text-[10px] shrink-0">
                         {t.project.name}
@@ -217,17 +223,27 @@ export default function DashboardPage() {
                     {renderTaskStatusBadge(t.status)}
                   </div>
                   {t.description && (
-                    <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 break-words">{t.description}</p>
-                  )}
-                  {t.due_date && (
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                      <Clock className="h-3 w-3 text-amber-600 shrink-0" /> Due: {formatDate(t.due_date)}
+                    <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 break-words leading-relaxed">
+                      {t.description}
                     </p>
                   )}
+                  <div className="flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400 pt-0.5 flex-wrap">
+                    {t.due_date && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="h-3 w-3 text-amber-600 shrink-0" /> Due: {formatDate(t.due_date)}
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400 opacity-90 group-hover:opacity-100 transition-opacity">
+                      <Eye className="h-3 w-3 shrink-0" /> Click for full details
+                    </span>
+                  </div>
                 </div>
 
                 {/* Direct Interactive Status Selector on Dashboard */}
-                <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-700">
+                <div
+                  className="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-slate-700"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">Status:</span>
                   <Select
                     value={t.status}
@@ -361,6 +377,81 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Task Details Modal */}
+      {selectedTask && (
+        <Modal
+          isOpen={!!selectedTask}
+          onClose={() => setSelectedTask(null)}
+          title={selectedTask.title}
+          className="max-w-2xl"
+        >
+          <div className="space-y-5">
+            <div className="flex flex-wrap items-center gap-2">
+              {selectedTask.project?.name && (
+                <Badge variant="forest" className="font-semibold text-xs">
+                  Project: {selectedTask.project.name}
+                </Badge>
+              )}
+              {renderTaskStatusBadge(selectedTask.status)}
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4 space-y-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Complete Task Instructions & Scope
+              </h4>
+              {selectedTask.description ? (
+                <p className="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-line leading-relaxed [overflow-wrap:anywhere]">
+                  {selectedTask.description}
+                </p>
+              ) : (
+                <p className="text-sm italic text-slate-400">No additional description provided for this task.</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 bg-white dark:bg-slate-900">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Due Date</p>
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 mt-0.5 flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-amber-500 shrink-0" />
+                  {selectedTask.due_date ? formatDate(selectedTask.due_date) : "No deadline assigned"}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 bg-white dark:bg-slate-900">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Update Your Progress</p>
+                <div className="mt-1">
+                  <Select
+                    value={selectedTask.status}
+                    onChange={(e) => {
+                      const newStatus = e.target.value as TaskStatus;
+                      handleUpdateTaskStatus(selectedTask.id, newStatus);
+                      setSelectedTask({ ...selectedTask, status: newStatus });
+                    }}
+                    className="w-full text-xs font-semibold"
+                  >
+                    <option value="todo">To Do</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="review">Under Review</option>
+                    <option value="done">Done ✓</option>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+              <Link href="/dashboard/projects">
+                <Button variant="ghost" size="sm" className="text-xs text-slate-600 dark:text-slate-400">
+                  Go to Projects <ArrowRight className="ml-1 h-3.5 w-3.5" />
+                </Button>
+              </Link>
+              <Button variant="outline" size="sm" onClick={() => setSelectedTask(null)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </>
   );
 }
