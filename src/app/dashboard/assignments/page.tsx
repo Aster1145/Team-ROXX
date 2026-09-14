@@ -327,19 +327,34 @@ export default function AssignmentsPage() {
 
   const handleDeleteAssignment = async (assignmentId: string) => {
     if (!confirm("Are you sure you want to delete this assignment?")) return;
-    try {
-      const { error } = await supabase
-        .from("trainee_assignments")
-        .delete()
-        .eq("id", assignmentId);
 
-      if (error) {
-        alert("Error deleting assignment: " + error.message);
-      } else {
-        await fetchData();
+    // Optimistic UI removal
+    setAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
+
+    try {
+      const res = await fetch("/api/assignments/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignmentId }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        // Fallback to client-side supabase delete
+        const { error: clientErr } = await supabase
+          .from("trainee_assignments")
+          .delete()
+          .eq("id", assignmentId);
+
+        if (clientErr) {
+          alert("Error deleting assignment: " + (data.error || clientErr.message));
+        }
       }
+      await fetchData();
     } catch (err: any) {
       alert("Failed to delete assignment: " + err.message);
+      await fetchData();
     }
   };
 
