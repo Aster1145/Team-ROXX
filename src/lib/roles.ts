@@ -63,6 +63,10 @@ export function canRateTrainees(profile?: Profile | null) {
   return profile?.role === "captain" || profile?.role === "vice_captain";
 }
 
+export function canDeleteTask(profile?: Profile | null) {
+  return profile?.role === "captain" || profile?.role === "vice_captain";
+}
+
 
 export function roleLabel(role?: Role, department?: Department) {
   if (role === "trainee" || department === "Trainee") {

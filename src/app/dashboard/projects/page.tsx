@@ -11,7 +11,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DEPARTMENTS, STATUS_OPTIONS } from "@/lib/constants";
-import { canEditProject, isCaptain } from "@/lib/roles";
+import { canEditProject, isCaptain, canDeleteTask } from "@/lib/roles";
 import { Project, Profile, Task } from "@/types";
 import { Plus, Pencil, Trash2, ChevronRight } from "lucide-react";
 
@@ -239,6 +239,13 @@ function ProjectDetailModal({
     fetchTasks();
   };
 
+  const handleDeleteTask = async (taskId: string) => {
+    if (!confirm("Are you sure you want to delete this task?")) return;
+    await supabase.from("tasks").delete().eq("id", taskId);
+    fetchTasks();
+    onUpdate();
+  };
+
   const assignedMember = (id: string | null) => members.find((m) => m.id === id);
 
   return (
@@ -321,16 +328,29 @@ function ProjectDetailModal({
                       {t.due_date && <span>• Due: <strong className="text-slate-700 dark:text-slate-300">{t.due_date}</strong></span>}
                     </div>
                   </div>
-                  <Select
-                    value={t.status}
-                    onChange={(e) => updateTaskStatus(t.id, e.target.value as Task["status"])}
-                    className="w-full sm:w-36 shrink-0"
-                  >
-                    <option value="todo">To Do</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="review">Review</option>
-                    <option value="done">Done</option>
-                  </Select>
+                  <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                    <Select
+                      value={t.status}
+                      onChange={(e) => updateTaskStatus(t.id, e.target.value as Task["status"])}
+                      className="w-full sm:w-36"
+                    >
+                      <option value="todo">To Do</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="review">Review</option>
+                      <option value="done">Done</option>
+                    </Select>
+                    {canDeleteTask(profile) && (
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => handleDeleteTask(t.id)}
+                        className="h-10 px-2.5 shrink-0"
+                        title="Delete Task"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
