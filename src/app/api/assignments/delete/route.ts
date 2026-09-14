@@ -3,10 +3,10 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { assignmentId } = await request.json();
+    const { assignmentId, title, deleteAllWithTitle } = await request.json();
 
-    if (!assignmentId) {
-      return NextResponse.json({ error: "Assignment ID is required." }, { status: 400 });
+    if (!assignmentId && !title) {
+      return NextResponse.json({ error: "Assignment ID or Title is required." }, { status: 400 });
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://ycznkbutsbtzyxmjadwd.supabase.co";
@@ -22,10 +22,27 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    const { error } = await adminSupabase
-      .from("trainee_assignments")
-      .delete()
-      .eq("id", assignmentId);
+    let error = null;
+
+    if (deleteAllWithTitle && title) {
+      const res = await adminSupabase
+        .from("trainee_assignments")
+        .delete()
+        .eq("title", title);
+      error = res.error;
+    } else if (assignmentId) {
+      const res = await adminSupabase
+        .from("trainee_assignments")
+        .delete()
+        .eq("id", assignmentId);
+      error = res.error;
+    } else if (title) {
+      const res = await adminSupabase
+        .from("trainee_assignments")
+        .delete()
+        .eq("title", title);
+      error = res.error;
+    }
 
     if (error) {
       console.error("Assignment admin deletion error:", error);

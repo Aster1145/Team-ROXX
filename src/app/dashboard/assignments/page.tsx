@@ -347,13 +347,43 @@ export default function AssignmentsPage() {
           .delete()
           .eq("id", assignmentId);
 
-        if (clientErr) {
-          alert("Error deleting assignment: " + (data.error || clientErr.message));
-        }
       }
       await fetchData();
     } catch (err: any) {
       alert("Failed to delete assignment: " + err.message);
+      await fetchData();
+    }
+  };
+
+  const handleDeleteAllForTitle = async (title: string, count: number) => {
+    if (!confirm(`Are you sure you want to delete "${title}" for ALL ${count} assigned members in 1 click?`)) return;
+
+    // Optimistic UI removal for all assignments with matching title
+    setAssignments((prev) => prev.filter((a) => a.title !== title));
+
+    try {
+      const res = await fetch("/api/assignments/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, deleteAllWithTitle: true }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        // Fallback to client-side supabase delete
+        const { error: clientErr } = await supabase
+          .from("trainee_assignments")
+          .delete()
+          .eq("title", title);
+
+        if (clientErr) {
+          alert("Error deleting common assignment: " + (data.error || clientErr.message));
+        }
+      }
+      await fetchData();
+    } catch (err: any) {
+      alert("Failed to delete common assignment: " + err.message);
       await fetchData();
     }
   };
@@ -822,18 +852,32 @@ export default function AssignmentsPage() {
                       </Button>
                     )}
 
-                    {/* Delete Assignment (Captain & Vice Captain) */}
+                    {/* Delete Assignment Options (Captain & Vice Captain) */}
                     {userCanManage && (
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => handleDeleteAssignment(a.id)}
-                        className="text-xs font-medium gap-1 px-2.5"
-                        title="Delete Assignment"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                        Delete
-                      </Button>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {assignments.filter((item) => item.title === a.title).length > 1 && (
+                          <Button
+                            size="sm"
+                            variant="danger"
+                            onClick={() => handleDeleteAllForTitle(a.title, assignments.filter((item) => item.title === a.title).length)}
+                            className="text-xs font-bold gap-1 px-2.5 bg-red-700 hover:bg-red-800 text-white shadow-2xs"
+                            title="Delete this common assignment for all members in 1 click"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                            Delete for ALL ({assignments.filter((item) => item.title === a.title).length})
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeleteAssignment(a.id)}
+                          className="text-xs font-medium gap-1 px-2 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900 hover:bg-red-50 dark:hover:bg-red-950/40"
+                          title="Delete only this member's assignment"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          {assignments.filter((item) => item.title === a.title).length > 1 ? "This Only" : "Delete"}
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
