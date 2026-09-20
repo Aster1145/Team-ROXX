@@ -320,7 +320,37 @@ export default function MembersPage() {
       <div className="space-y-8">
         {HIERARCHY_GROUPS.map((group) => {
           const groupMembers = displayMembers.filter(group.filter);
-          if (groupMembers.length === 0) return null;
+          if (groupMembers.length === 0) {
+            if (group.key === "mentor" && !isUserMentor) {
+              return (
+                <div key={group.key} className="space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b border-slate-200/80 dark:border-slate-800">
+                    <group.icon className={`h-4 w-4 shrink-0 ${group.iconColor}`} />
+                    <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      {group.title}
+                    </h3>
+                    <span className="rounded-full bg-slate-200/70 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:text-slate-300">
+                      0
+                    </span>
+                  </div>
+                  <div className="rounded-2xl border border-dashed border-purple-200 dark:border-purple-900/50 bg-purple-50/40 dark:bg-purple-950/20 p-4 text-center">
+                    <p className="text-xs text-purple-900 dark:text-purple-300 font-medium">
+                      No Project Mentors assigned yet.
+                    </p>
+                    {userIsCaptain && (
+                      <button
+                        onClick={() => setModalOpen(true)}
+                        className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-purple-700 dark:text-purple-300 hover:underline"
+                      >
+                        <Plus className="h-3.5 w-3.5" /> Add Project Mentor
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+            return null;
+          }
 
           return (
             <div key={group.key} className="space-y-3">
