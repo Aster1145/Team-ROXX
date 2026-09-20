@@ -25,15 +25,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // 1. Create auth user
+    // 1. Create auth user (Pass safe default metadata to avoid database trigger failure on profiles_role_check)
     const { data: authData, error: authError } = await adminSupabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name,
-          role: role || "member",
-          department: department || "General",
+          role: "member",
+          department: "General",
         },
       },
     });
@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to obtain user ID from Supabase." }, { status: 500 });
     }
 
-    // 2. Insert/upsert into public.profiles
+    // 2. Insert/upsert into public.profiles with the requested role and department
+    const targetDept = role === "trainee" ? "Trainee" : (department || "General");
     let { data: profile, error: profileError } = await adminSupabase
       .from("profiles")
       .upsert(
@@ -57,7 +58,7 @@ export async function POST(request: NextRequest) {
           email,
           full_name,
           role: role || "member",
-          department: role === "trainee" ? "Trainee" : (department || "General"),
+          department: targetDept,
           project_id: project_id || null,
           phone_number: phone_number || null,
         },
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (profileError && (profileError.message.includes("check constraint") || profileError.message.includes("profiles_role_check"))) {
-      // Fallback for strict database constraints: store role as 'member' and department as 'Trainee'
+      // Fallback for strict database constraints: store role as 'member'
       const fallback = await adminSupabase
         .from("profiles")
         .upsert(
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
             email,
             full_name,
             role: "member",
-            department: "Trainee",
+            department: targetDept,
             project_id: project_id || null,
             phone_number: phone_number || null,
           },

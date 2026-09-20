@@ -352,6 +352,8 @@ BEGIN
     role = EXCLUDED.role,
     department = EXCLUDED.department;
   RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
