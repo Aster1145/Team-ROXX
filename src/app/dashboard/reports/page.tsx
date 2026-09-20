@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Input, Textarea } from "@/components/ui/Input";
 import { WeeklyReport, Profile } from "@/types";
-import { isCaptain, isViceCaptain, isTrainee, roleLabel } from "@/lib/roles";
+import { isCaptain, isViceCaptain, isTrainee, roleLabel, canRateReportForMember } from "@/lib/roles";
 import { Plus, Download, FileText, Star, Trophy, Award, MessageSquare, CheckCircle2, AlertTriangle, FileDown, GraduationCap } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import * as XLSX from "xlsx";
@@ -48,7 +48,7 @@ export default function ReportsPage() {
       const [reportsRes, membersRes] = await Promise.all([
         supabase
           .from("weekly_reports")
-          .select("*, profile:profiles!profile_id(full_name, department, role)")
+          .select("*, profile:profiles!profile_id(full_name, department, role, project_id)")
           .order("created_at", { ascending: false }),
         supabase.from("profiles").select("*"),
       ]);
@@ -282,6 +282,11 @@ export default function ReportsPage() {
     );
   };
 
+  const isUserMentor = profile?.role === "mentor";
+  const displayedReports = isUserMentor && profile?.project_id
+    ? reports.filter((r) => r.profile_id === profile.id || r.profile?.project_id === profile.project_id)
+    : reports;
+
   return (
     <>
       <Header title="Weekly Reports & Performance" />
@@ -388,10 +393,11 @@ export default function ReportsPage() {
       <div className="space-y-4">
         <h3 className="text-base font-bold text-charcoal">Weekly Work Submissions</h3>
 
-        {reports.map((r) => {
+        {displayedReports.map((r) => {
           const authorIsCaptain = r.profile?.role === "captain";
           const hasBeenRated = r.rating_stars != null;
           const canDownloadDoc = isCaptain(profile) || isViceCaptain(profile) || r.profile_id === profile?.id;
+          const canRateThisReport = canRateReportForMember(profile, r.profile?.project_id);
 
           return (
             <Card key={r.id} className="hover:shadow-sm transition-shadow">
@@ -433,8 +439,8 @@ export default function ReportsPage() {
                       </div>
                     )}
 
-                    {/* Captain Only Action to Rate Non-Captain Teammates */}
-                    {userIsCaptain && !authorIsCaptain && (
+                    {/* Captain & Mentor Action to Rate Teammates */}
+                    {canRateThisReport && !authorIsCaptain && (
                       <Button
                         size="sm"
                         variant="outline"

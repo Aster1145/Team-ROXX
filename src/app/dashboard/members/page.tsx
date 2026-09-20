@@ -13,7 +13,7 @@ import { Select } from "@/components/ui/Select";
 import { DEPARTMENTS, ROLES } from "@/lib/constants";
 import { isCaptain, isTrainee, roleLabel } from "@/lib/roles";
 import { Profile, Project, Role, Department } from "@/types";
-import { Plus, Trash2, Mail, Phone, Building, FolderGit2, Pencil, Crown, ShieldAlert, Eye, EyeOff, Users, GraduationCap } from "lucide-react";
+import { Plus, Trash2, Mail, Phone, Building, FolderGit2, Pencil, Crown, ShieldAlert, Eye, EyeOff, Users, GraduationCap, Award } from "lucide-react";
 
 export default function MembersPage() {
   const { profile } = useAuth();
@@ -256,6 +256,12 @@ export default function MembersPage() {
   };
 
   const userIsCaptain = isCaptain(profile);
+  const isUserMentor = profile?.role === "mentor";
+  const mentorProjectId = profile?.project_id;
+
+  const displayMembers = isUserMentor
+    ? members.filter((m) => m.id === profile?.id || (mentorProjectId && m.project_id === mentorProjectId))
+    : members;
 
   const HIERARCHY_GROUPS = [
     {
@@ -273,6 +279,13 @@ export default function MembersPage() {
       filter: (m: Profile) => m.role === "vice_captain",
     },
     {
+      key: "mentor",
+      title: "Project Mentors",
+      icon: Award,
+      iconColor: "text-purple-600 dark:text-purple-400",
+      filter: (m: Profile) => m.role === "mentor",
+    },
+    {
       key: "member",
       title: "Team Members",
       icon: Users,
@@ -283,8 +296,8 @@ export default function MembersPage() {
       key: "trainee",
       title: "Trainees (1st Year)",
       icon: GraduationCap,
-      iconColor: "text-purple-600 dark:text-purple-400",
-      filter: (m: Profile) => isTrainee(m) && m.role !== "captain" && m.role !== "vice_captain",
+      iconColor: "text-indigo-600 dark:text-indigo-400",
+      filter: (m: Profile) => isTrainee(m) && m.role !== "captain" && m.role !== "vice_captain" && m.role !== "mentor",
     },
   ];
 
@@ -306,7 +319,7 @@ export default function MembersPage() {
 
       <div className="space-y-8">
         {HIERARCHY_GROUPS.map((group) => {
-          const groupMembers = members.filter(group.filter);
+          const groupMembers = displayMembers.filter(group.filter);
           if (groupMembers.length === 0) return null;
 
           return (

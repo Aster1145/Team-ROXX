@@ -11,7 +11,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input, Textarea } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { DEPARTMENTS, STATUS_OPTIONS } from "@/lib/constants";
-import { canEditProject, isCaptain, canDeleteTask } from "@/lib/roles";
+import { canEditProject, isCaptain, canDeleteTask, canAssignTasksForProject } from "@/lib/roles";
 import { Project, Profile, Task } from "@/types";
 import { Plus, Pencil, Trash2, ChevronRight } from "lucide-react";
 
@@ -77,6 +77,11 @@ export default function ProjectsPage() {
     setModalOpen(true);
   };
 
+  const isUserMentor = profile?.role === "mentor";
+  const displayedProjects = isUserMentor && profile?.project_id
+    ? projects.filter((p) => p.id === profile.project_id)
+    : projects;
+
   return (
     <>
       <Header title="Projects" />
@@ -91,7 +96,7 @@ export default function ProjectsPage() {
       </div>
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {projects.map((p) => (
+        {displayedProjects.map((p) => (
           <Card
             key={p.id}
             className="cursor-pointer transition-shadow hover:shadow-md"
@@ -267,7 +272,7 @@ function ProjectDetailModal({
                 {tasks.length}
               </span>
             </div>
-            {canEditProject(profile) && (
+            {canAssignTasksForProject(profile, project.id) && (
               <Button size="sm" onClick={() => setShowTaskForm(true)} className="gap-1">
                 <Plus className="h-4 w-4" /> Add Task
               </Button>
@@ -293,9 +298,11 @@ function ProjectDetailModal({
                   onChange={(e) => setTaskForm({ ...taskForm, assigned_to: e.target.value || null })}
                 >
                   <option value="">Assign to...</option>
-                  {members.map((m) => (
-                    <option key={m.id} value={m.id}>{m.full_name} ({m.department})</option>
-                  ))}
+                  {members
+                    .filter((m) => !profile || profile.role !== "mentor" || m.project_id === project.id)
+                    .map((m) => (
+                      <option key={m.id} value={m.id}>{m.full_name} ({m.department})</option>
+                    ))}
                 </Select>
                 <Input
                   type="date"

@@ -20,7 +20,7 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { isTrainee, roleLabel } from "@/lib/roles";
+import { isTrainee, isMentor, roleLabel } from "@/lib/roles";
 import { useSidebar } from "@/context/SidebarContext";
 
 const NAV = [
@@ -44,9 +44,13 @@ export function Sidebar() {
   const { isCollapsed, toggleSidebar } = useSidebar();
 
   const isUserTrainee = isTrainee(profile);
+  const isUserMentor = isMentor(profile);
   const visibleNav = NAV.filter((item) => {
     if (isUserTrainee) {
       return !["/dashboard/inventory", "/dashboard/budget", "/dashboard/meetings"].includes(item.href);
+    }
+    if (isUserMentor) {
+      return !["/dashboard/inventory", "/dashboard/budget", "/dashboard/meetings", "/dashboard/learning"].includes(item.href);
     }
     return true;
   });

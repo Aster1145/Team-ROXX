@@ -26,8 +26,9 @@ export const STATUS_OPTIONS = [
 ];
 
 export const ROLES = [
-  { value: "captain", label: "Captain" },
+  { value: "captain", label: "Captain (Team Lead)" },
   { value: "vice_captain", label: "Vice Captain" },
+  { value: "mentor", label: "Project Mentor" },
   { value: "member", label: "Member" },
   { value: "trainee", label: "Trainee (1st Year)" },
 ];

@@ -1,4 +1,4 @@
-export type Role = "captain" | "vice_captain" | "member" | "trainee";
+export type Role = "captain" | "vice_captain" | "mentor" | "member" | "trainee";
 
 export type Department =
   | "Aero Mechanics"
@@ -95,7 +95,7 @@ export interface WeeklyReport {
   rated_by?: string | null;
   rating_feedback?: string | null;
   created_at: string;
-  profile?: { full_name: string; department: Department; role?: string };
+  profile?: { full_name: string; department: Department; role?: string; project_id?: string | null };
 }
 
 export interface InventoryLog {
