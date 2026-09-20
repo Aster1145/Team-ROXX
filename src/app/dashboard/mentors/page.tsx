@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { DEPARTMENTS, ACADEMIC_DEPARTMENTS } from "@/lib/constants";
+import { ACADEMIC_DEPARTMENTS } from "@/lib/constants";
 import { isCaptain, roleLabel } from "@/lib/roles";
 import { Profile, Project, Department } from "@/types";
 import { Plus, Award, Mail, Phone, Building, FolderGit2, Pencil, Trash2, Users, Eye, EyeOff } from "lucide-react";
@@ -98,7 +98,7 @@ export default function MentorsPage() {
         password: "",
         full_name: "",
         phone_number: "",
-        department: "General",
+        department: "Computer Science & Engineering (CSE)",
         project_id: "",
       });
       await fetchData();
@@ -115,7 +115,7 @@ export default function MentorsPage() {
       full_name: m.full_name || "",
       email: m.email || "",
       phone_number: m.phone_number || "",
-      department: m.department || "General",
+      department: m.department || "Computer Science & Engineering (CSE)",
       project_id: m.project_id || "",
     });
     setEditModalOpen(true);
