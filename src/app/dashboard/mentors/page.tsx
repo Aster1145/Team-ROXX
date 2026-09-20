@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { DEPARTMENTS } from "@/lib/constants";
+import { DEPARTMENTS, ACADEMIC_DEPARTMENTS } from "@/lib/constants";
 import { isCaptain, roleLabel } from "@/lib/roles";
 import { Profile, Project, Department } from "@/types";
 import { Plus, Award, Mail, Phone, Building, FolderGit2, Pencil, Trash2, Users, Eye, EyeOff } from "lucide-react";
@@ -34,7 +34,7 @@ export default function MentorsPage() {
     password: "",
     full_name: "",
     phone_number: "",
-    department: "General" as Department,
+    department: "Computer Science & Engineering (CSE)" as Department,
     project_id: "",
   });
 
@@ -42,7 +42,7 @@ export default function MentorsPage() {
     full_name: "",
     email: "",
     phone_number: "",
-    department: "General" as Department,
+    department: "Computer Science & Engineering (CSE)" as Department,
     project_id: "",
   });
 
@@ -359,12 +359,12 @@ export default function MentorsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">Department</label>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">Academic Department</label>
               <Select
                 value={form.department}
                 onChange={(e) => setForm({ ...form, department: e.target.value as any })}
               >
-                {DEPARTMENTS.map((d) => <option key={d}>{d}</option>)}
+                {ACADEMIC_DEPARTMENTS.map((d) => <option key={d}>{d}</option>)}
               </Select>
             </div>
 
@@ -422,12 +422,12 @@ export default function MentorsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">Department</label>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">Academic Department</label>
               <Select
                 value={editForm.department}
                 onChange={(e) => setEditForm({ ...editForm, department: e.target.value as any })}
               >
-                {DEPARTMENTS.map((d) => <option key={d}>{d}</option>)}
+                {ACADEMIC_DEPARTMENTS.map((d) => <option key={d}>{d}</option>)}
               </Select>
             </div>
 

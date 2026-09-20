@@ -18,6 +18,19 @@ export const DEPARTMENTS: Department[] = [
   "General",
 ];
 
+export const ACADEMIC_DEPARTMENTS: Department[] = [
+  "Computer Science & Engineering (CSE)",
+  "Computer Science & Engineering (CSE)-DS",
+  "Computer Science & Engineering (CSE)-AIML",
+  "Computer Science & Engineering (CSE)-AIDS",
+  "Computer Science & Engineering (CSE)-CY",
+  "Computer Science & Engineering (CSE)- AI & Robotics",
+  "ECE",
+  "Aero space",
+  "Mechanical",
+  "Computer Science & Technology (CST)",
+];
+
 export const STATUS_OPTIONS = [
   { value: "planned", label: "Planned" },
   { value: "ongoing", label: "Ongoing" },

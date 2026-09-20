@@ -1,6 +1,16 @@
 export type Role = "captain" | "vice_captain" | "mentor" | "member" | "trainee";
 
 export type Department =
+  | "Computer Science & Engineering (CSE)"
+  | "Computer Science & Engineering (CSE)-DS"
+  | "Computer Science & Engineering (CSE)-AIML"
+  | "Computer Science & Engineering (CSE)-AIDS"
+  | "Computer Science & Engineering (CSE)-CY"
+  | "Computer Science & Engineering (CSE)- AI & Robotics"
+  | "ECE"
+  | "Aero space"
+  | "Mechanical"
+  | "Computer Science & Technology (CST)"
   | "Aero Mechanics"
   | "Electronics"
   | "System Integration"
@@ -15,7 +25,8 @@ export type Department =
   | "Avionics"
   | "Autonomy Stack"
   | "Testing & Flight Operations"
-  | "General";
+  | "General"
+  | (string & {});
 
 export interface Profile {
   id: string;

@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { DEPARTMENTS, ROLES } from "@/lib/constants";
+import { DEPARTMENTS, ACADEMIC_DEPARTMENTS, ROLES } from "@/lib/constants";
 import { isCaptain, isTrainee, roleLabel } from "@/lib/roles";
 import { Profile, Project, Role, Department } from "@/types";
 import { Plus, Trash2, Mail, Phone, Building, FolderGit2, Pencil, Crown, ShieldAlert, Eye, EyeOff, Users, GraduationCap, Award } from "lucide-react";
@@ -579,7 +579,7 @@ export default function MembersPage() {
                 setForm({
                   ...form,
                   role: newRole,
-                  department: newRole === "trainee" ? "Trainee" : form.department,
+                  department: newRole === "mentor" ? "Computer Science & Engineering (CSE)" : newRole === "trainee" ? "Trainee" : form.department,
                 });
               }}
             >
@@ -591,7 +591,7 @@ export default function MembersPage() {
               value={form.department}
               onChange={(e) => setForm({ ...form, department: e.target.value as any })}
             >
-              {DEPARTMENTS.map((d) => <option key={d}>{d}</option>)}
+              {(form.role === "mentor" ? ACADEMIC_DEPARTMENTS : DEPARTMENTS).map((d) => <option key={d}>{d}</option>)}
             </Select>
           </div>
           <Button type="submit" className="w-full" isLoading={submitting}>
@@ -643,7 +643,7 @@ export default function MembersPage() {
                   setEditForm({
                     ...editForm,
                     role: newRole,
-                    department: newRole === "trainee" ? "Trainee" : editForm.department,
+                    department: newRole === "mentor" ? "Computer Science & Engineering (CSE)" : newRole === "trainee" ? "Trainee" : editForm.department,
                   });
                 }}
               >
@@ -662,7 +662,7 @@ export default function MembersPage() {
                 value={editForm.department}
                 onChange={(e) => setEditForm({ ...editForm, department: e.target.value as any })}
               >
-                {DEPARTMENTS.map((d) => <option key={d}>{d}</option>)}
+                {(editForm.role === "mentor" ? ACADEMIC_DEPARTMENTS : DEPARTMENTS).map((d) => <option key={d}>{d}</option>)}
               </Select>
             </div>
           </div>
