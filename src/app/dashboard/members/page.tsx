@@ -13,7 +13,7 @@ import { Select } from "@/components/ui/Select";
 import { DEPARTMENTS, ROLES } from "@/lib/constants";
 import { isCaptain, isTrainee, roleLabel } from "@/lib/roles";
 import { Profile, Project, Role, Department } from "@/types";
-import { Plus, Trash2, Mail, Phone, Building, FolderGit2, Pencil, Crown, ShieldAlert, Eye, EyeOff } from "lucide-react";
+import { Plus, Trash2, Mail, Phone, Building, FolderGit2, Pencil, Crown, ShieldAlert, Eye, EyeOff, Users, GraduationCap } from "lucide-react";
 
 export default function MembersPage() {
   const { profile } = useAuth();
@@ -51,12 +51,25 @@ export default function MembersPage() {
     project_id: "",
   });
 
+  const getHierarchyRank = (m: Profile): number => {
+    if (m.role === "captain") return 1;
+    if (m.role === "vice_captain") return 2;
+    if (isTrainee(m)) return 4;
+    return 3;
+  };
+
   const fetchMembers = async () => {
     const { data } = await supabase
       .from("profiles")
-      .select("*")
-      .order("created_at", { ascending: false });
-    setMembers((data as Profile[]) || []);
+      .select("*");
+    const list = (data as Profile[]) || [];
+    const sorted = [...list].sort((a, b) => {
+      const rankA = getHierarchyRank(a);
+      const rankB = getHierarchyRank(b);
+      if (rankA !== rankB) return rankA - rankB;
+      return (a.full_name || "").localeCompare(b.full_name || "");
+    });
+    setMembers(sorted);
   };
 
   const fetchProjects = async () => {
@@ -244,6 +257,37 @@ export default function MembersPage() {
 
   const userIsCaptain = isCaptain(profile);
 
+  const HIERARCHY_GROUPS = [
+    {
+      key: "captain",
+      title: "Team Lead / Captain",
+      icon: Crown,
+      iconColor: "text-amber-500 fill-amber-400",
+      filter: (m: Profile) => m.role === "captain",
+    },
+    {
+      key: "vice_captain",
+      title: "Vice Captains",
+      icon: ShieldAlert,
+      iconColor: "text-emerald-600 dark:text-emerald-400",
+      filter: (m: Profile) => m.role === "vice_captain",
+    },
+    {
+      key: "member",
+      title: "Team Members",
+      icon: Users,
+      iconColor: "text-blue-600 dark:text-blue-400",
+      filter: (m: Profile) => m.role === "member" && !isTrainee(m),
+    },
+    {
+      key: "trainee",
+      title: "Trainees (1st Year)",
+      icon: GraduationCap,
+      iconColor: "text-purple-600 dark:text-purple-400",
+      filter: (m: Profile) => isTrainee(m) && m.role !== "captain" && m.role !== "vice_captain",
+    },
+  ];
+
   return (
     <>
       <Header title="Members" />
@@ -260,105 +304,126 @@ export default function MembersPage() {
         )}
       </div>
 
-      <div className="space-y-4">
-        {members.map((m) => {
-          const memberProjectName = projects.find((p) => p.id === m.project_id)?.name;
-          const isCurrentCaptain = m.role === "captain";
-          const isSelf = m.id === profile?.id;
-
-          const isTeammateTeamLead = m.role === "captain" || m.role === "vice_captain";
-          const isUserTrainee = isTrainee(profile);
-          const canSeeContactDetails = !isUserTrainee || isTeammateTeamLead || isSelf;
+      <div className="space-y-8">
+        {HIERARCHY_GROUPS.map((group) => {
+          const groupMembers = members.filter(group.filter);
+          if (groupMembers.length === 0) return null;
 
           return (
-            <Card key={m.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-3.5 sm:p-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between min-w-0">
-                {/* Member Info */}
-                <div className="space-y-2 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-base font-bold text-charcoal flex items-center gap-1.5 break-words">
-                      {isCurrentCaptain && <Crown className="h-4 w-4 text-amber-500 fill-amber-400 shrink-0" />}
-                      <span>{m.full_name}</span>
-                      {isSelf && <span className="text-xs text-charcoal/50 font-normal">(You)</span>}
-                    </h3>
-                    <Badge variant={m.role === "captain" ? "forest" : m.role === "vice_captain" ? "sage" : "default"} className="shrink-0">
-                      {roleLabel(m.role, m.department)}
-                    </Badge>
-                  </div>
+            <div key={group.key} className="space-y-3">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-200/80 dark:border-slate-800">
+                <group.icon className={`h-4 w-4 shrink-0 ${group.iconColor}`} />
+                <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  {group.title}
+                </h3>
+                <span className="rounded-full bg-slate-200/70 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-slate-700 dark:text-slate-300">
+                  {groupMembers.length}
+                </span>
+              </div>
 
-                  <div className="space-y-1.5 text-xs text-charcoal/70 min-w-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Mail className="h-3.5 w-3.5 text-forest shrink-0" />
-                      <span className="break-all no-underline font-medium text-charcoal/90" style={{ textDecoration: "none" }}>
-                        {canSeeContactDetails ? m.email : "••••••@••••• (Restricted)"}
-                      </span>
-                    </div>
+              <div className="space-y-3">
+                {groupMembers.map((m) => {
+                  const memberProjectName = projects.find((p) => p.id === m.project_id)?.name;
+                  const isCurrentCaptain = m.role === "captain";
+                  const isSelf = m.id === profile?.id;
 
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Phone className="h-3.5 w-3.5 text-forest shrink-0" />
-                        <span className="truncate no-underline font-medium text-charcoal/90" style={{ textDecoration: "none" }}>
-                          {canSeeContactDetails
-                            ? m.phone_number || "No phone listed"
-                            : "Restricted (Team Leads Only)"}
-                        </span>
-                      </div>
+                  const isTeammateTeamLead = m.role === "captain" || m.role === "vice_captain";
+                  const isUserTrainee = isTrainee(profile);
+                  const canSeeContactDetails = !isUserTrainee || isTeammateTeamLead || isSelf;
 
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Building className="h-3.5 w-3.5 text-sage shrink-0" />
-                        <span className="font-medium text-charcoal/80">{m.department}</span>
-                      </div>
+                  return (
+                    <Card key={m.id} className="hover:shadow-md transition-shadow">
+                      <CardContent className="p-3.5 sm:p-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between min-w-0">
+                        {/* Member Info */}
+                        <div className="space-y-2 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-base font-bold text-charcoal flex items-center gap-1.5 break-words">
+                              {isCurrentCaptain && <Crown className="h-4 w-4 text-amber-500 fill-amber-400 shrink-0" />}
+                              <span>{m.full_name}</span>
+                              {isSelf && <span className="text-xs text-charcoal/50 font-normal">(You)</span>}
+                            </h3>
+                            <Badge variant={m.role === "captain" ? "forest" : m.role === "vice_captain" ? "sage" : "default"} className="shrink-0">
+                              {roleLabel(m.role, m.department)}
+                            </Badge>
+                          </div>
 
-                      {memberProjectName && (
-                        <div className="flex items-center gap-2 shrink-0">
-                          <FolderGit2 className="h-3.5 w-3.5 text-amber-700 shrink-0" />
-                          <span className="font-medium text-charcoal/80">{memberProjectName}</span>
+                          <div className="space-y-1.5 text-xs text-charcoal/70 min-w-0">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Mail className="h-3.5 w-3.5 text-forest shrink-0" />
+                              <span className="break-all no-underline font-medium text-charcoal/90" style={{ textDecoration: "none" }}>
+                                {canSeeContactDetails ? m.email : "••••••@••••• (Restricted)"}
+                              </span>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <Phone className="h-3.5 w-3.5 text-forest shrink-0" />
+                                <span className="truncate no-underline font-medium text-charcoal/90" style={{ textDecoration: "none" }}>
+                                  {canSeeContactDetails
+                                    ? m.phone_number || "No phone listed"
+                                    : "Restricted (Team Leads Only)"}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0">
+                                <Building className="h-3.5 w-3.5 text-sage shrink-0" />
+                                <span className="font-medium text-charcoal/80">{m.department}</span>
+                              </div>
+
+                              {memberProjectName && (
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <FolderGit2 className="h-3.5 w-3.5 text-amber-700 shrink-0" />
+                                  <span className="font-medium text-charcoal/80">{memberProjectName}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
 
-                {/* Action Buttons for Captain */}
-                {userIsCaptain && (
-                  <div className="flex flex-wrap items-center gap-2 pt-1 lg:pt-0">
-                    {/* Transfer Captain Ownership button (Only for non-self teammates) */}
-                    {!isSelf && (
-                      <button
-                        onClick={() => {
-                          setTargetMember(m);
-                          setTransferModalOpen(true);
-                        }}
-                        className="p-2 text-amber-800 hover:text-amber-950 hover:bg-amber-100/70 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold border border-amber-300 bg-amber-50 px-3 py-1.5"
-                        title="Transfer Captain Ownership to this teammate"
-                      >
-                        <Crown className="h-3.5 w-3.5 text-amber-600" />
-                        <span>Transfer Captain Role</span>
-                      </button>
-                    )}
+                        {/* Action Buttons for Captain */}
+                        {userIsCaptain && (
+                          <div className="flex flex-wrap items-center gap-2 pt-1 lg:pt-0">
+                            {/* Transfer Captain Ownership button (Only for non-self teammates) */}
+                            {!isSelf && (
+                              <button
+                                onClick={() => {
+                                  setTargetMember(m);
+                                  setTransferModalOpen(true);
+                                }}
+                                className="p-2 text-amber-800 hover:text-amber-950 hover:bg-amber-100/70 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold border border-amber-300 bg-amber-50 px-3 py-1.5"
+                                title="Transfer Captain Ownership to this teammate"
+                              >
+                                <Crown className="h-3.5 w-3.5 text-amber-600" />
+                                <span>Transfer Captain Role</span>
+                              </button>
+                            )}
 
-                    <button
-                      onClick={() => handleOpenEditModal(m)}
-                      className="p-2 text-charcoal/70 hover:text-forest hover:bg-forest/10 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium border border-stone/60 px-3 py-1.5"
-                      title="Edit Member Details"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                      <span>Edit Teammate</span>
-                    </button>
+                            <button
+                              onClick={() => handleOpenEditModal(m)}
+                              className="p-2 text-charcoal/70 hover:text-forest hover:bg-forest/10 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium border border-stone/60 px-3 py-1.5"
+                              title="Edit Member Details"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                              <span>Edit Teammate</span>
+                            </button>
 
-                    {!isSelf && (
-                      <button
-                        onClick={() => handleRemoveMember(m.id, m.full_name)}
-                        className="p-2 text-charcoal/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Remove Member"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                            {!isSelf && (
+                              <button
+                                onClick={() => handleRemoveMember(m.id, m.full_name)}
+                                className="p-2 text-charcoal/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Remove Member"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>
