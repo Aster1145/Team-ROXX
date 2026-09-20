@@ -189,9 +189,10 @@ CREATE POLICY "Non-trainee members can create own reports"
   );
 
 DROP POLICY IF EXISTS "Captains can rate weekly reports" ON public.weekly_reports;
-CREATE POLICY "Captains can rate weekly reports"
+DROP POLICY IF EXISTS "Captains and mentors can rate weekly reports" ON public.weekly_reports;
+CREATE POLICY "Captains and mentors can rate weekly reports"
   ON public.weekly_reports FOR UPDATE TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'captain'));
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain', 'mentor')));
 
 -- 9. Inventory Logs Table (Restricted for Trainees)
 CREATE TABLE IF NOT EXISTS public.inventory_logs (
