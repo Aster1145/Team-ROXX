@@ -4,15 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Menu, X, LayoutDashboard, FolderKanban, Users, CalendarDays, FlaskConical, FileText, Package, Wallet, BookOpen, Video, GraduationCap } from "lucide-react";
+import { Menu, X, LayoutDashboard, FolderKanban, Users, CalendarDays, FlaskConical, FileText, Package, Wallet, BookOpen, Video, GraduationCap, Award } from "lucide-react";
 
 import { useAuth } from "@/hooks/useAuth";
-import { isTrainee } from "@/lib/roles";
+import { isTrainee, isMentor } from "@/lib/roles";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/projects", label: "Projects", icon: FolderKanban },
   { href: "/dashboard/assignments", label: "Assignments", icon: GraduationCap },
+  { href: "/dashboard/mentors", label: "Mentors", icon: Award },
   { href: "/dashboard/learning", label: "Learning Hub", icon: BookOpen },
   { href: "/dashboard/meetings", label: "Meetings", icon: Video },
   { href: "/dashboard/events", label: "Events", icon: CalendarDays },
