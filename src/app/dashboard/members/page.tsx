@@ -144,53 +144,25 @@ export default function MembersPage() {
     if (!editingMember) return;
     setSubmitting(true);
     try {
-      const updateData: Record<string, any> = {
-        full_name: editForm.full_name,
-        email: editForm.email,
-        department: editForm.department,
-        project_id: editForm.project_id || null,
-        role: editForm.role,
-        phone_number: editForm.phone_number || null,
-      };
-
-      let { error } = await supabase
-        .from("profiles")
-        .update(updateData)
-        .eq("id", editingMember.id);
-
-      if (error && (error.message.includes("profiles_role_check") || error.message.includes("check constraint"))) {
-        alert("Database constraint error: 'mentor' role is not allowed in your Supabase database. Please run the SQL command in Supabase SQL Editor to enable Project Mentors.");
-        setSubmitting(false);
-        return;
-      } else if (error && error.message.includes("phone_number")) {
-        delete updateData.phone_number;
-        const fallback = await supabase
-          .from("profiles")
-          .update(updateData)
-          .eq("id", editingMember.id);
-
-        if (fallback.error) {
-          alert("Error updating profile: " + fallback.error.message);
-          setSubmitting(false);
-          return;
-        }
-      } else if (error) {
-        alert("Error updating profile: " + error.message);
-        setSubmitting(false);
-        return;
-      }
-
-      if (editForm.role === "mentor") {
-        await supabase.from("mentors").upsert({
-          id: editingMember.id,
-          email: editForm.email,
+      const res = await fetch("/api/admin/update-member", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: editingMember.id,
           full_name: editForm.full_name,
-          phone_number: editForm.phone_number || null,
+          email: editForm.email,
+          phone_number: editForm.phone_number,
+          role: editForm.role,
           department: editForm.department,
-          project_id: editForm.project_id || null,
-        }, { onConflict: "id" });
-      } else {
-        await supabase.from("mentors").delete().eq("id", editingMember.id);
+          project_id: editForm.project_id,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        alert(data.error || "Failed to update member details");
+        setSubmitting(false);
+        return;
       }
 
       setEditModalOpen(false);

@@ -126,30 +126,26 @@ export default function MentorsPage() {
     if (!editingMentor) return;
     setSubmitting(true);
     try {
-      const updateData = {
-        full_name: editForm.full_name,
-        email: editForm.email,
-        department: editForm.department,
-        project_id: editForm.project_id || null,
-        phone_number: editForm.phone_number || null,
-      };
+      const res = await fetch("/api/admin/update-member", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: editingMentor.id,
+          full_name: editForm.full_name,
+          email: editForm.email,
+          phone_number: editForm.phone_number,
+          role: "mentor",
+          department: editForm.department,
+          project_id: editForm.project_id,
+        }),
+      });
 
-      const { error } = await supabase
-        .from("profiles")
-        .update(updateData)
-        .eq("id", editingMentor.id);
-
-      if (error) {
-        alert("Error updating mentor: " + error.message);
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        alert(data.error || "Failed to update mentor details");
         setSubmitting(false);
         return;
       }
-
-      // Sync to public.mentors table
-      await supabase.from("mentors").upsert({
-        id: editingMentor.id,
-        ...updateData,
-      }, { onConflict: "id" });
 
       setEditModalOpen(false);
       setEditingMentor(null);
