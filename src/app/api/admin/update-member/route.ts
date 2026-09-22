@@ -51,10 +51,8 @@ export async function POST(request: NextRequest) {
       updateErr = fallback.error;
     }
 
-    if (updateErr && (updateErr.message.includes("check constraint") || updateErr.message.includes("profiles_role_check"))) {
-      // Fallback role to 'member' if DB check constraint is not updated yet
-      updatePayload.role = "member";
-      await adminSupabase.from("profiles").update(updatePayload).eq("id", userId);
+    if (updateErr) {
+      return NextResponse.json({ error: updateErr.message }, { status: 400 });
     }
 
     // 2. Sync to public.mentors if role is mentor
