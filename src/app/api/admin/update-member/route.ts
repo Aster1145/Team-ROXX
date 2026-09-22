@@ -47,11 +47,11 @@ export async function POST(request: NextRequest) {
         await adminSupabase.from("mentors").upsert(mentorPayload, { onConflict: "id" });
       }
 
-      // Safe update to public.profiles: set role = "member" to clear any invalid "mentor" role in profiles and avoid profiles_role_check failures
+      // Try updating public.profiles with role = "mentor" first (stores mentor role in DB if constraint allows)
       const profilePayload: Record<string, any> = {
         full_name,
         email,
-        role: "member",
+        role: "mentor",
         department: targetDept,
         project_id: project_id || null,
         phone_number: phone_number || null,
@@ -61,6 +61,12 @@ export async function POST(request: NextRequest) {
         .from("profiles")
         .update(profilePayload)
         .eq("id", userId);
+
+      // If DB constraint fails because 'mentor' isn't added to profiles_role_check yet, fallback to 'member' for profiles
+      if (profileErr && (profileErr.message.includes("profiles_role_check") || profileErr.message.includes("check constraint"))) {
+        profilePayload.role = "member";
+        profileErr = (await adminSupabase.from("profiles").update(profilePayload).eq("id", userId)).error;
+      }
 
       if (profileErr && profileErr.message.includes("phone_number")) {
         delete profilePayload.phone_number;
