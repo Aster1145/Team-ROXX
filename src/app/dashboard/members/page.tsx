@@ -180,6 +180,19 @@ export default function MembersPage() {
         return;
       }
 
+      if (editForm.role === "mentor") {
+        await supabase.from("mentors").upsert({
+          id: editingMember.id,
+          email: editForm.email,
+          full_name: editForm.full_name,
+          phone_number: editForm.phone_number || null,
+          department: editForm.department,
+          project_id: editForm.project_id || null,
+        }, { onConflict: "id" });
+      } else {
+        await supabase.from("mentors").delete().eq("id", editingMember.id);
+      }
+
       setEditModalOpen(false);
       setEditingMember(null);
       await fetchMembers();
