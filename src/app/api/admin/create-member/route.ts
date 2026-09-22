@@ -38,11 +38,30 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (authError) {
-      return NextResponse.json({ error: authError.message }, { status: 400 });
-    }
+    let userId: string | undefined = authData?.user?.id;
 
-    const userId = authData.user?.id;
+    if (authError) {
+      if (
+        authError.message.toLowerCase().includes("already registered") ||
+        authError.message.toLowerCase().includes("already exists") ||
+        authError.message.toLowerCase().includes("user_already_exists")
+      ) {
+        // User already exists in Supabase Auth — fetch existing profile by email to update role & project
+        const { data: existingProfile } = await adminSupabase
+          .from("profiles")
+          .select("id")
+          .eq("email", email)
+          .maybeSingle();
+
+        if (existingProfile?.id) {
+          userId = existingProfile.id;
+        } else {
+          return NextResponse.json({ error: authError.message }, { status: 400 });
+        }
+      } else {
+        return NextResponse.json({ error: authError.message }, { status: 400 });
+      }
+    }
 
     if (!userId) {
       return NextResponse.json({ error: "Failed to obtain user ID from Supabase." }, { status: 500 });
