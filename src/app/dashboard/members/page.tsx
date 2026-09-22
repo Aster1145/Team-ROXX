@@ -159,20 +159,9 @@ export default function MembersPage() {
         .eq("id", editingMember.id);
 
       if (error && (error.message.includes("profiles_role_check") || error.message.includes("check constraint"))) {
-        // Fallback for DB check constraints: store role as 'member' and department as 'Trainee'
-        updateData.role = "member";
-        updateData.department = "Trainee";
-        const fallback = await supabase
-          .from("profiles")
-          .update(updateData)
-          .eq("id", editingMember.id);
-
-        if (fallback.error) {
-          alert("Error updating profile: " + fallback.error.message);
-          setSubmitting(false);
-          return;
-        }
-        error = null;
+        alert("Database constraint error: 'mentor' role is not allowed in your Supabase database. Please run the SQL command in Supabase SQL Editor to enable Project Mentors.");
+        setSubmitting(false);
+        return;
       } else if (error && error.message.includes("phone_number")) {
         delete updateData.phone_number;
         const fallback = await supabase

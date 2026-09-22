@@ -68,27 +68,10 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (profileError && (profileError.message.includes("check constraint") || profileError.message.includes("profiles_role_check"))) {
-      // Fallback for strict database constraints: store role as 'member'
-      const fallback = await adminSupabase
-        .from("profiles")
-        .upsert(
-          {
-            id: userId,
-            email,
-            full_name,
-            role: "member",
-            department: targetDept,
-            project_id: project_id || null,
-            phone_number: phone_number || null,
-          },
-          { onConflict: "id" }
-        )
-        .select("*")
-        .single();
-
-      if (fallback.data) {
-        profile = fallback.data;
-      }
+      return NextResponse.json(
+        { error: "Database constraint error: 'mentor' role is not allowed by your Supabase database yet. Please run the SQL command in Supabase SQL Editor to enable Project Mentors." },
+        { status: 400 }
+      );
     }
 
     return NextResponse.json({
