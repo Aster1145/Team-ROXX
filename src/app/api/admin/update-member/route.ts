@@ -27,7 +27,50 @@ export async function POST(request: NextRequest) {
 
     const targetDept = role === "trainee" ? "Trainee" : (department || "General");
 
-    // 1. Update public.profiles
+    // 1. If updating a Project Mentor, update public.mentors table directly
+    if (role === "mentor") {
+      const mentorPayload: Record<string, any> = {
+        id: userId,
+        email,
+        full_name,
+        phone_number: phone_number || null,
+        department: targetDept,
+        project_id: project_id || null,
+      };
+
+      const { error: mentorErr } = await adminSupabase
+        .from("mentors")
+        .upsert(mentorPayload, { onConflict: "id" });
+
+      if (mentorErr && mentorErr.message.includes("phone_number")) {
+        delete mentorPayload.phone_number;
+        await adminSupabase.from("mentors").upsert(mentorPayload, { onConflict: "id" });
+      }
+
+      // Safe update to public.profiles: set role = "member" to clear any invalid "mentor" role in profiles and avoid profiles_role_check failures
+      const profilePayload: Record<string, any> = {
+        full_name,
+        email,
+        role: "member",
+        department: targetDept,
+        project_id: project_id || null,
+        phone_number: phone_number || null,
+      };
+
+      let { error: profileErr } = await adminSupabase
+        .from("profiles")
+        .update(profilePayload)
+        .eq("id", userId);
+
+      if (profileErr && profileErr.message.includes("phone_number")) {
+        delete profilePayload.phone_number;
+        profileErr = (await adminSupabase.from("profiles").update(profilePayload).eq("id", userId)).error;
+      }
+
+      return NextResponse.json({ success: true });
+    }
+
+    // 2. Standard update for student members (Captain, Vice Captain, Member, Trainee)
     const updatePayload: Record<string, any> = {
       full_name,
       email,
@@ -55,22 +98,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: updateErr.message }, { status: 400 });
     }
 
-    // 2. Sync to public.mentors if role is mentor
-    if (role === "mentor") {
-      await adminSupabase.from("mentors").upsert(
-        {
-          id: userId,
-          email,
-          full_name,
-          phone_number: phone_number || null,
-          department: targetDept,
-          project_id: project_id || null,
-        },
-        { onConflict: "id" }
-      );
-    } else {
-      await adminSupabase.from("mentors").delete().eq("id", userId);
-    }
+    // If demoting from mentor, remove from mentors table
+    await adminSupabase.from("mentors").delete().eq("id", userId);
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

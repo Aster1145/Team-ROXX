@@ -67,44 +67,60 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to obtain user ID from Supabase." }, { status: 500 });
     }
 
-    // 2. Insert/upsert into public.profiles with the requested role and department
+    // 2. Insert/upsert into public.profiles with safe role ("member" if mentor)
     const targetDept = role === "trainee" ? "Trainee" : (department || "General");
+    const safeProfileRole = role === "mentor" ? "member" : (role || "member");
+
+    const profilePayload: Record<string, any> = {
+      id: userId,
+      email,
+      full_name,
+      role: safeProfileRole,
+      department: targetDept,
+      project_id: project_id || null,
+      phone_number: phone_number || null,
+    };
+
     let { data: profile, error: profileError } = await adminSupabase
       .from("profiles")
-      .upsert(
-        {
-          id: userId,
-          email,
-          full_name,
-          role: role || "member",
-          department: targetDept,
-          project_id: project_id || null,
-          phone_number: phone_number || null,
-        },
-        { onConflict: "id" }
-      )
+      .upsert(profilePayload, { onConflict: "id" })
       .select("*")
       .single();
 
-    if (profileError && (profileError.message.includes("check constraint") || profileError.message.includes("profiles_role_check"))) {
-      return NextResponse.json(
-        { error: "Database constraint error: 'mentor' role is not allowed by your Supabase database yet. Please run the SQL command in Supabase SQL Editor to enable Project Mentors." },
-        { status: 400 }
-      );
+    if (profileError && profileError.message.includes("phone_number")) {
+      delete profilePayload.phone_number;
+      const fallback = await adminSupabase
+        .from("profiles")
+        .upsert(profilePayload, { onConflict: "id" })
+        .select("*")
+        .single();
+      profile = fallback.data;
+      profileError = fallback.error;
     }
 
-    if (role === "mentor" && (profile || userId)) {
-      await adminSupabase.from("mentors").upsert(
-        {
-          id: userId,
-          email,
-          full_name,
-          phone_number: phone_number || null,
-          department: targetDept,
-          project_id: project_id || null,
-        },
-        { onConflict: "id" }
-      );
+    if (profileError && (profileError.message.includes("check constraint") || profileError.message.includes("profiles_role_check"))) {
+      // Retry with role: "member" if custom check constraint fires
+      profilePayload.role = "member";
+      const retry = await adminSupabase.from("profiles").upsert(profilePayload, { onConflict: "id" }).select("*").single();
+      profile = retry.data;
+      profileError = retry.error;
+    }
+
+    if (role === "mentor" && userId) {
+      const mentorPayload: Record<string, any> = {
+        id: userId,
+        email,
+        full_name,
+        phone_number: phone_number || null,
+        department: targetDept,
+        project_id: project_id || null,
+      };
+
+      const { error: mErr } = await adminSupabase.from("mentors").upsert(mentorPayload, { onConflict: "id" });
+      if (mErr && mErr.message.includes("phone_number")) {
+        delete mentorPayload.phone_number;
+        await adminSupabase.from("mentors").upsert(mentorPayload, { onConflict: "id" });
+      }
     }
 
     return NextResponse.json({

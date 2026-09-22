@@ -51,8 +51,24 @@ export function useAuth() {
           data = inserted || newProfile;
         }
 
-        // 4. If 0 Captains exist in the entire database, promote initial user to Captain
-        if (data) {
+        // 4. Check if logged-in user exists in public.mentors table
+        if (data && sessionUser.id) {
+          const { data: mentorRecord } = await supabase
+            .from("mentors")
+            .select("*")
+            .or(`id.eq.${sessionUser.id},email.eq.${sessionUser.email || ""}`)
+            .maybeSingle();
+
+          if (mentorRecord) {
+            (data as Profile).role = "mentor";
+            (data as Profile).department = mentorRecord.department || (data as Profile).department;
+            (data as Profile).project_id = mentorRecord.project_id || (data as Profile).project_id;
+            (data as Profile).phone_number = mentorRecord.phone_number || (data as Profile).phone_number;
+          }
+        }
+
+        // 5. If 0 Captains exist in the entire database, promote initial user to Captain
+        if (data && (data as Profile).role !== "mentor") {
           const { count: captainCount } = await supabase
             .from("profiles")
             .select("*", { count: "exact", head: true })
