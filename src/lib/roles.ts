@@ -64,12 +64,22 @@ export function canCreateOrEdit(profile?: Profile | null) {
   return !isTrainee(profile);
 }
 
-export function canRateTrainees(profile?: Profile | null) {
-  return profile?.role === "captain" || profile?.role === "vice_captain";
+export function canRateTrainees(profile?: Profile | null, targetProjectId?: string | null) {
+  if (!profile) return false;
+  if (profile.role === "captain" || profile.role === "vice_captain") return true;
+  if (profile.role === "mentor") {
+    return !!profile.project_id && (!targetProjectId || profile.project_id === targetProjectId);
+  }
+  return false;
 }
 
-export function canDeleteTask(profile?: Profile | null) {
-  return profile?.role === "captain" || profile?.role === "vice_captain";
+export function canDeleteTask(profile?: Profile | null, targetProjectId?: string | null) {
+  if (!profile) return false;
+  if (profile.role === "captain" || profile.role === "vice_captain") return true;
+  if (profile.role === "mentor") {
+    return !!profile.project_id && (!targetProjectId || profile.project_id === targetProjectId);
+  }
+  return false;
 }
 
 export function canAssignTasksForProject(profile?: Profile | null, projectId?: string | null) {
