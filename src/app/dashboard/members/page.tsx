@@ -233,9 +233,10 @@ export default function MembersPage() {
   const isUserMentor = profile?.role === "mentor";
   const mentorProjectId = profile?.project_id;
 
-  const displayMembers = isUserMentor
+  const displayMembers = (isUserMentor
     ? members.filter((m) => m.id === profile?.id || (mentorProjectId && m.project_id === mentorProjectId))
-    : members;
+    : members
+  ).filter((m) => m.role !== "mentor" && (!m.full_name || !m.full_name.startsWith("Dr.")));
 
   const HIERARCHY_GROUPS = [
     {

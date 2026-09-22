@@ -48,15 +48,32 @@ export default function MentorsPage() {
 
   const fetchData = async () => {
     try {
-      const [profilesRes, projectsRes] = await Promise.all([
+      const [mentorsRes, profilesRes, projectsRes] = await Promise.all([
+        supabase.from("mentors").select("*"),
         supabase.from("profiles").select("*"),
         supabase.from("projects").select("*"),
       ]);
 
+      const mentorTableList = (mentorsRes.data as any[]) || [];
       const allProfiles = (profilesRes.data as Profile[]) || [];
-      const mentorProfiles = allProfiles.filter((p) => p.role === "mentor");
       
-      setMentors(mentorProfiles);
+      const mentorIds = new Set(mentorTableList.map((m) => m.id));
+
+      const combinedMentors: Profile[] = [
+        ...mentorTableList.map((m) => ({
+          id: m.id,
+          email: m.email,
+          full_name: m.full_name,
+          role: "mentor" as const,
+          department: m.department,
+          project_id: m.project_id,
+          phone_number: m.phone_number,
+          created_at: m.created_at || new Date().toISOString(),
+        })),
+        ...allProfiles.filter((p) => (p.role === "mentor" || (p.full_name && p.full_name.startsWith("Dr."))) && !mentorIds.has(p.id)),
+      ];
+
+      setMentors(combinedMentors);
       setMembers(allProfiles);
       setProjects((projectsRes.data as Project[]) || []);
     } catch (err) {
