@@ -78,8 +78,8 @@ export default function ProjectsPage() {
   };
 
   const isUserMentor = profile?.role === "mentor";
-  const displayedProjects = isUserMentor && profile?.project_id
-    ? projects.filter((p) => p.id === profile.project_id)
+  const displayedProjects = isUserMentor
+    ? (profile?.project_id ? projects.filter((p) => p.id === profile.project_id) : [])
     : projects;
 
   return (

@@ -6,7 +6,7 @@
 -- 1. Enable UUID Extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- 2. Profiles Table (Extends auth.users with Captain, Vice Captain, Member & Trainee roles)
+-- 2. Profiles Table (Extends auth.users with Captain, Vice Captain, Project Mentor, Member & Trainee roles)
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
@@ -32,27 +32,6 @@ CREATE POLICY "Profiles are viewable by authenticated users"
 DROP POLICY IF EXISTS "Authenticated users can manage profiles" ON public.profiles;
 CREATE POLICY "Authenticated users can manage profiles"
   ON public.profiles FOR ALL TO authenticated USING (true) WITH CHECK (true);
-
--- 2b. Mentors Table (Dedicated table for Project Mentors)
-CREATE TABLE IF NOT EXISTS public.mentors (
-  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email TEXT NOT NULL,
-  full_name TEXT NOT NULL,
-  phone_number TEXT,
-  department TEXT NOT NULL DEFAULT 'Computer Science & Engineering (CSE)',
-  project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-ALTER TABLE public.mentors ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Mentors are viewable by authenticated users" ON public.mentors;
-CREATE POLICY "Mentors are viewable by authenticated users"
-  ON public.mentors FOR SELECT TO authenticated USING (true);
-
-DROP POLICY IF EXISTS "Authenticated users can manage mentors" ON public.mentors;
-CREATE POLICY "Authenticated users can manage mentors"
-  ON public.mentors FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- 3. Projects Table
 CREATE TABLE IF NOT EXISTS public.projects (

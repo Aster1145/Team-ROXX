@@ -275,8 +275,8 @@ export default function ReportsPage() {
   const canDownload = isCaptain(profile) || isViceCaptain(profile);
 
   const isUserMentor = profile?.role === "mentor";
-  const availableLeaderboardMembers = isUserMentor && profile?.project_id
-    ? members.filter((m) => m.project_id === profile.project_id)
+  const availableLeaderboardMembers = isUserMentor
+    ? (profile?.project_id ? members.filter((m) => m.project_id === profile.project_id) : [])
     : members;
 
   // Leaderboard Calculation (Excludes Captain and Trainees, ranks Members & Vice Captains)
@@ -311,8 +311,8 @@ export default function ReportsPage() {
     );
   };
 
-  const displayedReports = isUserMentor && profile?.project_id
-    ? reports.filter((r) => r.profile_id === profile.id || r.profile?.project_id === profile.project_id)
+  const displayedReports = isUserMentor
+    ? (profile?.project_id ? reports.filter((r) => r.profile_id === profile.id || r.profile?.project_id === profile.project_id) : [])
     : reports;
 
   return (

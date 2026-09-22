@@ -234,7 +234,7 @@ export default function MembersPage() {
   const mentorProjectId = profile?.project_id;
 
   const displayMembers = (isUserMentor
-    ? members.filter((m) => m.id === profile?.id || (mentorProjectId && m.project_id === mentorProjectId))
+    ? (mentorProjectId ? members.filter((m) => m.id === profile?.id || m.project_id === mentorProjectId) : [])
     : members
   ).filter((m) => m.role !== "mentor" && (!m.full_name || !m.full_name.startsWith("Dr.")));
 

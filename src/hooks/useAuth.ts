@@ -51,24 +51,9 @@ export function useAuth() {
           data = inserted || newProfile;
         }
 
-        // 4. Check if logged-in user is a Project Mentor (by mentors table, email, or Dr. name)
-        let mentorRecord: any = null;
-        if (sessionUser.id) {
-          const { data: mId } = await supabase.from("mentors").select("*").eq("id", sessionUser.id).maybeSingle();
-          mentorRecord = mId;
-        }
-        if (!mentorRecord && sessionUser.email) {
-          const { data: mEmail } = await supabase.from("mentors").select("*").eq("email", sessionUser.email).maybeSingle();
-          mentorRecord = mEmail;
-        }
-
-        if (data && (mentorRecord || (data.full_name && data.full_name.startsWith("Dr.")) || data.role === "mentor")) {
+        // 4. Set mentor role if profile.role === 'mentor' or full_name starts with 'Dr.'
+        if (data && (data.role === "mentor" || (data.full_name && data.full_name.startsWith("Dr.")))) {
           (data as Profile).role = "mentor";
-          if (mentorRecord) {
-            (data as Profile).department = mentorRecord.department || (data as Profile).department;
-            (data as Profile).project_id = mentorRecord.project_id || (data as Profile).project_id;
-            (data as Profile).phone_number = mentorRecord.phone_number || (data as Profile).phone_number;
-          }
         }
 
         // 5. If 0 Captains exist in the entire database, promote initial user to Captain

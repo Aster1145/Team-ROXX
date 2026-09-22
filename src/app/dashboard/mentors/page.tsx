@@ -48,32 +48,17 @@ export default function MentorsPage() {
 
   const fetchData = async () => {
     try {
-      const [mentorsRes, profilesRes, projectsRes] = await Promise.all([
-        supabase.from("mentors").select("*"),
+      const [profilesRes, projectsRes] = await Promise.all([
         supabase.from("profiles").select("*"),
         supabase.from("projects").select("*"),
       ]);
 
-      const mentorTableList = (mentorsRes.data as any[]) || [];
       const allProfiles = (profilesRes.data as Profile[]) || [];
-      
-      const mentorIds = new Set(mentorTableList.map((m) => m.id));
+      const mentorProfiles = allProfiles.filter(
+        (p) => p.role === "mentor" || (p.full_name && p.full_name.startsWith("Dr."))
+      );
 
-      const combinedMentors: Profile[] = [
-        ...mentorTableList.map((m) => ({
-          id: m.id,
-          email: m.email,
-          full_name: m.full_name,
-          role: "mentor" as const,
-          department: m.department,
-          project_id: m.project_id,
-          phone_number: m.phone_number,
-          created_at: m.created_at || new Date().toISOString(),
-        })),
-        ...allProfiles.filter((p) => (p.role === "mentor" || (p.full_name && p.full_name.startsWith("Dr."))) && !mentorIds.has(p.id)),
-      ];
-
-      setMentors(combinedMentors);
+      setMentors(mentorProfiles);
       setMembers(allProfiles);
       setProjects((projectsRes.data as Project[]) || []);
     } catch (err) {
@@ -178,7 +163,6 @@ export default function MentorsPage() {
     if (!confirm(`Are you sure you want to remove Mentor ${name}?`)) return;
 
     try {
-      await supabase.from("mentors").delete().eq("id", id);
       const { error } = await supabase.from("profiles").delete().eq("id", id);
       if (error) {
         alert("Database error: " + error.message);

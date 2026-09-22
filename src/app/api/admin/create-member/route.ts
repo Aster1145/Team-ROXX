@@ -67,15 +67,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Failed to obtain user ID from Supabase." }, { status: 500 });
     }
 
-    // 2. Insert/upsert into public.profiles with safe role ("member" if mentor)
+    // 2. Insert/upsert into public.profiles directly
     const targetDept = role === "trainee" ? "Trainee" : (department || "General");
-    const safeProfileRole = role === "mentor" ? "member" : (role || "member");
 
     const profilePayload: Record<string, any> = {
       id: userId,
       email,
       full_name,
-      role: safeProfileRole,
+      role: role || "member",
       department: targetDept,
       project_id: project_id || null,
       phone_number: phone_number || null,
@@ -99,28 +98,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (profileError && (profileError.message.includes("check constraint") || profileError.message.includes("profiles_role_check"))) {
-      // Retry with role: "member" if custom check constraint fires
+      // Fallback role: "member" if database check constraint excludes 'mentor'
       profilePayload.role = "member";
       const retry = await adminSupabase.from("profiles").upsert(profilePayload, { onConflict: "id" }).select("*").single();
       profile = retry.data;
       profileError = retry.error;
-    }
-
-    if (role === "mentor" && userId) {
-      const mentorPayload: Record<string, any> = {
-        id: userId,
-        email,
-        full_name,
-        phone_number: phone_number || null,
-        department: targetDept,
-        project_id: project_id || null,
-      };
-
-      const { error: mErr } = await adminSupabase.from("mentors").upsert(mentorPayload, { onConflict: "id" });
-      if (mErr && mErr.message.includes("phone_number")) {
-        delete mentorPayload.phone_number;
-        await adminSupabase.from("mentors").upsert(mentorPayload, { onConflict: "id" });
-      }
     }
 
     return NextResponse.json({

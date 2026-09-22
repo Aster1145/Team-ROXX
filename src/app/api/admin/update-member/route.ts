@@ -27,56 +27,7 @@ export async function POST(request: NextRequest) {
 
     const targetDept = role === "trainee" ? "Trainee" : (department || "General");
 
-    // 1. If updating a Project Mentor, update public.mentors table directly
-    if (role === "mentor") {
-      const mentorPayload: Record<string, any> = {
-        id: userId,
-        email,
-        full_name,
-        phone_number: phone_number || null,
-        department: targetDept,
-        project_id: project_id || null,
-      };
-
-      const { error: mentorErr } = await adminSupabase
-        .from("mentors")
-        .upsert(mentorPayload, { onConflict: "id" });
-
-      if (mentorErr && mentorErr.message.includes("phone_number")) {
-        delete mentorPayload.phone_number;
-        await adminSupabase.from("mentors").upsert(mentorPayload, { onConflict: "id" });
-      }
-
-      // Try updating public.profiles with role = "mentor" first (stores mentor role in DB if constraint allows)
-      const profilePayload: Record<string, any> = {
-        full_name,
-        email,
-        role: "mentor",
-        department: targetDept,
-        project_id: project_id || null,
-        phone_number: phone_number || null,
-      };
-
-      let { error: profileErr } = await adminSupabase
-        .from("profiles")
-        .update(profilePayload)
-        .eq("id", userId);
-
-      // If DB constraint fails because 'mentor' isn't added to profiles_role_check yet, fallback to 'member' for profiles
-      if (profileErr && (profileErr.message.includes("profiles_role_check") || profileErr.message.includes("check constraint"))) {
-        profilePayload.role = "member";
-        profileErr = (await adminSupabase.from("profiles").update(profilePayload).eq("id", userId)).error;
-      }
-
-      if (profileErr && profileErr.message.includes("phone_number")) {
-        delete profilePayload.phone_number;
-        profileErr = (await adminSupabase.from("profiles").update(profilePayload).eq("id", userId)).error;
-      }
-
-      return NextResponse.json({ success: true });
-    }
-
-    // 2. Standard update for student members (Captain, Vice Captain, Member, Trainee)
+    // Update public.profiles directly for all roles (including mentor)
     const updatePayload: Record<string, any> = {
       full_name,
       email,
@@ -91,6 +42,12 @@ export async function POST(request: NextRequest) {
       .update(updatePayload)
       .eq("id", userId);
 
+    if (updateErr && (updateErr.message.includes("profiles_role_check") || updateErr.message.includes("check constraint"))) {
+      // Fallback role: "member" if database check constraint excludes 'mentor'
+      updatePayload.role = "member";
+      updateErr = (await adminSupabase.from("profiles").update(updatePayload).eq("id", userId)).error;
+    }
+
     if (updateErr && updateErr.message.includes("phone_number")) {
       delete updatePayload.phone_number;
       const fallback = await adminSupabase
@@ -103,9 +60,6 @@ export async function POST(request: NextRequest) {
     if (updateErr) {
       return NextResponse.json({ error: updateErr.message }, { status: 400 });
     }
-
-    // If demoting from mentor, remove from mentors table
-    await adminSupabase.from("mentors").delete().eq("id", userId);
 
     return NextResponse.json({ success: true });
   } catch (err: any) {
