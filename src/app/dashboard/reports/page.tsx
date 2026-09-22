@@ -45,15 +45,39 @@ export default function ReportsPage() {
 
   const fetchData = async () => {
     try {
-      const [reportsRes, membersRes] = await Promise.all([
-        supabase
-          .from("weekly_reports")
-          .select("*, profile:profiles!profile_id(full_name, department, role, project_id)")
-          .order("created_at", { ascending: false }),
-        supabase.from("profiles").select("*"),
-      ]);
+      let reportsData: WeeklyReport[] = [];
+      const { data, error } = await supabase
+        .from("weekly_reports")
+        .select("*, profile:profiles!profile_id(full_name, department, role, project_id)")
+        .order("created_at", { ascending: false });
 
-      setReports((reportsRes.data as WeeklyReport[]) || []);
+      if (error) {
+        // Fallback for user_id / week_starting schema
+        const fallback = await supabase
+          .from("weekly_reports")
+          .select("*, profile:profiles!user_id(full_name, department, role, project_id)");
+
+        reportsData = ((fallback.data as any[]) || []).map((r) => ({
+          id: r.id,
+          profile_id: r.profile_id || r.user_id,
+          week_ending: r.week_ending || r.week_starting,
+          summary: r.summary || r.report_text || "",
+          accomplishments: r.accomplishments || "",
+          blockers: r.blockers || "",
+          next_steps: r.next_steps || "",
+          rating_stars: r.rating_stars,
+          points: r.points,
+          rated_by: r.rated_by,
+          rating_feedback: r.rating_feedback,
+          created_at: r.created_at || r.submitted_at || new Date().toISOString(),
+          profile: r.profile,
+        }));
+      } else {
+        reportsData = (data as WeeklyReport[]) || [];
+      }
+
+      setReports(reportsData);
+      const membersRes = await supabase.from("profiles").select("*");
       setMembers((membersRes.data as Profile[]) || []);
     } catch (err) {
       console.error("Error fetching reports:", err);
