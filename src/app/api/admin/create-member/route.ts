@@ -74,6 +74,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (role === "mentor" && (profile || userId)) {
+      await adminSupabase.from("mentors").upsert(
+        {
+          id: userId,
+          email,
+          full_name,
+          phone_number: phone_number || null,
+          department: targetDept,
+          project_id: project_id || null,
+        },
+        { onConflict: "id" }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       member: profile || {

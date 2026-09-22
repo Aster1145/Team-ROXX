@@ -250,9 +250,14 @@ export default function ReportsPage() {
   const userIsCaptain = isCaptain(profile);
   const canDownload = isCaptain(profile) || isViceCaptain(profile);
 
+  const isUserMentor = profile?.role === "mentor";
+  const availableLeaderboardMembers = isUserMentor && profile?.project_id
+    ? members.filter((m) => m.project_id === profile.project_id)
+    : members;
+
   // Leaderboard Calculation (Excludes Captain and Trainees, ranks Members & Vice Captains)
-  const leaderboard = members
-    .filter((m) => m.role !== "captain" && !isTrainee(m))
+  const leaderboard = availableLeaderboardMembers
+    .filter((m) => m.role !== "captain" && m.role !== "mentor" && !isTrainee(m))
     .map((m) => {
       const mReports = reports.filter((r) => r.profile_id === m.id && r.points != null);
       const totalPoints = mReports.reduce((sum, r) => sum + (r.points || 0), 0);
@@ -282,7 +287,6 @@ export default function ReportsPage() {
     );
   };
 
-  const isUserMentor = profile?.role === "mentor";
   const displayedReports = isUserMentor && profile?.project_id
     ? reports.filter((r) => r.profile_id === profile.id || r.profile?.project_id === profile.project_id)
     : reports;

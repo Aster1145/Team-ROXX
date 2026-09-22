@@ -33,6 +33,27 @@ DROP POLICY IF EXISTS "Authenticated users can manage profiles" ON public.profil
 CREATE POLICY "Authenticated users can manage profiles"
   ON public.profiles FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+-- 2b. Mentors Table (Dedicated table for Project Mentors)
+CREATE TABLE IF NOT EXISTS public.mentors (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  full_name TEXT NOT NULL,
+  phone_number TEXT,
+  department TEXT NOT NULL DEFAULT 'Computer Science & Engineering (CSE)',
+  project_id UUID REFERENCES public.projects(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.mentors ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Mentors are viewable by authenticated users" ON public.mentors;
+CREATE POLICY "Mentors are viewable by authenticated users"
+  ON public.mentors FOR SELECT TO authenticated USING (true);
+
+DROP POLICY IF EXISTS "Authenticated users can manage mentors" ON public.mentors;
+CREATE POLICY "Authenticated users can manage mentors"
+  ON public.mentors FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 -- 3. Projects Table
 CREATE TABLE IF NOT EXISTS public.projects (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

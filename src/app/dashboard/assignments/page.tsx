@@ -78,8 +78,9 @@ export default function AssignmentsPage() {
     drive_url: "",
   });
 
-  const userCanManage = canEditProject(profile);
-  const userCanRate = canRateTrainees(profile);
+  const isUserMentor = profile?.role === "mentor";
+  const userCanManage = canEditProject(profile) || (isUserMentor && !!profile?.project_id);
+  const userCanRate = canRateTrainees(profile) || (isUserMentor && !!profile?.project_id);
   const isUserTrainee = isTrainee(profile);
 
   const fetchData = async () => {
@@ -511,8 +512,12 @@ export default function AssignmentsPage() {
     URL.revokeObjectURL(url);
   };
 
-  // Leaderboard Calculation
-  const traineeLeaderboard = trainees
+  // Leaderboard Calculation (Filter for Mentors: only members assigned to mentor's project)
+  const availableLeaderboardMembers = isUserMentor && profile?.project_id
+    ? trainees.filter((t) => t.project_id === profile.project_id)
+    : trainees;
+
+  const traineeLeaderboard = availableLeaderboardMembers
     .map((t) => {
       const tAssignments = assignments.filter((a) => a.profile_id === t.id && a.points != null);
       const totalPoints = tAssignments.reduce((sum, a) => sum + (a.points || 0), 0);
@@ -527,10 +532,13 @@ export default function AssignmentsPage() {
     })
     .sort((a, b) => b.totalPoints - a.totalPoints);
 
-  // VISIBILITY SCOPING: Trainees ONLY see their own assignments. Captains & Vice Captains see ALL team assignments.
+  // VISIBILITY SCOPING: Trainees ONLY see their own assignments. Mentors ONLY see their project's assignments.
   const visibleAssignments = assignments.filter((a) => {
     if (isUserTrainee) {
       return a.profile_id === profile?.id;
+    }
+    if (isUserMentor && profile?.project_id) {
+      return a.profile_id === profile.id || a.profile?.project_id === profile.project_id;
     }
     return true;
   });
@@ -1012,10 +1020,13 @@ export default function AssignmentsPage() {
                 onChange={(e) => setCreateForm({ ...createForm, target_profile_id: e.target.value })}
               >
                 <option value="">Select a member or target group...</option>
-                <option value="all_trainees">★ Assign to ALL 1st-Year Trainees</option>
-                <option value="all_members">★ Assign to ALL Team Members</option>
-                <optgroup label="Specific Team Members">
-                  {teamMembers.map((m) => (
+                {!isUserMentor && <option value="all_trainees">★ Assign to ALL 1st-Year Trainees</option>}
+                {!isUserMentor && <option value="all_members">★ Assign to ALL Team Members</option>}
+                <optgroup label={isUserMentor ? "Project Members" : "Specific Team Members"}>
+                  {(isUserMentor && profile?.project_id
+                    ? teamMembers.filter((m) => m.project_id === profile.project_id && m.id !== profile.id)
+                    : teamMembers
+                  ).map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.full_name} ({roleLabel(m.role)} — {m.department})
                     </option>

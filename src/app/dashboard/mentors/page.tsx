@@ -126,15 +126,17 @@ export default function MentorsPage() {
     if (!editingMentor) return;
     setSubmitting(true);
     try {
+      const updateData = {
+        full_name: editForm.full_name,
+        email: editForm.email,
+        department: editForm.department,
+        project_id: editForm.project_id || null,
+        phone_number: editForm.phone_number || null,
+      };
+
       const { error } = await supabase
         .from("profiles")
-        .update({
-          full_name: editForm.full_name,
-          email: editForm.email,
-          department: editForm.department,
-          project_id: editForm.project_id || null,
-          phone_number: editForm.phone_number || null,
-        })
+        .update(updateData)
         .eq("id", editingMentor.id);
 
       if (error) {
@@ -142,6 +144,12 @@ export default function MentorsPage() {
         setSubmitting(false);
         return;
       }
+
+      // Sync to public.mentors table
+      await supabase.from("mentors").upsert({
+        id: editingMentor.id,
+        ...updateData,
+      }, { onConflict: "id" });
 
       setEditModalOpen(false);
       setEditingMentor(null);
@@ -157,6 +165,7 @@ export default function MentorsPage() {
     if (!confirm(`Are you sure you want to remove Mentor ${name}?`)) return;
 
     try {
+      await supabase.from("mentors").delete().eq("id", id);
       const { error } = await supabase.from("profiles").delete().eq("id", id);
       if (error) {
         alert("Database error: " + error.message);

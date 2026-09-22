@@ -212,7 +212,7 @@ export interface TraineeAssignment {
   rated_by?: string | null;
   rating_feedback?: string | null;
   created_at: string;
-  profile?: { full_name: string; department: Department; role?: string };
+  profile?: { full_name: string; department: Department; role?: string; project_id?: string | null };
   assigner?: { full_name: string; role: Role };
   rater?: { full_name: string; role: Role };
 }
