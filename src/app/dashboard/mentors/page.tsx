@@ -216,7 +216,13 @@ export default function MentorsPage() {
       <div className="space-y-4">
         {displayedMentors.map((m) => {
           const assignedProject = projects.find((p) => p.id === m.project_id);
-          const projectMembers = members.filter((pm) => pm.project_id === m.project_id && pm.id !== m.id);
+          const projectMembers = members.filter(
+            (pm) =>
+              pm.project_id === m.project_id &&
+              pm.id !== m.id &&
+              pm.role !== "mentor" &&
+              (!pm.full_name || !pm.full_name.startsWith("Dr."))
+          );
 
           return (
             <Card key={m.id} className="hover:shadow-md transition-shadow border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900">
