@@ -243,12 +243,13 @@ CREATE POLICY "Non-trainees can view budget items"
 DROP POLICY IF EXISTS "Team leads can insert budget items" ON public.budget_items;
 CREATE POLICY "Team leads can insert budget items"
   ON public.budget_items FOR INSERT TO authenticated
-  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
+  WITH CHECK (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain', 'mentor')));
 
 DROP POLICY IF EXISTS "Captains exclusively can update or delete budget items" ON public.budget_items;
-CREATE POLICY "Captains exclusively can update or delete budget items"
-  ON public.budget_items FOR UPDATE TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'captain'));
+DROP POLICY IF EXISTS "Captains and mentors can update or delete budget items" ON public.budget_items;
+CREATE POLICY "Captains and mentors can update or delete budget items"
+  ON public.budget_items FOR ALL TO authenticated
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'mentor')));
 
 -- 11. Budget Requests Table (Item Requests Queue)
 CREATE TABLE IF NOT EXISTS public.budget_requests (
@@ -285,9 +286,10 @@ CREATE POLICY "Non-trainees can create budget requests"
   );
 
 DROP POLICY IF EXISTS "Captains and vice captains can manage budget requests" ON public.budget_requests;
-CREATE POLICY "Captains and vice captains can manage budget requests"
+DROP POLICY IF EXISTS "Captains and mentors can manage budget requests" ON public.budget_requests;
+CREATE POLICY "Captains and mentors can manage budget requests"
   ON public.budget_requests FOR ALL TO authenticated
-  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'vice_captain')));
+  USING (EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('captain', 'mentor')));
 
 -- 12. Learning Resources Table (Google Drive links, YouTube videos & docs)
 CREATE TABLE IF NOT EXISTS public.learning_resources (
