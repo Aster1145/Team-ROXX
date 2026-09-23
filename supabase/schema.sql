@@ -93,9 +93,17 @@ CREATE TABLE IF NOT EXISTS public.events (
   event_date DATE NOT NULL,
   max_participants INTEGER NOT NULL DEFAULT 4 CHECK (max_participants > 0),
   location TEXT,
-  registered_by UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  result_position TEXT,
+  result_summary TEXT,
+  result_link TEXT,
+  is_completed BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS result_position TEXT;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS result_summary TEXT;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS result_link TEXT;
+ALTER TABLE public.events ADD COLUMN IF NOT EXISTS is_completed BOOLEAN DEFAULT false;
 
 ALTER TABLE public.events ENABLE ROW LEVEL SECURITY;
 

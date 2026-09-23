@@ -73,6 +73,10 @@ export interface Event {
   location: string;
   registered_by: string | null;
   created_at: string;
+  result_position?: string | null;
+  result_summary?: string | null;
+  result_link?: string | null;
+  is_completed?: boolean;
 }
 
 export interface EventParticipant {
