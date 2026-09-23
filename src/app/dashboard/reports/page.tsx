@@ -279,9 +279,9 @@ export default function ReportsPage() {
     ? (profile?.project_id ? members.filter((m) => m.project_id === profile.project_id) : [])
     : members;
 
-  // Leaderboard Calculation (Excludes Captain and Trainees, ranks Members & Vice Captains)
+  // Leaderboard Calculation (Excludes Captain, Mentors, Dr. profiles, and Trainees)
   const leaderboard = availableLeaderboardMembers
-    .filter((m) => m.role !== "captain" && m.role !== "mentor" && !isTrainee(m))
+    .filter((m) => m.role !== "captain" && m.role !== "mentor" && (!m.full_name || !m.full_name.startsWith("Dr.")) && !isTrainee(m))
     .map((m) => {
       const mReports = reports.filter((r) => r.profile_id === m.id && r.points != null);
       const totalPoints = mReports.reduce((sum, r) => sum + (r.points || 0), 0);
