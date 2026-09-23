@@ -67,17 +67,31 @@ export default function BudgetPage() {
 
   const fetchData = async () => {
     try {
-      const [itemsRes, projectsRes, requestsRes] = await Promise.all([
+      const [itemsRes, projectsRes] = await Promise.all([
         supabase
           .from("budget_items")
           .select("*, profile:profiles(full_name)")
           .order("purchased_at", { ascending: false }),
         supabase.from("projects").select("*"),
-        supabase
-          .from("budget_requests")
-          .select("*, requester:profiles!requested_by(full_name, email), reviewer:profiles!reviewed_by(full_name)")
-          .order("created_at", { ascending: false }),
       ]);
+
+      let requestsData: BudgetItemRequest[] = [];
+      const primaryReqsRes = await supabase
+        .from("budget_requests")
+        .select("*, requester:profiles!requested_by(full_name, email), reviewer:profiles!reviewed_by(full_name)")
+        .order("created_at", { ascending: false });
+
+      if (!primaryReqsRes.error && primaryReqsRes.data) {
+        requestsData = primaryReqsRes.data as BudgetItemRequest[];
+      } else {
+        const fallbackReqsRes = await supabase
+          .from("budget_requests")
+          .select("*")
+          .order("created_at", { ascending: false });
+        if (fallbackReqsRes.data) {
+          requestsData = fallbackReqsRes.data as BudgetItemRequest[];
+        }
+      }
 
       // Read deleted IDs from localStorage so page refresh never brings deleted items back
       let deletedExpenseIds: string[] = [];
@@ -95,11 +109,8 @@ export default function BudgetPage() {
 
       setProjects((projectsRes.data as Project[]) || []);
 
-      if (!requestsRes.error && requestsRes.data) {
-        const rawRequests = requestsRes.data as BudgetItemRequest[];
-        const cleanRequests = rawRequests.filter((r) => !deletedRequestIds.includes(r.id));
-        setRequests(cleanRequests);
-      }
+      const cleanRequests = requestsData.filter((r) => !deletedRequestIds.includes(r.id));
+      setRequests(cleanRequests);
     } catch (err) {
       console.error("Error loading budget data:", err);
     }
@@ -245,10 +256,13 @@ export default function BudgetPage() {
 
   const handleCreateRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!profile?.id) return;
+    if (!profile?.id) {
+      alert("You must be logged in to submit an item request.");
+      return;
+    }
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.from("budget_requests").insert({
+      const { error } = await supabase.from("budget_requests").insert({
         requested_by: profile.id,
         item: requestForm.item,
         amount: Number(requestForm.amount),
@@ -259,13 +273,13 @@ export default function BudgetPage() {
         justification: requestForm.justification || null,
         link: requestForm.link || null,
         status: "pending",
-      }).select("*, requester:profiles!requested_by(full_name, email)");
+      });
 
-      if (error) throw error;
-
-      if (data) {
-        setRequests((prev) => [data[0] as BudgetItemRequest, ...prev]);
+      if (error) {
+        alert("Database Error submitting request: " + error.message);
+        throw error;
       }
+
       setRequestModalOpen(false);
       setRequestForm({
         item: "",
@@ -278,7 +292,7 @@ export default function BudgetPage() {
         link: "",
       });
       await fetchData();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error creating item request:", err);
     } finally {
       setSubmitting(false);
