@@ -571,6 +571,23 @@ export default function AssignmentsPage() {
     );
   };
 
+  if (isUserMentor) {
+    return (
+      <>
+        <Header title="Assignments & Technical Task Portal" />
+        <Card className="border-dashed border-2 border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 p-12 text-center">
+          <GraduationCap className="h-12 w-12 mx-auto text-orange-500/50 mb-3" />
+          <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+            Assignments Section Restricted
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
+            The Assignments portal is restricted for Project Mentors. Please use Projects, Weekly Reports, or Members to view and rate work for your assigned project.
+          </p>
+        </Card>
+      </>
+    );
+  }
+
   return (
     <>
       <Header title="Assignments & Technical Task Portal" />

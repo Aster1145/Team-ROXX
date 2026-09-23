@@ -30,9 +30,13 @@ export function MobileNav() {
   const { profile } = useAuth();
 
   const isUserTrainee = isTrainee(profile);
+  const isUserMentor = isMentor(profile);
   const visibleNav = NAV.filter((item) => {
     if (isUserTrainee) {
       return !["/dashboard/inventory", "/dashboard/budget", "/dashboard/meetings"].includes(item.href);
+    }
+    if (isUserMentor) {
+      return !["/dashboard/inventory", "/dashboard/budget", "/dashboard/meetings", "/dashboard/learning", "/dashboard/assignments"].includes(item.href);
     }
     return true;
   });
