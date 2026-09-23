@@ -450,30 +450,30 @@ export default function ReportsPage() {
 
                   <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     {/* Display Rating & Points */}
-                    {!authorIsCaptain && (
-                      <div className="flex items-center gap-2 bg-stone-50 px-2.5 py-1.5 rounded-lg border border-stone/60">
+                    {(!authorIsCaptain || isUserMentor || hasBeenRated) && (
+                      <div className="flex items-center gap-2 bg-stone-50 dark:bg-slate-800 px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-slate-700">
                         {hasBeenRated ? (
                           <>
                             {renderStars(r.rating_stars!)}
-                            <span className="text-xs font-bold text-amber-700 ml-1">
+                            <span className="text-xs font-bold text-amber-700 dark:text-amber-400 ml-1">
                               +{r.points} Pts
                             </span>
                           </>
                         ) : (
-                          <span className="text-xs text-charcoal/50 italic flex items-center gap-1">
-                            <Star className="h-3.5 w-3.5 text-stone-400" /> Awaiting Rating
+                          <span className="text-xs text-charcoal/50 dark:text-slate-400 italic flex items-center gap-1">
+                            <Star className="h-3.5 w-3.5 text-stone-400 dark:text-slate-600" /> Awaiting Rating
                           </span>
                         )}
                       </div>
                     )}
 
-                    {/* Captain & Mentor Action to Rate Teammates */}
-                    {canRateThisReport && !authorIsCaptain && (
+                    {/* Captain & Mentor Action to Rate Performance (Mentors can rate Team Lead reports) */}
+                    {canRateThisReport && (!authorIsCaptain || isUserMentor) && (
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleOpenRatingModal(r)}
-                        className="text-xs bg-amber-50 border-amber-200 text-amber-900 hover:bg-amber-600 hover:text-white hover:border-amber-600 transition-all font-medium gap-1"
+                        className="text-xs bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 hover:bg-amber-600 hover:text-white transition-all font-medium gap-1"
                       >
                         <Award className="h-3.5 w-3.5" />
                         {hasBeenRated ? "Edit Rating" : "Rate Performance"}
