@@ -105,6 +105,22 @@ export async function POST(request: NextRequest) {
       profileError = retry.error;
     }
 
+    if (role === "mentor") {
+      try {
+        await adminSupabase.from("mentors").upsert({
+          id: userId,
+          user_id: userId,
+          email,
+          full_name,
+          department: targetDept,
+          project_id: project_id || null,
+          phone_number: phone_number || null,
+        }, { onConflict: "email" });
+      } catch (e) {
+        console.warn("Mentors table sync notice:", e);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       member: profile || {

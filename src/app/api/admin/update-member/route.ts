@@ -57,8 +57,20 @@ export async function POST(request: NextRequest) {
       updateErr = fallback.error;
     }
 
-    if (updateErr) {
-      return NextResponse.json({ error: updateErr.message }, { status: 400 });
+    if (role === "mentor") {
+      try {
+        await adminSupabase.from("mentors").upsert({
+          id: userId,
+          user_id: userId,
+          email,
+          full_name,
+          department: targetDept,
+          project_id: project_id || null,
+          phone_number: phone_number || null,
+        }, { onConflict: "email" });
+      } catch (e) {
+        console.warn("Mentors update sync notice:", e);
+      }
     }
 
     return NextResponse.json({ success: true });
