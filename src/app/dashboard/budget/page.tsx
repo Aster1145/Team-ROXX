@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { canManageBudget, isCaptain } from "@/lib/roles";
+import { canManageBudget, isCaptain, canApproveBudgetRequests } from "@/lib/roles";
 import { BudgetItem, BudgetItemRequest, Project, RequestPriority, RequestStatus } from "@/types";
 import { Plus, IndianRupee, Wallet, ShoppingCart, CheckCircle, XCircle, ExternalLink, Clock, PackageCheck, AlertCircle, Pencil, Trash2, Download } from "lucide-react";
 import { formatDate } from "@/lib/utils";
@@ -695,8 +695,8 @@ export default function BudgetPage() {
                     </div>
                   )}
 
-                  {/* Team Lead Actions */}
-                  {canManageBudget(profile) && (
+                  {/* Captain & Mentor Approval Actions */}
+                  {canApproveBudgetRequests(profile, req.project_id) && (
                     <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
                       <div className="text-xs text-slate-500 dark:text-slate-400">
                         {req.reviewer?.full_name && (

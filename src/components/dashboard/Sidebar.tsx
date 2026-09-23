@@ -52,7 +52,7 @@ export function Sidebar() {
       return !["/dashboard/inventory", "/dashboard/budget", "/dashboard/meetings"].includes(item.href);
     }
     if (isUserMentor) {
-      return !["/dashboard/inventory", "/dashboard/budget", "/dashboard/meetings", "/dashboard/learning", "/dashboard/assignments"].includes(item.href);
+      return !["/dashboard/meetings", "/dashboard/learning", "/dashboard/assignments"].includes(item.href);
     }
     return true;
   });

@@ -100,6 +100,15 @@ export function canRateReportForMember(profile?: Profile | null, reportMemberPro
   return false;
 }
 
+export function canApproveBudgetRequests(profile?: Profile | null, requestProjectId?: string | null) {
+  if (!profile) return false;
+  if (profile.role === "captain") return true;
+  if (profile.role === "mentor") {
+    return !requestProjectId || !profile.project_id || profile.project_id === requestProjectId;
+  }
+  return false;
+}
+
 export function roleLabel(role?: Role, department?: Department) {
   if (role === "trainee" || department === "Trainee") {
     return "Trainee (1st Year)";
