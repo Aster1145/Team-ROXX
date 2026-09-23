@@ -516,28 +516,47 @@ export default function MembersPage() {
             </button>
           </div>
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-charcoal/70 block mb-1">Role</label>
+              <Select
+                value={form.role}
+                onChange={(e) => {
+                  const newRole = e.target.value as Role;
+                  setForm({
+                    ...form,
+                    role: newRole,
+                    department: newRole === "mentor" ? "Computer Science & Engineering (CSE)" : newRole === "trainee" ? "Trainee" : form.department,
+                  });
+                }}
+              >
+                {availableRoles.map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-charcoal/70 block mb-1">Department</label>
+              <Select
+                value={form.department}
+                onChange={(e) => setForm({ ...form, department: e.target.value as any })}
+              >
+                {(form.role === "mentor" ? ACADEMIC_DEPARTMENTS : DEPARTMENTS).map((d) => <option key={d}>{d}</option>)}
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-charcoal/70 block mb-1">Assigned Project</label>
             <Select
-              value={form.role}
-              onChange={(e) => {
-                const newRole = e.target.value as Role;
-                setForm({
-                  ...form,
-                  role: newRole,
-                  department: newRole === "mentor" ? "Computer Science & Engineering (CSE)" : newRole === "trainee" ? "Trainee" : form.department,
-                });
-              }}
+              value={form.project_id}
+              onChange={(e) => setForm({ ...form, project_id: e.target.value })}
             >
-              {availableRoles.map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
-              ))}
-            </Select>
-            <Select
-              value={form.department}
-              onChange={(e) => setForm({ ...form, department: e.target.value as any })}
-            >
-              {(form.role === "mentor" ? ACADEMIC_DEPARTMENTS : DEPARTMENTS).map((d) => <option key={d}>{d}</option>)}
+              <option value="">No project assigned</option>
+              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </Select>
           </div>
+
           <Button type="submit" className="w-full" isLoading={submitting}>
             Create Team Member
           </Button>
