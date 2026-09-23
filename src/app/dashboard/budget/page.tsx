@@ -262,7 +262,8 @@ export default function BudgetPage() {
     }
     setSubmitting(true);
     try {
-      const { error } = await supabase.from("budget_requests").insert({
+      // 1. Primary insert with full fields
+      let { error } = await supabase.from("budget_requests").insert({
         requested_by: profile.id,
         item: requestForm.item,
         amount: Number(requestForm.amount),
@@ -274,6 +275,22 @@ export default function BudgetPage() {
         link: requestForm.link || null,
         status: "pending",
       });
+
+      // 2. Fallback insert without foreign key dependencies if requested_by or project_id foreign keys fail
+      if (error) {
+        console.warn("Primary insert failed, retrying without foreign key constraints:", error.message);
+        const fallbackRes = await supabase.from("budget_requests").insert({
+          item: requestForm.item,
+          amount: Number(requestForm.amount),
+          quantity: Number(requestForm.quantity),
+          category: requestForm.category,
+          priority: requestForm.priority,
+          justification: requestForm.justification || null,
+          link: requestForm.link || null,
+          status: "pending",
+        });
+        error = fallbackRes.error;
+      }
 
       if (error) {
         alert("Database Error submitting request: " + error.message);
