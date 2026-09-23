@@ -199,6 +199,26 @@ export default function BudgetPage() {
     }
   };
 
+  const handleClearAllExpenses = async () => {
+    if (!confirm("Are you sure you want to clear all purchase logs and recorded expenses? This action will wipe all purchase history.")) return;
+
+    const allIds = items.map((i) => i.id);
+    setItems([]);
+
+    try {
+      const saved = localStorage.getItem("team_roxx_deleted_expense_ids");
+      const existing: string[] = saved ? JSON.parse(saved) : [];
+      const updated = Array.from(new Set([...existing, ...allIds]));
+      localStorage.setItem("team_roxx_deleted_expense_ids", JSON.stringify(updated));
+    } catch (e) {}
+
+    try {
+      await supabase.from("budget_items").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    } catch (err: any) {
+      console.warn("Failed to clear budget_items in database:", err);
+    }
+  };
+
   const handleDeleteRequest = async (id: string, itemName: string) => {
     if (!confirm(`Are you sure you want to delete item request "${itemName}"?`)) return;
 
@@ -778,9 +798,21 @@ export default function BudgetPage() {
         <Card>
           <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4">
             <CardTitle>Expenses & Purchases Log</CardTitle>
-            <Button variant="outline" size="sm" onClick={exportExpensesExcel} className="text-xs font-medium gap-1.5 w-full sm:w-auto justify-center">
-              <Download className="h-3.5 w-3.5" /> Export Excel
-            </Button>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" onClick={exportExpensesExcel} className="text-xs font-medium gap-1.5 flex-1 sm:flex-initial justify-center">
+                <Download className="h-3.5 w-3.5" /> Export Excel
+              </Button>
+              {(canManageBudget(profile) || profile?.role === "mentor") && items.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearAllExpenses}
+                  className="text-xs font-medium gap-1.5 bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-all flex-1 sm:flex-initial justify-center"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Clear History
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="p-3.5 sm:p-5">
             {/* MOBILE CARD VIEW (Phone screens < md) */}
