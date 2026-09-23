@@ -62,7 +62,8 @@ export default function MembersPage() {
     const { data } = await supabase
       .from("profiles")
       .select("*");
-    const list = (data as Profile[]) || [];
+    const rawList = (data as Profile[]) || [];
+    const list = rawList.filter((p) => p.role !== "mentor");
     const sorted = [...list].sort((a, b) => {
       const rankA = getHierarchyRank(a);
       const rankB = getHierarchyRank(b);

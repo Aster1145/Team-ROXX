@@ -55,7 +55,7 @@ export default function MentorsPage() {
 
       const allProfiles = (profilesRes.data as Profile[]) || [];
       const mentorProfiles = allProfiles.filter(
-        (p) => p.role === "mentor" || (p.full_name && p.full_name.startsWith("Dr."))
+        (p) => p.role === "mentor" && p.department !== "Trainee"
       );
 
       setMentors(mentorProfiles);
