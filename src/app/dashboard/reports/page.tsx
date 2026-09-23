@@ -327,11 +327,6 @@ export default function ReportsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
-          <Link href="/dashboard/assignments">
-            <Button variant="outline" className="text-xs font-semibold gap-1.5 bg-orange-50 dark:bg-orange-950/40 text-orange-900 dark:text-orange-200 border-orange-200 dark:border-orange-800 hover:bg-orange-600 hover:text-white transition-colors">
-              <GraduationCap className="h-4 w-4 shrink-0" /> Trainee Leaderboard
-            </Button>
-          </Link>
           {canDownload && (
             <Button variant="outline" onClick={exportExcel} className="text-xs font-semibold gap-1.5">
               <Download className="h-4 w-4 shrink-0" /> Export Excel
