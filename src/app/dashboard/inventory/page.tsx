@@ -30,11 +30,20 @@ export default function InventoryPage() {
         .order("taken_at", { ascending: false });
 
       if (error) {
-        const fallback = await supabase
+        const fallback1 = await supabase
           .from("inventory_logs")
           .select("*, profile:profiles(full_name)")
           .order("taken_at", { ascending: false });
-        data = fallback.data;
+        data = fallback1.data;
+        error = fallback1.error;
+      }
+
+      if (error || !data) {
+        const fallback2 = await supabase
+          .from("material_logs")
+          .select("*, profile:profiles(full_name)")
+          .order("taken_at", { ascending: false });
+        data = fallback2.data;
       }
 
       setLogs((data as InventoryLog[]) || []);
@@ -56,7 +65,7 @@ export default function InventoryPage() {
     setSubmitting(true);
 
     try {
-      // 1. Primary insert attempting profile_id & notes
+      // 1. Primary insert attempting inventory_logs
       let { error } = await supabase.from("inventory_logs").insert({
         item_name: form.item_name,
         purpose: form.purpose || null,
@@ -64,15 +73,26 @@ export default function InventoryPage() {
         notes: form.condition_notes || null,
       });
 
-      // 2. Fallback attempt if database schema expects taken_by / condition_notes
+      // 2. Fallback attempt 1
       if (error) {
-        const fallback = await supabase.from("inventory_logs").insert({
+        const fallback1 = await supabase.from("inventory_logs").insert({
           item_name: form.item_name,
           purpose: form.purpose || null,
           taken_by: profile.id,
           condition_notes: form.condition_notes || null,
         });
-        error = fallback.error;
+        error = fallback1.error;
+      }
+
+      // 3. Fallback attempt 2 (material_logs table)
+      if (error) {
+        const fallback2 = await supabase.from("material_logs").insert({
+          item_name: form.item_name,
+          purpose: form.purpose || null,
+          profile_id: profile.id,
+          notes: form.condition_notes || null,
+        });
+        error = fallback2.error;
       }
 
       if (error) {
@@ -92,10 +112,18 @@ export default function InventoryPage() {
 
   const markReturned = async (id: string) => {
     try {
-      const { error } = await supabase
+      let { error } = await supabase
         .from("inventory_logs")
         .update({ returned_at: new Date().toISOString() })
         .eq("id", id);
+
+      if (error) {
+        const fallback = await supabase
+          .from("material_logs")
+          .update({ returned_at: new Date().toISOString() })
+          .eq("id", id);
+        error = fallback.error;
+      }
 
       if (error) throw error;
       await fetchLogs();

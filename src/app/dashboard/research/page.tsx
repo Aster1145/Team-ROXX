@@ -27,11 +27,18 @@ export default function ResearchPage() {
 
   const fetchData = async () => {
     setLoading(true);
-    const [docsRes, projectsRes] = await Promise.all([
-      supabase.from("research_docs").select("*, author:profiles(full_name)").order("created_at", { ascending: false }),
-      supabase.from("projects").select("*"),
-    ]);
-    setDocs((docsRes.data as ResearchDoc[]) || []);
+    let docsData: ResearchDoc[] = [];
+    let docsRes = await supabase.from("research_docs").select("*, author:profiles(full_name)").order("created_at", { ascending: false });
+
+    if (docsRes.error || !docsRes.data) {
+      const fallbackRes = await supabase.from("research_ideas").select("*, author:profiles(full_name)").order("created_at", { ascending: false });
+      docsData = (fallbackRes.data as ResearchDoc[]) || [];
+    } else {
+      docsData = docsRes.data as ResearchDoc[];
+    }
+
+    const projectsRes = await supabase.from("projects").select("*");
+    setDocs(docsData);
     setProjects((projectsRes.data as Project[]) || []);
     setLoading(false);
   };
@@ -62,7 +69,7 @@ export default function ResearchPage() {
     try {
       if (editingDoc) {
         // Update document
-        const { error } = await supabase
+        let { error } = await supabase
           .from("research_docs")
           .update({
             title: form.title,
@@ -71,15 +78,37 @@ export default function ResearchPage() {
           })
           .eq("id", editingDoc.id);
 
+        if (error) {
+          const fallback = await supabase
+            .from("research_ideas")
+            .update({
+              title: form.title,
+              content: form.content,
+              project_id: form.project_id || null,
+            })
+            .eq("id", editingDoc.id);
+          error = fallback.error;
+        }
+
         if (error) throw error;
       } else {
         // Create new document
-        const { error } = await supabase.from("research_docs").insert({
+        let { error } = await supabase.from("research_docs").insert({
           title: form.title,
           content: form.content,
           project_id: form.project_id || null,
           author_id: profile?.id || user?.id || null,
         });
+
+        if (error) {
+          const fallback = await supabase.from("research_ideas").insert({
+            title: form.title,
+            content: form.content,
+            project_id: form.project_id || null,
+            author_id: profile?.id || user?.id || null,
+          });
+          error = fallback.error;
+        }
 
         if (error) throw error;
       }
@@ -98,7 +127,11 @@ export default function ResearchPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this research document?")) return;
     try {
-      const { error } = await supabase.from("research_docs").delete().eq("id", id);
+      let { error } = await supabase.from("research_docs").delete().eq("id", id);
+      if (error) {
+        const fallback = await supabase.from("research_ideas").delete().eq("id", id);
+        error = fallback.error;
+      }
       if (error) throw error;
       fetchData();
     } catch (err: any) {
